@@ -1,0 +1,6 @@
+Robot Expressive
+Author: Tomás Laulhé (http://www.tomaslau.com)
+License: CC0 1.0 Universal — 可免费商用，无需署名
+Source: https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/RobotExpressive
+
+Adobe Mixamo 也可免费商用，但不能把原始动作文件打进本仓库再分发。请自行从 https://www.mixamo.com 下载并绑到自己的角色。

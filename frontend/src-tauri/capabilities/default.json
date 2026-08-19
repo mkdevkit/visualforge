@@ -1,0 +1,8 @@
+{
+  "identifier": "default",
+  "description": "VisualForge desktop capabilities",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}
