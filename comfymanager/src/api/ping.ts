@@ -2,7 +2,7 @@ export async function pingComfy(baseUrl?: string) {
   const base = (baseUrl || "").replace(/\/+$/, "");
   if (!base) return { ok: false, baseUrl: "", error: "未配置地址" };
   try {
-    const res = await fetch(`${base}/system_stats`);
+    const res = await fetch(`${base}/system_stats`, { signal: AbortSignal.timeout(3000) });
     const text = await res.text();
     let json: unknown = text;
     try {

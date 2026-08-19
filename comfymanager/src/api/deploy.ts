@@ -25,6 +25,7 @@ function installLogFile() {
 }
 
 let installRunning = false;
+let lastInstallError = "";
 
 export function isInstallRunning() {
   return installRunning;
@@ -33,15 +34,16 @@ export function isInstallRunning() {
 export function readInstallLog(maxChars = 80_000) {
   const path = installLogFile();
   if (!existsSync(path)) {
-    return { text: "", path: formatOsPath(path), installing: installRunning, truncated: false };
+    return { text: "", path: formatOsPath(path), installing: installRunning, truncated: false, error: lastInstallError };
   }
-  const raw = normalizeLog(readFileSync(path, "utf8"));
+  const raw = normalizeLog(readFileSync(path, "utf8")).replace(/\u0000/g, "");
   const truncated = raw.length > maxChars;
   return {
     text: truncated ? raw.slice(-maxChars) : raw,
     path: formatOsPath(path),
     installing: installRunning,
     truncated,
+    error: lastInstallError,
   };
 }
 
@@ -532,19 +534,27 @@ function requireGit() {
 }
 
 export async function installComfy() {
-  if (installRunning) throw new Error("正在安装，请稍候");
+  if (installRunning) return { ok: true, started: false, installing: true };
   installRunning = true;
+  lastInstallError = "";
   appendLog(`======== ${new Date().toISOString()} 开始安装 ========`);
   try {
     const result = await doInstallComfy();
     appendLog("======== 安装完成 ========");
-    return result;
+    return { ...result, started: true, installing: false };
   } catch (err) {
-    appendLog(`======== 安装失败：${err instanceof Error ? err.message.split("\n")[0] : String(err)} ========`);
+    lastInstallError = err instanceof Error ? err.message.split("\n")[0] : String(err);
+    appendLog(`======== 安装失败：${lastInstallError} ========`);
     throw err;
   } finally {
     installRunning = false;
   }
+}
+
+export function startInstallComfy() {
+  if (installRunning) return { ok: true, started: false, installing: true };
+  void installComfy().catch(() => undefined);
+  return { ok: true, started: true, installing: true };
 }
 
 async function doInstallComfy() {

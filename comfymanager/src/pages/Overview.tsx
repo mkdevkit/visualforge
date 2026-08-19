@@ -18,6 +18,7 @@ export function Overview() {
       setInstallLog(r.text || "");
       setInstalling(!!r.installing);
       setLogPath(r.path || "");
+      if (!r.installing && r.error) setError(r.error);
     }).catch(() => undefined);
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export function Overview() {
             refreshLog();
             try {
               await api.install();
-              await refresh();
+              setInstalling(true);
               await refreshLog();
             } catch (e) {
               setError(e instanceof Error ? e.message : String(e));

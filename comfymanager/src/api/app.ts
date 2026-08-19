@@ -6,7 +6,7 @@ import { FEATURE_IDS, FEATURE_LABELS } from "./types.ts";
 import type { FeatureId } from "./types.ts";
 import { modelCatalog, deleteModel } from "./catalog.ts";
 import { cancelDownload, loadDownloads, startDownload } from "./download.ts";
-import { comfyStatus, installComfy, readInstallLog, startComfy, stopComfy, writeExtraModelPaths } from "./deploy.ts";
+import { comfyStatus, isInstallRunning, readInstallLog, startComfy, startInstallComfy, stopComfy, writeExtraModelPaths } from "./deploy.ts";
 import { installUniRig, runUniRigFromBuffer, unirigStatus } from "./unirig.ts";
 import { pingComfy } from "./ping.ts";
 import {
@@ -58,8 +58,21 @@ app.get("/api/comfy/ping", async (c) => {
 });
 
 app.get("/api/comfy/status", async (c) => c.json({ ok: true, ...(await comfyStatus()), unirig: unirigStatus() }));
-app.get("/api/comfy/install-log", (c) => c.json({ ok: true, ...readInstallLog() }));
-app.post("/api/comfy/install", async (c) => c.json({ ...(await installComfy()), ok: true }));
+app.get("/api/comfy/install-log", (c) => {
+  try {
+    return c.json({ ok: true, ...readInstallLog() });
+  } catch (err) {
+    return c.json({
+      ok: true,
+      text: "",
+      installing: isInstallRunning(),
+      truncated: false,
+      path: "",
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+});
+app.post("/api/comfy/install", (c) => c.json(startInstallComfy()));
 app.post("/api/comfy/start", (c) => c.json({ ...startComfy(), ok: true }));
 app.post("/api/comfy/stop", (c) => c.json({ ...stopComfy(), ok: true }));
 app.post("/api/tools/unirig/install", async (c) => c.json({ ...(await installUniRig()), ok: true }));

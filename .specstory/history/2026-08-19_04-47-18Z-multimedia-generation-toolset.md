@@ -37808,3 +37808,139 @@ _**Agent (grok-4.6)**_
 _**User**_
 
 日志没有换行。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户反馈安装日志缺少换行符。
+
+正在排查日志无换行的原因。怀疑 pip 进度条使用了 `\r` 而非 `\n`，也可能是 CSS、appendLogChunk 或 JSON 序列化导致换行符丢失。
+
+也在考虑前端是否意外过滤了换行符，或日志文件本身仅包含 `\r` 回车符。虽然 `<pre>` 标签本应保留换行，但 `break-all` 等样式属性可能干扰了显示。
+
+已确认 JSON 序列化不会吞掉换行符。现在重点检查 API 与前端的交互逻辑，怀疑 Hono 的响应处理或请求函数在传递日志时丢失了换行。
+
+已确认前端 `<pre>` 标签和 Tailwind 的 `whitespace-pre-wrap` 都能保留换行。问题更可能是 pip 进度条只输出了 `\r` 而没有 `\n`，导致浏览器无法换行。
+
+排除了进度条回车符导致单行显示的可能，因为 pip 安装包时通常仍会包含换行符。同时确认 React 文本内容在 `<pre>` 中不会被 HTML 转义，且 `readInstallLog` 返回的是原始文本而非 HTML，因此换行丢失并非由前端渲染引起。
+
+怀疑日志中存在大量 `\r` 回车符。若直接替换为 `\n`，进度条会逐行堆叠；若保留 `\r`，则无法换行。需要确定日志中的实际换行符格式。
+
+怀疑 CSS 的 `whitespace-pre-wrap` 没有生效。如果该样式未正确应用，HTML 会将换行符压缩为空格，导致所有内容连成一片，看起来像没有换行。正在检查 Tailwind v4 是否正确生成了该类名，以及父元素或 `forge-scroll` 是否覆盖了样式。
+
+正在检查 Hono 的 `c.json()` 是否会转换换行符，以及 `req` 函数是否在 GET 请求中错误设置了 JSON 响应头。同时怀疑日志追加逻辑中可能意外替换了换行符。
+
+已确认日志追加函数会原样写入换行符，因此文件本身不含 `\r`。正在检查 JSON 解析是否因特殊字符失败，以及 Windows 下 git clone 的 shell 输出是否为二进制流。
+
+怀疑日志在读取或展示前被拼接成了单行。准备将日志中的 `\r` 和 `\r\n` 统一替换为 `\n`，使进度条每行独立换行。同时会在 CSS 中增加内联样式作为后备，确保 `white-space: pre-wrap` 生效。
+
+已排除 JSON 序列化导致换行丢失的可能。同时确认用户看到的日志是前端界面，而非 Windows 记事本等编辑器，因此问题不在编辑器对 Unix 换行符的兼容性上。
+
+已排除 Tailwind 类名未生成、Hono 序列化或 Vite 中间件剥离换行符等假设。突然意识到可能发现了真正的问题根源。
+
+已确认根因：pip 与 git 的进度条使用 `\r` 回车符，HTML `<pre>` 中该字符会被忽略或当作空白，导致所有内容连成一行。修复方案是在读取或展示日志时，将 `\r` 和 `\r\n` 统一替换为 `\n`，使每条进度输出成为独立的一行。
+
+决定直接将日志中的 `\r` 替换为 `\n`，使进度条每行独立换行。同时考虑在写入日志时就完成规范化，这样文件本身也能在记事本等编辑器中正常显示。
+
+决定在写入日志时就统一将 `\r` 和 `\r\n` 替换为 `\n`，这样安装日志文件本身也能在记事本等编辑器中正常换行。同时准备在前端内联设置 `white-space: pre-wrap` 作为后备。接下来会查看 `deploy.ts` 中的 `readInstallLog` 与 `Overview` 组件代码，确认具体修改位置。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+多半是 `git`/`pip` 用 `\r` 刷进度，网页里不会当成换行。正在把回车规范成真正的换行并核对界面显示。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备将 `\r\n` 和 `\r` 统一替换为 `\n`，以修复日志换行问题。
+
+考虑用 `whitespace-pre-wrap` 配合 `<div>` 换行渲染。`--progress-bar on` 使用 `\r`，转为 `\n` 后会拆成多行。计划新增 `toDisplayLog` 函数统一处理写入和读取。但逐块转换可能把 `\r\n` 切到不同块里，需要处理边界情况。
+
+确定先替换 `\r\n` 再替换 `\r`，避免跨块切分导致多余空行。不加缓冲区，直接逐块规范化。显示侧仍用 `pre-wrap` 配合 `<div>` 换行，确保即使样式失效也能逐行展示。
+
+确认用索引作为 key 即可，因为日志只会追加。normalize 逻辑会同时写入文件和读取时处理，这样旧日志无需重装也能正常显示。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要将 logRef 的类型从 HTMLPreElement 改为 HTMLDivElement，以解决日志不换行的问题。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备用中文简要解释日志未换行的问题。
+
+用户需要刷新页面。现有日志文件中的回车符会在读取时被规范化，重启或刷新管理器后即可看到换行。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+原因是 `git` / `pip` 用回车 `\r` 在同一行刷进度，网页不会把它当成换行，所以整段日志挤成一行。
+
+已改成把 `\r` 转成真正的换行，并按行显示。刷新管理端页面即可；正在装的话日志会马上按行刷出来。
+
+---
+
+_**User**_
+
+Failed to execute 'json' on 'Response': Unexpected end of JSON input

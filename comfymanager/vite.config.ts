@@ -12,10 +12,19 @@ function apiPlugin(): Plugin {
       const s = loadSettings();
       ensureLayout(s.dataDir, s.comfy.modelsDir);
       const listener = getRequestListener(app.fetch);
-      server.middlewares.use((req, res, next) => {
-        if (req.url?.startsWith("/api")) return listener(req, res);
-        next();
+      server.middlewares.use(async (req, res, next) => {
+        if (!req.url?.startsWith("/api")) return next();
+        try {
+          await listener(req, res);
+        } catch (err) {
+          if (!res.headersSent) {
+            res.statusCode = 500;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ ok: false, error: err instanceof Error ? err.message : String(err) }));
+          }
+        }
       });
+      server.httpServer && Object.assign(server.httpServer, { timeout: 0, headersTimeout: 0, requestTimeout: 0 });
     },
   };
 }

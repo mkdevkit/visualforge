@@ -3,7 +3,16 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
   });
-  const json = await res.json();
+  const raw = await res.text();
+  if (!raw.trim()) {
+    throw new Error(`接口 ${path} 返回空响应（HTTP ${res.status}）`);
+  }
+  let json: { ok?: boolean; error?: string };
+  try {
+    json = JSON.parse(raw) as { ok?: boolean; error?: string };
+  } catch {
+    throw new Error(`接口 ${path} 返回了非 JSON（HTTP ${res.status}）：${raw.slice(0, 180)}`);
+  }
   if (!res.ok || json.ok === false) throw new Error(json.error || `请求失败 ${res.status}`);
   return json as T;
 }
@@ -30,7 +39,7 @@ export const api = {
     ),
   install: () => req("/api/comfy/install", { method: "POST" }),
   installLog: () =>
-    req<{ ok: boolean; text: string; path: string; installing: boolean; truncated: boolean }>("/api/comfy/install-log"),
+    req<{ ok: boolean; text: string; path: string; installing: boolean; truncated: boolean; error?: string }>("/api/comfy/install-log"),
   start: () => req<{ pid: number; baseUrl: string }>("/api/comfy/start", { method: "POST" }),
   stop: () => req("/api/comfy/stop", { method: "POST" }),
   installUniRig: () => req("/api/tools/unirig/install", { method: "POST" }),
