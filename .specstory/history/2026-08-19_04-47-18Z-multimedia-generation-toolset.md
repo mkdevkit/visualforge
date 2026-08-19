@@ -41054,7 +41054,1791 @@ _**User**_
 
 _**Agent (grok-4.6)**_
 
+<think><details><summary>Thought Process</summary>
+用户要求将对话中讨论的占位符信息更新到 README.md。
+
+正在查看 README 中工作流相关的章节，准备全面更新占位符信息。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要更新 README.md 中关于视铸填充占位符及 POST 操作的过时描述。
+
+ComfyManager 负责注入、替换和 POST；VisualForge 仅透传参数。上传可直接使用原生 ComfyUI JSON，无需占位符。自动注入规则为：首个 CLIPTextEncode 节点映射 prompt，第二个映射 negative，UNet 或 CKPT 映射 model，LoadImage 映射 image。两个 CLIP 节点可能冲突。JSON 中已有占位符的字段会被跳过。占位符值位于 API 的 inputs 或 UI 的 widgets_values 中。UI JSON 可直接添加。示例包含 Qwen LoadDiffusionModel 工作流。磁盘文件不会被修改。
+
+UI 转 API 需要 ComfyUI 运行以确保转换准确。同时会修正"如何配置"第 4 步和模型绑定段落。README 保持中文，简洁完整。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+担心最后一次替换导致"### 页面字段"重复或被误删。
+
+正在读取 README 中的相关章节。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+合并时出现混乱，页面字段被误并入3D章节，同时遗留了一个重复的旧占位符章节。
+
+将重新排列章节顺序。页面字段会插入到占位符之前。随后删除重复的3D章节。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 README.md 中是否存在重复的占位符或 3D 部分。
+
+JSON 示例虽非标准有效格式，但作为说明性片段可接受。同时确认 Check 页面字段未重复。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "^### 占位符|^## 3D|^### 页面字段"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "^### 占位符|^## 3D|^### 页面字段",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+结构看起来没有问题。我将用中文简要总结。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+已写入 `README.md` 的「占位符」一节，主要包括：
+
+- 视铸只传参数，ComfyManager 读图、注入、替换后 POST `/prompt`
+- 上传的可以是 ComfyUI 原样 json，也可以自己带 `{{...}}`；已有占位符的字段不会被覆盖
+- 占位符是控件值（画布 `widgets_values` / API `inputs`），不是连线
+- 自动注入规则：两个 `CLIPTextEncode` 按顺序对应 `{{prompt}}` / `{{negative}}`，**可能对不上**
+- 画布 JSON 和 API Format 里怎么手写 `{{prompt}}`、`{{model}}`、`{{negative}}` 的例子
+
+---
+
+_**User**_
+
+上传的json要可以删除。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望 ComfyManager 支持删除已上传的 JSON 文件。
+
+正在查看 Workflows 页面和相关 API，准备添加删除功能。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "importWorkflow|deleteWorkflow|unlink|workflows"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "importWorkflow|deleteWorkflow|unlink|workflows",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\generate.ts"
+    },
+    {
+      "matchCount": 11,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 21,
+      "uri": "comfymanager\\src\\api\\features.ts"
+    },
+    {
+      "matchCount": 7,
+      "uri": "comfymanager\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 16,
+      "uri": "comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "matchCount": 9,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\catalog.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\components\\Layout.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\App.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\download.ts"
+    }
+  ],
+  "totalFiles": 10,
+  "totalMatches": 72
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要添加 deleteWorkflowFile 接口。该接口将从磁盘删除 JSON 文件，并解除引用它的站点。
+
+DELETE 接口将通过路径参数或请求体调用，仅允许删除 ComfyUI 工作流目录下的文件。前端需在表格中增加逐行删除按钮，并支持批量删除选中的文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将在 comfy-workflows.ts 中添加 `deleteWorkflowFiles` 函数，用于删除上传的 JSON 文件。
+
+删除逻辑将结合 unlinkSync 与 FEATURE_IDS 循环完成文件清理和功能解绑。计划新增 DELETE 接口，并在 UI 中增加逐行删除按钮及批量删除选项。同时需要同步更新 resolveCache。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在导入 unlinkSync，并准备实现 deleteWorkflowFiles 函数来支持删除 JSON 文件。
+
+已实现 deleteWorkflowFiles：去重过滤路径，校验非空后逐个删除文件并清理缓存，同时从各功能配置中移除对应的工作流引用。
+
+删除完成后会保存更新后的配置。UI 将添加确认对话框，若工作流被分配到站点则提示警告。支持批量选择删除。README 的批量操作列表也会补充删除说明。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+The string to replace was not found in the file.
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+importWorkflowJson 替换失败，deleteWorkflowFiles 函数未被添加。
+
+需将 deleteWorkflowFiles 插入到 importWorkflowJson 之前，并检查 app.ts 中的导入。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "deleteWorkflowFiles"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "deleteWorkflowFiles",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "删除选中|上传 JSON"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "删除选中|上传 JSON",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+README 中有拼写错误，需修正为“从工位里”。接下来将添加删除工作流文件的功能，并检查 unlinkSync 的导入。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "deleteWorkflows|删除选中"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "deleteWorkflows|删除选中",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\lib\\api.ts",
+  "pattern": "deleteWorkflows"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\lib\\api.ts",
+  "pattern": "deleteWorkflows",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\lib\\api.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 `deleteWorkflowFiles` 在 `app.ts` 中被导入，但在 `comfy-workflows.ts` 中未定义。原因是之前的替换操作失败了。
+
+需要补全该函数的定义。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 comfy-workflows.ts 中的 FEATURE_IDS 导入和 syncActiveWorkflow 函数是否存在。
+
+同时检查 Workflows.tsx 的 UI 是否完整，并读取相关文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api",
+  "pattern": "syncActiveWorkflow|FEATURE_IDS"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api",
+  "pattern": "syncActiveWorkflow|FEATURE_IDS",
+  "topFiles": [
+    {
+      "matchCount": 8,
+      "uri": "comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\generate.ts"
+    },
+    {
+      "matchCount": 7,
+      "uri": "comfymanager\\src\\api\\features.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\config.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "comfymanager\\src\\api\\catalog.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\types.ts"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 25
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 resolveCache、resolveWorkflowFile 和 app.ts 的删除路由。
+
+确认了删除按钮样式。用户要求的JSON删除功能已实现。正在验证deleteWorkflowFiles是否正确插入。FEATURE_LABELS未使用警告是之前就存在的。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/*.{tsx,ts}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "tone.*danger|danger"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "tone.*danger|danger",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\pages\\Models.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\components\\ui.tsx"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\comfy-workflows.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 resolveCache 是否存在，因为删除功能依赖它。
+
+接下来将查看删除函数，并搜索 resolveCache 的相关代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "resolveCache"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "resolveCache",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "comfymanager\\src\\api\\comfy-workflows.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现一处潜在问题，与 `const features` 的声明有关。
+
+确认 features 浅拷贝后替换对象不会引发引用问题。若 ID 不存在会导致 cfg.workflows 报错，但 FEATURE_IDS 完整时风险较低。删除操作后，app.ts 路由需要像其他路由一样加入 try/catch 异常处理。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages",
+  "pattern": "粘贴|paste|importWorkflowJson|textarea"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages",
+  "pattern": "粘贴|paste|importWorkflowJson|textarea",
+  "topFiles": [
+    {
+      "matchCount": 9,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 9
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+还需考虑"手动粘贴"这类非文件工作流。
+
+库列表已支持删除JSON。正在检查站点工作流列表是否也缺少删除功能。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "removeWorkflow|deleteStation|workflows\\.filter|拿掉|移出"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "removeWorkflow|deleteStation|workflows\\.filter|拿掉|移出",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已添加缺失的 `deleteWorkflowFiles` 函数，JSON 文件删除功能现已完成。
+
+单条删除后会同步清除选中状态。错误处理已由全局异常捕获覆盖。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+JSON 文件的删除功能已实现。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+工作流库里的 JSON 现在可以删了。
+
+在 **ComfyManager → 工作流** 页：
+
+- 每一行有红色 **删除**，会删掉磁盘上的 json。
+- 勾选后点 **删除选中**，可一次删多个。
+
+如果这份 json 已经加入工位，删除时会一并从工位列表里拿掉，不会留下失效引用。工位里点 **移除** 只是取消引用，文件还在库里。
+
+---
+
+_**User**_
+
+ComfyManager，工作流页上部显示支持的占位符信息。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要在 ComfyManager 工作流页面顶部展示支持的占位符信息。
+
+正在查看工作流页面现有结构，并查阅 README 以确认应展示哪些占位符信息。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先看工作流页布局和现有占位符说明，再把支持的占位符信息放到页面上部。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{md,ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "占位符|\\{\\{prompt\\}\\}|\\{\\{model\\}\\}|\\{\\{negative\\}\\}|\\{\\{image"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "占位符|\\{\\{prompt\\}\\}|\\{\\{model\\}\\}|\\{\\{negative\\}\\}|\\{\\{image",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": ".\\comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 32,
+      "uri": ".\\README.md"
+    },
+    {
+      "matchCount": 178,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\components\\WorkflowSelect.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 22,
+      "uri": ".\\frontend\\server\\src\\lib\\features.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": ".\\comfymanager\\src\\api\\workflow-convert.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\server\\src\\lib\\comfy.ts"
+    }
+  ],
+  "totalFiles": 9,
+  "totalMatches": 242
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看 injectPlaceholders 函数与 README 的占位符说明。同时检查 PageHead 和现有 UI 组件以匹配界面风格。
+
+还需确认 viaVars 实际应用的占位符，而不仅是自动注入的。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "applyVars|width|height|seed|duration|lyrics|voice"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "applyVars|width|height|seed|duration|lyrics|voice",
+  "topFiles": [
+    {
+      "matchCount": 6,
+      "uri": "comfymanager\\src\\api\\generate.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\features.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\pages\\Models.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\catalog.ts"
+    },
+    {
+      "matchCount": 6,
+      "uri": "comfymanager\\src\\api\\workflow-convert.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\unirig.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "comfymanager\\src\\api\\types.ts"
+    }
+  ],
+  "totalFiles": 8,
+  "totalMatches": 28
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\components\PageHead.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要在 ComfyManager 工作流页面顶部添加支持的占位符信息展示。
+
+正在检查 generate.ts 以确认所有实际生效的变量。计划在 PageHead 与库区域之间放置一个紧凑卡片，列出支持的占位符及其自动注入规则。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\generate.ts",
+  "pattern": "vars\\[|vars =|width|negative|image2|resolution|ratio|instrumental|instructions"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\generate.ts",
+  "pattern": "vars\\[|vars =|width|negative|image2|resolution|ratio|instrumental|instructions",
+  "topFiles": [
+    {
+      "matchCount": 5,
+      "uri": "comfymanager\\src\\api\\generate.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **4** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge\comfymanager\src\pages`** (4 files)
+
+| File |
+|------|
+| `../comfymanager\src\pages\Workflows.tsx` |
+| `../comfymanager\src\pages\Models.tsx` |
+| `../comfymanager\src\pages\Overview.tsx` |
+| `../comfymanager\src\pages\Settings.tsx` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看前端变量，以确认 VisualForge 发送的完整占位符列表。
+
+README 已包含完整的占位符表格。我将在工作流页面顶部添加一个紧凑卡片来展示这些信息，采用现有的 brass/ink 面板风格。占位符数据会提取为常量，放在页面或共享模块中统一维护。
+
+卡片将置于 PageHead 之后、库区域之前。内容按解释、占位符列表、自动注入规则三层排列，确保可快速扫描。我会核对 varsFrom 中的前端变量，确保列表完整。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "varsFrom|negative|instrumental|instructions|image2"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "varsFrom|negative|instrumental|instructions|image2",
+  "topFiles": [
+    {
+      "matchCount": 7,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 4,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend\\server\\src\\lib\\features.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend\\server\\src\\types.ts"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 31
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在读取 varsFrom 的完整内容，以列出 VisualForge 发送的所有占位符。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/*.{tsx,css}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "font-mono"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "font-mono",
+  "topFiles": [
+    {
+      "matchCount": 5,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\pages\\Overview.tsx"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\index.css</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将在工作流页面顶部（PageHead 之后）添加一个占位符信息面板。
+
+面板将采用紧凑卡片样式，标题为“支持的占位符”。内容包括一段简短说明：JSON 无需手写，生成时自动注入替换，已有 `{{` 的字段不会被覆盖。下方以网格展示各占位符的 token、含义及典型站点。布局考虑双列设计，左侧为 token 列表，底部为自动注入规则。为避免文字过多，会按类别分组，优先列出 prompt、model、negative 等常用字段。
+
+补充了功能专属占位符（如 duration、resolution、ratio 等）。面板内将提示连线不会被替换、单独写成 `"{{width}}"` 会输出数字、CLIP 顺序可能填反等注意事项。代码直接放在 Workflows.tsx 中作为常量数组，不额外拆分文件。页面头部描述暂不更新，由面板本身承担引导作用。UI 设计已确定：卡片圆角、边框、背景色与现有风格一致，标题采用 11px 大小和宽字间距的 uppercase 铜色样式。
+
+具体实现上，面板内将使用双列网格展示占位符列表，每行以等宽字体的 `{{token}}` 配合中文描述呈现。面板底部另设“自动注入”区域，列出生成时的自动填充规则。说明文字明确提示上传原样 ComfyUI JSON，由系统自动注入未填写的槽位后再用视铸参数替换，且已有 `{{` 的字段不会被覆盖。
+
+正在核对从 README 提取的全部占位符清单，确认 prompt、model、negative、image、image2、width、height、seed、n、duration、resolution、ratio、lyrics、instrumental、text、voice、instructions、name 等字段均纳入。同时考虑是否将 varsFrom 中的 size、gender、language、targetModel、feature、image1 等补充进列表，因为它们虽不自动注入但同样支持手动替换。
+
+决定将面板内容拆分为两部分：一是“生成会替换”的完整占位符列表，二是“json 没写时会自动注入”的规则说明。列表严格依据 README 表格中的文档契约，不再额外罗列 varsFrom 中的 size、gender、language、targetModel 等字段，避免界面拥挤。若视铸实际下发了这些额外参数，用户也可手动在 JSON 中填入。
+
+最终决定不额外罗列 varsFrom 中的 size、gender、language、targetModel 等字段，保持主列表聚焦 README 文档契约。面板内的占位符列表将改用 CSS grid 实现，兼顾响应式与紧凑性。同时会在 PageHead 描述中轻量提示占位符信息位于下方。
+
+决定采用紧凑的芯片布局来展示主要占位符，避免面板过高。自动注入规则将作为独立短注释置于下方，不折叠隐藏。正在统计全部占位符条目，准备按类别分组排列。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+在工作流页标题下方加上占位符说明，内容和 README 里实际会替换、自动注入的项对齐。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+意识到可能过度加粗了，准备去掉 `<strong>` 标签。
+
+正在简化代码。同时检查 `isLibrary` 函数是否被重复定义。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "function isLibrary"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "function isLibrary",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现一处结构问题：PLACEHOLDERS、AUTO_INJECT 和 isLibrary 被插入到了 Workflows 函数内部（patchList 闭合大括号之后）。
+
+这会导致 PLACEHOLDERS 在每次渲染时被重新创建，造成不必要的性能浪费。虽然语法上允许在函数内声明 const 和函数，但这种嵌套方式并不合理。
+
+isLibrary 原本就在 Workflows 内部，因此将其移出是合理的。接下来需要将 PLACEHOLDERS、AUTO_INJECT 和 isLibrary 统一提升到模块作用域，放在 `export function Workflows` 之前，并修正嵌套函数的缩进。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+常量被插进了组件函数内部，先挪到模块顶层并理顺结构。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要从 Workflows 中移除常量。
+
+常量和 isLibrary 将移至 Workflows 函数之前。isLibrary 改为模块级函数。介绍文本会去掉 strong 标签。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 isLibrary 是否重复，并确认 AUTO_INJECT 键唯一。"{{width}} 等" 是唯一的。
+
+已确认所有 token 均唯一。AUTO_INJECT 的键拼接方式正确。正在检查导出函数与 isLibrary 的文件结构。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+工作流页面顶部已添加支持的占位符信息。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+工作流页标题下面现在有一块 **支持的占位符** 说明，刷新页面就能看到。
+
+上面是视铸会替换的占位符（提示词、模型、参考图、尺寸、时长等），下面是 json 里没写时的自动注入规则。上传原样 ComfyUI json 即可；字段里已经有 `{{` 的不会被覆盖。
+
+---
+
+_**User**_
+
+高级：手动粘贴 API JSON，工位的这个功能不要，而是放到上传josn按钮下方，就是手动粘贴增加工作流的意思，增加文件名配置，其实就是用粘贴的方式上传文件。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望将“高级：手动粘贴 API JSON”功能从工位区域移至“上传 JSON”按钮下方。该功能将改为通过粘贴方式上传文件，并需增加文件名配置。
+
+正在查看 Workflows 页面的现有粘贴界面与导入流程，以便确定如何实现该功能。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+把工位里的「手动粘贴 API JSON」挪到上传按钮下方，改成带文件名的粘贴导入。先看当前上传和粘贴是怎么做的。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,md}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "importWorkflowJson|手动粘贴|paste"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "importWorkflowJson|手动粘贴|paste",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": ".\\comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 24,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\README.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\comfymanager\\src\\api\\features.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\pages\\StudioAudio.tsx"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 34
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要从工位界面中移除"高级：手动粘贴 API JSON"功能。
+
+计划将"手动粘贴"功能移到上传JSON按钮下方，支持自定义文件名，并调用现有的 importWorkflowJson 接口实现上传。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "手动粘贴|粘贴 API|没有库文件"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "手动粘贴|粘贴 API|没有库文件",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "nanoid|editWf"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "nanoid|editWf",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 4
+}
+```
+Status: **completed**
 
 </details></tool-use>

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, relative, resolve, sep } from "node:path";
 import JSZip from "jszip";
 import { nanoid } from "nanoid";
@@ -264,6 +264,32 @@ function writeWorkflowFile(rel: string, text: string) {
   mkdirSync(dirname(abs), { recursive: true });
   writeFileSync(abs, text, "utf8");
   return slash(relative(installDir(), abs));
+}
+
+export function deleteWorkflowFiles(paths: string[]) {
+  const uniq = [...new Set(paths.map((p) => slash(p)).filter(Boolean))];
+  if (!uniq.length) throw new Error("请选择要删除的工作流");
+  const deleted: string[] = [];
+  const features = { ...loadSettings().features };
+  for (const rel of uniq) {
+    const abs = resolveWorkflowFile(rel);
+    unlinkSync(abs);
+    resolveCache.delete(rel);
+    deleted.push(rel);
+    for (const id of FEATURE_IDS) {
+      const cfg = features[id];
+      const list = (cfg.workflows || []).filter((w) => slash(w.source || "") !== rel);
+      if (list.length === (cfg.workflows || []).length && slash(cfg.workflowSource || "") !== rel) continue;
+      features[id] = syncActiveWorkflow({
+        ...cfg,
+        workflows: list,
+        workflowSource: slash(cfg.workflowSource || "") === rel ? "" : cfg.workflowSource,
+        workflow: slash(cfg.workflowSource || "") === rel ? "" : cfg.workflow,
+      });
+    }
+  }
+  saveSettings({ features });
+  return { deleted, features };
 }
 
 export function importWorkflowJson(filename: string, text: string) {

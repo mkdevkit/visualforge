@@ -18,6 +18,7 @@ import {
   listComfyWorkflows,
   readWorkflowJson,
   zipWorkflows,
+  deleteWorkflowFiles,
 } from "./comfy-workflows.ts";
 
 ensureLayout(loadSettings().dataDir, loadSettings().comfy.modelsDir);
@@ -105,6 +106,15 @@ app.post("/api/comfy/workflows/assign", async (c) => {
   const featureId = String(body.featureId || "");
   if (!path || !featureId) return c.json({ ok: false, error: "需要 path 和 featureId" }, 400);
   return c.json(await assignWorkflowToFeature(path, featureId, body.inject !== false));
+});
+app.post("/api/comfy/workflows/delete", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const paths = Array.isArray((body as { paths?: string[] }).paths)
+    ? (body as { paths: string[] }).paths
+    : String((body as { path?: string }).path || "")
+      ? [String((body as { path: string }).path)]
+      : [];
+  return c.json({ ok: true, ...deleteWorkflowFiles(paths) });
 });
 app.post("/api/comfy/workflows/zip", async (c) => {
   const body = await c.req.json().catch(() => ({}));

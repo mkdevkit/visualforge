@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { nanoid } from "nanoid";
-import { api, downloadWorkflowZip, importWorkflows } from "../lib/api";
+import { api, downloadWorkflowZip, importWorkflows, importWorkflowText } from "../lib/api";
 import { Button, ErrorBox, Field, Input, Select, Textarea } from "../components/ui";
 import { PageHead } from "../components/PageHead";
 import { FEATURE_IDS, FEATURE_LABELS } from "../api/types";
@@ -78,6 +77,34 @@ function stationList(f: FeatureCfg): StationWorkflow[] {
   ];
 }
 
+function isLibrary(source?: string) {
+  return Boolean(source) && source !== "manual";
+}
+
+const PLACEHOLDERS: Array<{ token: string; meaning: string; where: string }> = [
+  { token: "{{prompt}}", meaning: "描述 / 音色描述", where: "几乎全部" },
+  { token: "{{model}}", meaning: "所选主模型文件名，与工作流独立", where: "几乎全部" },
+  { token: "{{negative}}", meaning: "负向提示", where: "生图" },
+  { token: "{{image}}", meaning: "第一张参考图在 Comfy 里的文件名", where: "图生图、视频、3D" },
+  { token: "{{image2}}", meaning: "第二张 / 尾帧", where: "视频、3D 动画" },
+  { token: "{{width}} {{height}}", meaning: "分辨率；单独写成该占位符时替换成数字", where: "生图" },
+  { token: "{{n}} {{seed}}", meaning: "张数、种子（未填则随机）", where: "生图" },
+  { token: "{{duration}}", meaning: "时长，默认 5", where: "视频、音效" },
+  { token: "{{resolution}} {{ratio}}", meaning: "默认 720P、16:9", where: "视频" },
+  { token: "{{lyrics}} {{instrumental}}", meaning: "歌词、是否伴奏", where: "音乐" },
+  { token: "{{text}} {{voice}} {{instructions}}", meaning: "台词、音色、指示", where: "配音" },
+  { token: "{{name}}", meaning: "音色名", where: "音色设计" },
+];
+
+const AUTO_INJECT: Array<{ match: string; token: string }> = [
+  { match: "第一个 ckpt_name / unet_name / model_name", token: "{{model}}" },
+  { match: "第一个 CLIPTextEncode 的 text", token: "{{prompt}}" },
+  { match: "第二个 CLIPTextEncode 的 text", token: "{{negative}}" },
+  { match: "第一个 LoadImage 的 image", token: "{{image}}" },
+  { match: "第二个 LoadImage 的 image", token: "{{image2}}" },
+  { match: "已有的 width / height / seed 等控件", token: "{{width}} 等" },
+];
+
 export function Workflows() {
   const [features, setFeatures] = useState<Record<FeatureId, FeatureCfg>>(
     Object.fromEntries(FEATURE_IDS.map((id) => [id, empty()])) as Record<FeatureId, FeatureCfg>,
@@ -93,6 +120,8 @@ export function Workflows() {
   const [picked, setPicked] = useState<Record<string, boolean>>({});
   const [assignFor, setAssignFor] = useState<Record<string, FeatureId | "">>({});
   const [libPick, setLibPick] = useState<Partial<Record<FeatureId, string>>>({});
+  const [pasteName, setPasteName] = useState("");
+  const [pasteText, setPasteText] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const refresh = async () => {
@@ -136,10 +165,6 @@ export function Workflows() {
     });
   }
 
-  function isLibrary(source?: string) {
-    return Boolean(source) && source !== "manual";
-  }
-
   async function joinLibrary(path: string, featureId: FeatureId) {
     setError("");
     setOk("");
@@ -155,8 +180,46 @@ export function Workflows() {
       <PageHead
         kicker="Workflows"
         title="工作流"
-        desc="直接用上方 ComfyUI 工作流库里的 json：选工位后点加入。生成时会读这份文件（画布格式会转成 /prompt）。不必粘贴。"
+        desc="直接用上方 ComfyUI 工作流库里的 json：选工位后点加入。生成时会读这份文件（画布格式会转成 /prompt）。没有文件时可以粘贴 JSON，效果和上传一样。"
       />
+
+      <div className="mb-8 rounded-2xl border border-line bg-panel p-5">
+        <div className="text-[11px] tracking-[0.18em] uppercase text-brass">支持的占位符</div>
+        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-mute">
+          占位符是节点里某个控件值的模板（API 写在{" "}
+          <code className="font-mono text-foam/80">inputs</code>，画布写在{" "}
+          <code className="font-mono text-foam/80">widgets_values</code>），连线不会动。上传原样 ComfyUI json 即可；生成时先注入还没写的槽，再用视铸参数替换。字段里已有{" "}
+          <code className="font-mono text-foam/80">{"{{"}</code> 的一律跳过，不会覆盖。ComfyUI 收到的已经是填好的值。
+        </p>
+        <div className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+          {PLACEHOLDERS.map((row) => (
+            <div key={row.token} className="min-w-0">
+              <code className="font-mono text-[12px] text-brass">{row.token}</code>
+              <p className="mt-0.5 text-xs text-mute">
+                {row.meaning}
+                <span className="text-foam/40"> · {row.where}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 border-t border-line pt-3">
+          <div className="text-[11px] tracking-[0.16em] uppercase text-brass">json 没写时自动注入</div>
+          <ul className="mt-2 grid gap-x-8 gap-y-1 text-xs text-mute sm:grid-cols-2">
+            {AUTO_INJECT.map((row) => (
+              <li key={row.token + row.match}>
+                {row.match}
+                <span className="text-foam/50"> → </span>
+                <code className="font-mono text-brass">{row.token}</code>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs leading-relaxed text-mute">
+            按转换后的 API 图遍历，不看节点标题。两个 CLIP 顺序反了会把提示词和负向填反；LoRA / CLIP 编码器 / VAE 默认不注入。
+            <code className="mx-1 font-mono text-foam/80">{"{{image}}"}</code>
+            填的是 Comfy 里的文件名，参考图会先上传。要避免猜错，在 json 里自己写占位符。
+          </p>
+        </div>
+      </div>
 
       <div className="mb-8 space-y-4 rounded-2xl border border-line bg-panel p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -202,12 +265,73 @@ export function Workflows() {
             >
               {selected.length ? `下载选中 ZIP（${selected.length}）` : "全部下载 ZIP"}
             </Button>
+            <Button
+              tone="ghost"
+              disabled={!selected.length}
+              onClick={async () => {
+                if (!confirm(`删除选中的 ${selected.length} 个工作流文件？已加入工位的也会从工位里拿掉。`)) return;
+                setError("");
+                setOk("");
+                try {
+                  const r = await api.deleteWorkflows(selected.map((i) => i.path));
+                  setOk(`已删除 ${r.deleted.length} 个`);
+                  setPicked({});
+                  await refresh();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : String(err));
+                }
+              }}
+            >
+              {selected.length ? `删除选中（${selected.length}）` : "删除选中"}
+            </Button>
             <Button tone="ghost" onClick={() => refresh().catch((e) => setError(e.message))}>刷新</Button>
           </div>
         </div>
 
+        <div className="space-y-2 rounded-xl border border-line bg-ink-2/50 p-3">
+          <div className="text-[11px] tracking-[0.16em] uppercase text-brass">粘贴 JSON</div>
+          <p className="text-xs text-mute">写入 ComfyUI 的 user/default/workflows/，和上传文件相同。画布或 API 格式都可以。同名会覆盖。</p>
+          <Field label="文件名" hint="会自动补 .json">
+            <Input
+              className="font-mono text-sm"
+              placeholder="qwen-image.json"
+              value={pasteName}
+              onChange={(e) => setPasteName(e.target.value)}
+            />
+          </Field>
+          <Textarea
+            className="min-h-36 font-mono text-xs"
+            placeholder="{ ... }"
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+          />
+          <Button
+            tone="ghost"
+            className="py-1.5 text-xs"
+            disabled={!pasteText.trim()}
+            onClick={async () => {
+              setError("");
+              setOk("");
+              try {
+                const raw = pasteName.trim() || "pasted.json";
+                const name = raw.toLowerCase().endsWith(".json") ? raw : `${raw}.json`;
+                const exists = items.some((i) => i.path.replace(/\\/g, "/").split("/").pop()?.toLowerCase() === name.toLowerCase());
+                if (exists && !confirm(`库里已有 ${name}，覆盖？`)) return;
+                const r = await importWorkflowText(name, pasteText);
+                setOk(`已写入 ${r.imported.join("、")}`);
+                setPasteText("");
+                await refresh();
+              } catch (err) {
+                setError(err instanceof Error ? err.message : String(err));
+              }
+            }}
+          >
+            写入工作流库
+          </Button>
+        </div>
+
         {!items.length ? (
-          <p className="text-sm text-mute">还没有工作流。在 ComfyUI 里保存，或上传 JSON / ZIP。</p>
+          <p className="text-sm text-mute">还没有工作流。在 ComfyUI 里保存，或上传 / 粘贴 JSON。</p>
         ) : (
           <div className="overflow-hidden rounded-xl border border-line">
             <table className="w-full text-left text-sm">
@@ -277,6 +401,30 @@ export function Workflows() {
                         >
                           加入
                         </Button>
+                        <Button
+                          tone="danger"
+                          className="py-1.5 text-xs"
+                          onClick={async () => {
+                            const used = item.assignedTo.map((id) => FEATURE_LABELS[id as FeatureId] || id).join("、");
+                            if (!confirm(used ? `删除 ${item.name}？会从工位（${used}）里拿掉。` : `删除 ${item.name}？`)) return;
+                            setError("");
+                            setOk("");
+                            try {
+                              await api.deleteWorkflows([item.path]);
+                              setOk(`已删除 ${item.name}`);
+                              setPicked((prev) => {
+                                const next = { ...prev };
+                                delete next[item.path];
+                                return next;
+                              });
+                              await refresh();
+                            } catch (err) {
+                              setError(err instanceof Error ? err.message : String(err));
+                            }
+                          }}
+                        >
+                          删除
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -288,7 +436,7 @@ export function Workflows() {
       </div>
 
       <p className="mb-4 text-sm text-mute">
-        推荐路径：ComfyUI 保存 → 本页库里加入工位 → 视铸指定工作流和模型。粘贴 API JSON 只给没有库文件的情况。
+        推荐路径：ComfyUI 保存或上传/粘贴 json → 本页库里加入工位 → 视铸指定工作流和模型。
       </p>
       <ErrorBox error={error} />
       {ok ? <div className="mb-4 text-sm text-brass">{ok}</div> : null}
@@ -380,7 +528,7 @@ export function Workflows() {
                       </Button>
                     </div>
                     {!list.length ? (
-                      <p className="text-sm text-mute">还没有工作流。选库里的 json 点加入即可，不用粘贴。</p>
+                      <p className="text-sm text-mute">还没有工作流。选库里的 json 点加入即可。</p>
                     ) : (
                       <ul className="space-y-2">
                         {list.map((w) => (
@@ -475,32 +623,9 @@ export function Workflows() {
                     </Field>
                   ) : editing && isLibrary(editing.source) ? (
                     <p className="text-xs leading-relaxed text-mute">
-                      正在用库文件 {editing.source}。请在 ComfyUI 里改图并保存，视铸生成时会重新读取并转换，不必在这里粘贴。
+                      正在用库文件 {editing.source}。请在 ComfyUI 里改图并保存，视铸生成时会重新读取并转换。
                     </p>
                   ) : null}
-                  <details className="rounded-xl border border-line px-3 py-2">
-                    <summary className="cursor-pointer text-xs text-mute">高级：手动粘贴 API JSON</summary>
-                    <div className="mt-2">
-                      <Button
-                        tone="ghost"
-                        className="py-1 text-xs"
-                        onClick={() => {
-                          const item: StationWorkflow = {
-                            id: nanoid(10),
-                            name: `手动粘贴 ${list.length + 1}`,
-                            source: "manual",
-                            workflow: f.mode === "http" ? "{}" : "{\n  \n}",
-                            enabled: true,
-                          };
-                          const next = [...list, item];
-                          patchList(id, next, { activeWorkflowId: item.id });
-                          setEditWf((prev) => ({ ...prev, [id]: item.id }));
-                        }}
-                      >
-                        新增粘贴
-                      </Button>
-                    </div>
-                  </details>
                 </div>
               ) : null}
             </div>

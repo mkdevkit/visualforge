@@ -76,6 +76,11 @@ export const api = {
     }>("/api/comfy/workflows"),
   assignWorkflow: (path: string, featureId: string) =>
     req("/api/comfy/workflows/assign", { method: "POST", body: JSON.stringify({ path, featureId }) }),
+  deleteWorkflows: (paths: string[]) =>
+    req<{ ok: boolean; deleted: string[] }>("/api/comfy/workflows/delete", {
+      method: "POST",
+      body: JSON.stringify({ paths }),
+    }),
 };
 
 export async function downloadWorkflowZip(paths?: string[]) {
@@ -104,4 +109,15 @@ export async function importWorkflows(files: File[]) {
   const json = await res.json();
   if (!res.ok || json.ok === false) throw new Error(json.error || "导入失败");
   return json as { imported: string[]; skipped: string[]; items: unknown[] };
+}
+
+export async function importWorkflowText(filename: string, text: string) {
+  const raw = filename.trim() || "pasted.json";
+  const name = raw.toLowerCase().endsWith(".json") ? raw : `${raw}.json`;
+  try {
+    JSON.parse(text);
+  } catch {
+    throw new Error("粘贴的内容不是合法 JSON");
+  }
+  return importWorkflows([new File([text], name, { type: "application/json" })]);
 }
