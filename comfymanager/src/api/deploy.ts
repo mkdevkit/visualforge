@@ -506,6 +506,8 @@ function comfyLaunchEnv(): NodeJS.ProcessEnv {
   }
   return env;
 }
+
+function canSudoN() {
   if (process.getuid?.() === 0) return true;
   const r = spawnSync("sudo", ["-n", "true"], { encoding: "utf8", timeout: 8000, windowsHide: true });
   return r.status === 0;
