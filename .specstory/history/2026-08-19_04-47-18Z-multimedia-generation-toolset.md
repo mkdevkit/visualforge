@@ -50954,6 +50954,203 @@ npm error command sh -c node ../scripts/check-node.cjs && vite
 
 _**Agent (grok-4.6)**_
 
+<think><details><summary>Thought Process</summary>
+An unexpected closing brace at line 512 in deploy.ts is causing the build to fail.
+
+A recent edit that replaced `function canSudoN()` appears to have introduced the brace mismatch. I will inspect the surrounding code to confirm.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+`deploy.ts` 括号对不上，我先看 512 行附近把语法修好。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The build error comes from orphaned code left after replacing `canSudoN`. A stray closing brace at line 512 is causing the syntax failure.
+
+Restoring `function canSudoN` before the leftover lines will fix the syntax error.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Verifying that `startComfy` is async and checking the rest of the file for syntax errors.
+
+Grepping for duplicate `canSudoN`.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "function canSudoN|export async function startComfy|function comfyLaunchEnv"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "function canSudoN|export async function startComfy|function comfyLaunchEnv",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The file appears correct. I will provide a brief Chinese summary.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+上次插入 `ensureCCompiler` 时把 `canSudoN` 的函数头冲掉了，留下一段悬空的 `}`，所以 Vite 编不过。已经补回去。
+
+把这次改动同步到 GPU 机后再跑 `npm run manager`。若还没装 gcc，可先执行：
+
+```bash
+sudo apt-get update && sudo apt-get install -y build-essential
+```
+
+然后重启 ComfyUI 再生成。
+
+---
+
+_**User**_
+
+[32m[INFO][0m Requested to load QwenImageTEModel_
+[32m[INFO][0m Model QwenImageTEModel_ prepared for dynamic VRAM loading. 7910MB Staged. 0 patches attached. Force pre-loaded 122 weights: 561 KB.
+/tmp/tmp6qwvehaq/cuda_utils.c:9:10: fatal error: Python.h: No such file or directory
+    9 | #include <Python.h>
+      |          ^~~~~~~~~~
+compilation terminated.
+[1m[31m[ERROR][0m !!! Exception during processing !!! Command '['gcc', '/tmp/tmp6qwvehaq/cuda_utils.c', '-O3', '-shared', '-fPIC', '-Wno-psabi', '-o', '/tmp/tmp6qwvehaq/cuda_utils.cpython-310-x86_64-linux-gnu.so', '-l:libcuda.so.1', '-L/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/backends/nvidia/lib', '-L/lib/x86_64-linux-gnu', '-I/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/backends/nvidia/include', '-I/tmp/tmp6qwvehaq', '-I/usr/include/python3.10']' returned non-zero exit status 1.
+[1m[31m[ERROR][0m Traceback (most recent call last):
+  File "/home/ubuntu/visualforge/comfymanager/comfy/execution.py", line 545, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/execution.py", line 344, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/execution.py", line 318, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/execution.py", line 306, in process_inputs
+    result = f(**inputs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/nodes.py", line 77, in encode
+    return (clip.encode_from_tokens_scheduled(tokens), )
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/sd.py", line 340, in encode_from_tokens_scheduled
+    pooled_dict = self.encode_from_tokens(tokens, return_pooled=return_pooled, return_dict=True)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/sd.py", line 409, in encode_from_tokens
+    o = self.cond_stage_model.encode_token_weights(tokens)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/text_encoders/qwen_image.py", line 62, in encode_token_weights
+    out, pooled, extra = super().encode_token_weights(token_weight_pairs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/sd1_clip.py", line 743, in encode_token_weights
+    out = getattr(self, self.clip).encode_token_weights(token_weight_pairs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/sd1_clip.py", line 45, in encode_token_weights
+    o = self.encode(to_encode)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/sd1_clip.py", line 306, in encode
+    return self(tokens)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/sd1_clip.py", line 279, in forward
+    outputs = self.transformer(None, attention_mask_model, embeds=embeds, num_tokens=num_tokens, intermediate_output=intermediate_output, final_layer_norm_intermediate=self.layer_norm_hidden_state, dtype=torch.float32, embeds_info=embeds_info)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/text_encoders/llama.py", line 1301, in forward
+    return super().forward(x, attention_mask=attention_mask, embeds=embeds, num_tokens=num_tokens, intermediate_output=intermediate_output, final_layer_norm_intermediate=final_layer_norm_intermediate, dtype=dtype, position_ids=position_ids)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/text_encoders/llama.py", line 999, in forward
+    return self.model(input_ids, *args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/text_encoders/llama.py", line 843, in forward
+    freqs_cis = self.compute_freqs_cis(position_ids, x.device)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/text_encoders/llama.py", line 816, in compute_freqs_cis
+    return precompute_freqs_cis(self.config.head_dim,
+  File "/home/ubuntu/visualforge/comfymanager/comfy/comfy/text_encoders/llama.py", line 462, in precompute_freqs_cis
+    freqs = (inv_freq_expanded.float() @ position_ids_expanded.float()).transpose(1, 2)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/_native/registry.py", line 923, in eager_router
+    result = _dispatch(args, kwargs, swallow_cond_exceptions=False)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/_native/registry.py", line 919, in _dispatch
+    return getattr(torch.ops._native, impl_name)(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/_ops.py", line 1279, in __call__
+    return self._op(*args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/_native/ops/bmm_outer_product/triton_impl.py", line 28, in _bmm_outer_product_impl
+    return bmm_outer_product(a, b)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/torch/_native/ops/bmm_outer_product/triton_kernels.py", line 76, in bmm_outer_product
+    _bmm_outer_product_kernel[(B * triton.cdiv(M, BLOCK_M) * triton.cdiv(N, BLOCK_N),)](
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/jit.py", line 370, in <lambda>
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/jit.py", line 713, in run
+    device = driver.active.get_current_device()
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/driver.py", line 39, in active
+    self._active = self.default
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/driver.py", line 33, in default
+    self._default = _create_driver()
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/driver.py", line 21, in _create_driver
+    return active_drivers[0]()
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/backends/nvidia/driver.py", line 336, in __init__
+    self.utils = CudaUtils()  # TODO: make static
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/backends/nvidia/driver.py", line 66, in __init__
+    mod = compile_module_from_src(
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/build.py", line 93, in compile_module_from_src
+    so = _build(name, src_path, tmpdir, library_dirs or [], include_dirs or [], libraries or [], ccflags or [])
+  File "/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/runtime/build.py", line 48, in _build
+    subprocess.check_call(cc_cmd, stdout=subprocess.DEVNULL)
+  File "/usr/lib/python3.10/subprocess.py", line 369, in check_call
+    raise CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command '['gcc', '/tmp/tmp6qwvehaq/cuda_utils.c', '-O3', '-shared', '-fPIC', '-Wno-psabi', '-o', '/tmp/tmp6qwvehaq/cuda_utils.cpython-310-x86_64-linux-gnu.so', '-l:libcuda.so.1', '-L/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/backends/nvidia/lib', '-L/lib/x86_64-linux-gnu', '-I/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/triton/backends/nvidia/include', '-I/tmp/tmp6qwvehaq', '-I/usr/include/python3.10']' returned non-zero exit status 1.
+ 
+[32m[INFO][0m [32mPrompt executed in 9.79 seconds[0m
+
+---
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
 <summary>Tool use: **read_file_v2** • Read file: </summary>
 
@@ -50961,8 +51158,7 @@ _**Agent (grok-4.6)**_
 
 _**Agent (grok-4.6)**_
 
-<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
-<summary>Tool use: **edit_file_v2**</summary>
-Status: **loading**
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
 
 </details></tool-use>

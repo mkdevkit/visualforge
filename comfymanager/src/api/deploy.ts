@@ -468,27 +468,58 @@ function resolveCompiler(bin: string) {
   return existsSync(abs) ? abs : "";
 }
 
+function pythonVersionMinor() {
+  const r = spawnSync(pythonBin(), ["-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')"], {
+    encoding: "utf8",
+    timeout: 8000,
+    windowsHide: true,
+  });
+  const ver = String(r.stdout || "").trim();
+  return /^\d+\.\d+$/.test(ver) ? ver : "3.10";
+}
+
+function pythonHeaderReady() {
+  const inc = spawnSync(pythonBin(), ["-c", "import sysconfig; print(sysconfig.get_path('include') or '')"], {
+    encoding: "utf8",
+    timeout: 8000,
+    windowsHide: true,
+  });
+  const dir = String(inc.stdout || "").trim();
+  if (dir && existsSync(join(dir, "Python.h"))) return true;
+  return existsSync(join("/usr/include", `python${pythonVersionMinor()}`, "Python.h"));
+}
+
 async function ensureCCompiler() {
   if (process.platform !== "linux") return;
   if ((process.env.COMFYUI_CUDA || "").trim().toLowerCase() === "cpu") return;
   if (!nvidiaHardwarePresent() && detectAccel().kind !== "cuda") return;
-  if (resolveCompiler("gcc")) return;
-  const hint = "sudo apt-get update && sudo apt-get install -y build-essential";
+  const needGcc = !resolveCompiler("gcc");
+  const needPyh = !pythonHeaderReady();
+  if (!needGcc && !needPyh) return;
+  const pkgs = [
+    ...(needGcc ? ["build-essential"] : []),
+    ...(needPyh ? [`python${pythonVersionMinor()}-dev`, "python3-dev"] : []),
+  ];
+  const hint = `sudo apt-get update && sudo apt-get install -y ${pkgs.join(" ")}`;
   if (!canSudoN()) {
-    throw new Error(`未找到 gcc。新版 PyTorch / Qwen 会用 Triton 即时编译 CUDA 内核，需要 C 编译器。请执行：${hint}`);
+    throw new Error(
+      needPyh
+        ? `Triton 编译 CUDA 内核需要 Python.h。请执行：${hint}`
+        : `未找到 gcc。新版 PyTorch / Qwen 会用 Triton 即时编译 CUDA 内核，需要 C 编译器。请执行：${hint}`,
+    );
   }
-  appendLog("未找到 gcc，正在安装 build-essential（Triton 编译 CUDA 内核需要）");
+  appendLog(`正在安装 ${pkgs.join(" ")}（Triton 编译 CUDA 内核需要 gcc / Python.h）`);
   const cwd = loadSettings().dataDir;
   mkdirSync(cwd, { recursive: true });
   const env = { DEBIAN_FRONTEND: "noninteractive" };
   const update = rootCmd(["apt-get", "update"]);
   await run(update.cmd, update.args, cwd, env);
-  const inst = rootCmd(["apt-get", "install", "-y", "build-essential"]);
+  const inst = rootCmd(["apt-get", "install", "-y", ...pkgs]);
   const r = await run(inst.cmd, inst.args, cwd, env);
-  if (r.code !== 0 || !resolveCompiler("gcc")) {
-    throw new Error(`安装 gcc 失败。请手动执行：${hint}\n${r.log.slice(-1200)}`);
+  if (r.code !== 0 || (needGcc && !resolveCompiler("gcc")) || (needPyh && !pythonHeaderReady())) {
+    throw new Error(`安装编译依赖失败。请手动执行：${hint}\n${r.log.slice(-1200)}`);
   }
-  appendLog("已安装 gcc");
+  appendLog("Triton 编译依赖已就绪");
 }
 
 function comfyLaunchEnv(): NodeJS.ProcessEnv {
