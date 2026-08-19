@@ -42842,3 +42842,974 @@ Additional data:
 Status: **completed**
 
 </details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+计划新增粘贴导入 API，复用现有的 importWorkflowJson 接口来实现手动粘贴上传文件的功能。
+
+前端可直接将粘贴文本转为 File 对象，复用现有上传接口即可实现“粘贴即上传”，无需改动后端。该功能将放在上传按钮下方，提供文件名输入框。
+
+粘贴区域将包含文本输入框和保存/导入按钮，置于库面板内上传 JSON 按钮下方。
+
+同时移除工位的“手动粘贴 API JSON”功能，删除“新增粘贴”按钮，并去掉非库工作流的“编辑”按钮。HTTP 模式仍保留 JSON body 编辑器，旧版手动源工作流的文本框将保留以供迁移或删除。
+
+彻底移除粘贴到工位的界面与编辑入口。HTTP 请求体编辑器予以保留。遗留的旧版手动源工作流仅显示提示并提供移除选项，不再保留编辑器。
+
+遗留的旧版手动源工作流仍保留 JSON 文本编辑框，方便保存或移除，但不再提供“新增粘贴”入口。HTTP 模式的请求体编辑器继续保留，库模式则显示“正在用库文件”。彻底移除 details 块。
+
+正在梳理代码清理范围。editWf 与 nanoid 相关逻辑将被移除，因为它们只服务于即将删除的“新增粘贴”和“编辑”入口。HTTP 模式下点击工位工作流时，可能需要额外处理高亮选中项的逻辑。
+
+HTTP 模式下的 JSON 编辑器予以保留，它与 ComfyUI 库无关，属于独立的自定义请求体存储。粘贴功能仅针对库模式，不适用于 HTTP 模式。
+
+文件名自动补全 .json 后缀，后端会做安全化处理。同名文件上传时将直接覆盖。
+
+README 中关于粘贴功能的说明需要同步更新。
+
+移除“新增粘贴”后，nanoid 可以彻底删除；但 editWf 不应直接移除，否则 HTTP 模式下无法切换编辑哪个请求体。考虑改为点击列表项来选中对应工作流，或仅在 HTTP 模式保留“编辑”入口。
+
+彻底移除“编辑”按钮，改由点击工位卡片或名称来切换当前编辑项。HTTP 模式下点击卡片即可选中对应请求体进行编辑，无需保留“编辑”入口。页面头部描述中“不必粘贴”的说明仍然适用。
+
+正在调整辅助文本与空库提示语，补充“粘贴”入口说明。确认 nanoid 在移除后无其他引用。粘贴区域拟置于上传按钮下方，正在权衡使用 details 折叠块还是常驻显示，避免大文本框挤占文件列表空间。
+
+确定粘贴区域常驻显示，置于上传按钮与文件列表之间。输入框最小高度设为 32 行，文件名默认填入 `pasted.json` 或示例名称。上传前将在客户端校验 JSON
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+点击工位行以选中并编辑 HTTP 工作流。仅在 HTTP 模式下显示编辑选项。
+
+添加粘贴上传功能。输入文件名时自动追加 .json 后缀，并在默认目录中检查同名文件以确认覆盖。若用户输入无效 JSON 则提示解析错误。同时移除 nanoid 导入。
+
+保留剩余手动源的文本框以便复制导出，不再新增粘贴入口。删除详情区块和“新增粘贴”按钮，仅在非库模式与 HTTP 模式下保留编辑选项。空状态提示将同步更新。粘贴区域会置于上传 JSON 按钮下方。
+
+粘贴面板将置于上传按钮行之后、表格之前。面板内包含文件名输入框、JSON 文本域及写入工作流库按钮。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+把粘贴改成写入工作流库（带文件名），并从工位卡片里去掉这项。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 importWorkflowText 中 JSON.parse 的语法错误提示不够友好。
+
+计划将 JSON 解析错误改为“粘贴的内容不是合法 JSON”。确认客户端先解析 JSON 再调用服务端导入是合理的。考虑为文本域添加“内容”标签，并检查编辑按钮是否仍需保留。
+
+确认文本域保持现状即可，无需额外添加标签。空文件名时默认使用 pasted.json。准备读取 lint 并优化 importWorkflowText 的错误提示。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\lib\\api.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\lib\\api.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "nanoid|新增粘贴|高级：手动"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Workflows.tsx",
+  "pattern": "nanoid|新增粘贴|高级：手动",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现工位列表中仍残留着 source 为 "manual" 时的 "手动粘贴" 标签。
+
+旧数据保留该标签无影响。非库项目仍保留编辑按钮，用于遗留的手动粘贴和 HTTP 来源。修改已完成。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+工位上的「手动粘贴 API JSON」已经去掉。粘贴改到工作流库里，放在 **上传 JSON / ZIP** 那一行下面。
+
+用法：填 **文件名**（会自动补 `.json`），把 JSON 贴进文本框，点 **写入工作流库**。效果和上传文件一样，写到 `user/default/workflows/`。同名会先确认再覆盖。
+
+之后还是从库里「加入」工位。自定义 HTTP 工位的请求体编辑还在，那不是往库里存图。
+
+---
+
+_**User**_
+
+加速：CPU（未检测到 NVIDIA GPU）
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户报告系统未检测到 NVIDIA GPU，因此 ComfyUI/ComfyManager 当前仅使用 CPU 进行加速。
+
+正在分析用户的真实意图。可能是希望修复 GPU 检测问题，或需要将该状态显示出来。接下来会查看代码库和上下文来确认具体需求。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先查这个加速提示是在哪显示、GPU 是怎么检测的。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "未检测到 NVIDIA|加速：CPU|NVIDIA GPU"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "未检测到 NVIDIA|加速：CPU|NVIDIA GPU",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\comfymanager\\src\\api\\deploy.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,py,md}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "gpu|cuda|nvidia|acceleration|加速"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "gpu|cuda|nvidia|acceleration|加速",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": ".\\README.md"
+    },
+    {
+      "matchCount": 34,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    },
+    {
+      "matchCount": 29,
+      "uri": ".\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\comfymanager\\src\\pages\\Overview.tsx"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 66
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\10.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户报告 ComfyManager 显示 CPU 加速，但其设备可能已配备 NVIDIA GPU。
+
+正在排查 detectAccel 函数的检测逻辑。nvidia-smi 在 Windows 10 上可能无法找到，或 spawnSync 调用失败。需要确认这是本地 Windows 还是之前提到的 Ubuntu 云主机，并考虑是否需要强制启用 CUDA 或在检测失败时允许手动选择。
+
+用户信息显示操作系统为 win32。这更可能是本地 Windows 机器存在 GPU 但未被检测到。接下来将检查检测代码并尝试运行 nvidia-smi 验证环境。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "detectAccel|accel|nvidia-smi|COMFYUI_CUDA"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "detectAccel|accel|nvidia-smi|COMFYUI_CUDA",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户报告未检测到 NVIDIA GPU。
+
+怀疑是 Windows 上的 spawnSync 问题。使用 shell: true 执行 nvidia-smi 时，逗号可能被 cmd.exe 解析为参数分隔符，导致 --format=csv,noheader 参数被错误拆分。
+
+另一个可能是 32 位 Node.js 在 64 位 Windows 上通过 WOW64 文件系统重定向访问了 SysWOW64，而 nvidia-smi.exe 可能只存在于 System32 中。此时应尝试使用 C:\Windows\Sysnative 路径。
+
+正在考虑 nvidia-smi 的备用安装路径，例如 `C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe`。同时准备运行 nvidia-smi 命令直接测试，并查阅近期的 agent 记录以获取更多上下文。
+
+用户可能在无 GPU 的 Ubuntu 云环境，也可能是误报。将直接运行 nvidia-smi 并模拟代码中的 spawnSync 调用，以定位实际原因。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先在本机用和代码相同的方式跑 `nvidia-smi`，看是检测逻辑的问题还是机器上确实没有 GPU。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+Cancelled
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.ts",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "spawnSync|shell:"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "spawnSync|shell:",
+  "topFiles": [
+    {
+      "matchCount": 14,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\unirig.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 16
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+---
+
+_**User**_
+
+是远程的机子
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户确认该消息涉及远程机器。
+
+推测该远程服务器可能缺少 NVIDIA 驱动或 nvidia-smi，导致无法检测到 GPU。也可能是希望为远程 Linux 主机构建更清晰的说明文档。
+
+正在排查 Linux 下 nvidia-smi 检测逻辑的缺陷。同时考虑在 Ubuntu 远程主机上提供 NVIDIA 驱动安装支持，并核对现有文档是否已覆盖该场景。
+
+spawnSync 在 Linux 下不启用 shell，若 nvidia-smi 不在进程 PATH 中则检测失败。远程环境常见问题包括：云虚拟机无 GPU、GPU 存在但驱动未安装、或 nvidia-smi 路径异常。用户可能需要 Ubuntu 远程主机的 NVIDIA 驱动安装指南，以及如何通过环境变量强制使用 CUDA 的说明。
+
+正在查阅 README 的 Ubuntu GPU 章节与部署检测逻辑，同时回溯对话记录以确认远程服务器的具体配置。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+远程机上显示 CPU，多半是没检测到驱动或 `nvidia-smi`。我先核对 Ubuntu 上的检测方式和文档。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "nvidia|CUDA|GPU|驱动|Ubuntu"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "nvidia|CUDA|GPU|驱动|Ubuntu",
+  "topFiles": [
+    {
+      "matchCount": 13,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 13
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,md}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "nvidia-smi|detectAccel|hostPrereqs|prereqs"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "nvidia-smi|detectAccel|hostPrereqs|prereqs",
+  "topFiles": [
+    {
+      "matchCount": 9,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 6,
+      "uri": "comfymanager\\src\\pages\\Overview.tsx"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 15
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户确认这是远程机器，显示CPU负载，没有NVIDIA GPU。
+
+计划扩展GPU检测逻辑，检查更多路径并读取设备节点。针对远程Ubuntu环境，将添加更明确的提示：若检测到CPU负载，建议运行`nvidia-smi`验证GPU实例是否已安装NVIDIA驱动；若确实无GPU卡，则说明CPU运行是正常现象。
+
+将通过 `lspci` 识别未加载驱动的 NVIDIA 硬件，与无 GPU 卡区分。若检测到 NVIDIA 设备但找不到 `nvidia-smi`，会提示“检测到 NVIDIA 设备但未装驱动”。同时确认 Linux 下 `spawnSync` 调用 `nvidia-smi` 时默认包含 `/usr/bin` 路径，不受 systemd 环境影响。
+
+明确了云GPU实例的典型场景：需要GPU实例类型，且Ubuntu通常不会预装NVIDIA驱动。将新增 `findNvidiaSmi()` 按优先级搜索 `nvidia-smi`，包括 `/usr/bin`、Windows程序目录等常见路径。同时新增 `detectNvidiaHardware()`，通过读取 `/proc/driver/nvidia/version`、检查 `/dev/nvidia0` 或使用 `lspci` 来识别未加载驱动的NVIDIA硬件。
+
+明确了三种状态的界面提示文案。若检测到 NVIDIA 硬件但缺少驱动，提示将明确要求先安装驱动再重装 PyTorch。若无 GPU 硬件，提示将引导用户选择 GPU 实例并自行安装驱动。即使检测到 NVIDIA 设备，只要驱动未就绪，仍会安装 CPU 版本的 PyTorch，避免 CUDA 运行时出错。
+
+决定不在 README 中自动推荐安装 NVIDIA 驱动，避免远程误装风险。正在编写 `nvidiaSmiCandidates()` 函数，按平台优先级列出 `nvidia-smi` 的候选路径。
+
+实现了 `runSmi()` 函数，调用 `nvidia-smi` 时显式追加 `/usr/bin` 和 `/usr/local/bin` 到 PATH，并设置 8 秒超时。开始编写 `nvidiaPciPresent()`，用于 Linux 端检测未加载驱动的 NVIDIA 网卡。
+
+完成了 `nvidiaPciPresent()` 的具体实现：检查 `/dev/nvidia0`、`/proc/driver/nvidia/version`，或通过 `lspci` 匹配 `NVIDIA` 字样来识别未加载驱动的网卡。
+
+为 Overview 设计了两段具体的用户提示文案。若确实无 GPU 卡，提示云主机需选 GPU 型号并自行安装驱动；若检测到 NVIDIA 设备但 `nvidia-smi` 不可用，则提示先安装驱动并重启，确认 `nvidia-smi` 可用后再安装 ComfyUI。
+
+同时计划将加速提示一并写入状态 API，使前端界面能够直接展示。
+
+正在查看 .env.example 中的 COMFYUI_CUDA 配置。接下来将阅读 hostPrereqs 和 Overview 的剩余代码，以及 .env.example.nvidia 文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将优化 Linux 远程机器的 GPU 检测，并在概览页面提供更清晰的提示。
+
+将搜索 nvidia-smi 并检测 NVIDIA 设备，即使缺少驱动也能识别。会在加速器对象中返回提示信息并在概览页展示。README 中会补充安装前检查 GPU 驱动的说明。
+
+当 nvidia-smi 失败时，将回退到检测 /dev/nvidia0 和 /proc/driver/nvidia/version，或通过 lspci 命令扫描 NVIDIA 设备并识别 VGA/3D 显示接口。
+
+若检测到 NVIDIA 硬件但 nvidia-smi 不可用，标签显示「CPU（有 NVIDIA 卡，但 nvidia-smi 不可用）」，提示使用 ubuntu-drivers 安装驱动。若未检测到 GPU，则显示「CPU（未检测到 NVIDIA GPU）」，提示选择 GPU 实例并自行安装驱动。不会自动安装驱动。
+
+概览页面将展示加速器标签和对应提示。README 中会在确认 Python 环境后添加 GPU 云主机说明，引导用户 SSH 登录机器执行 nvidia-smi 检查。
+
+README 将补充具体的 GPU 驱动排查命令与后续操作指引。若 nvidia-smi 因 PATH 缺失而无法调用，改用绝对路径可绕过该限制完成检测。准备开始实现。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+远程机常见情况是：没选 GPU 机型，或有卡但没装驱动 / `nvidia-smi` 不在 PATH。我会加强 Linux 检测，并在概览里给出对应提示。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+我遗漏了路径参数。
+
+重新尝试。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在确认内联 detectAccel 后，pickCudaTag 仍位于其后。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要确认 detectAccel 之后 pickCudaTag 是否仍然存在。
+
+准备用 grep 搜索代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "function pickCudaTag"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "function pickCudaTag",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在准备中文回复。该现象在远程CPU虚拟机上属于正常情况，将说明如何在远程机器上检查，并给出处理建议。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这条提示是**远程那台机**上的检测结果，不是你本机。管理端只认那台 Linux 里能不能跑 `nvidia-smi`，认不到就会走 CPU。
+
+SSH 上去执行：
+
+```bash
+nvidia-smi
+lspci | grep -i nvidia
+```
+
+- **`nvidia-smi` 能列出显卡**：刷新概览，应变成 CUDA，再点安装。
+- **`lspci` 有 NVIDIA，但 `nvidia-smi` 失败**：有卡没驱动。按云厂商文档装 NVIDIA 驱动并重启。本工具不代装驱动。
+- **`lspci` 也没有**：机型没有 GPU，只能 CPU（会非常慢），需要换 GPU 实例。
+
+已经按 CPU 装过 ComfyUI 的，驱动就绪后再点「同步模型路径 / CUDA 依赖」，会改装 CUDA 版 PyTorch。
+
+---
+
+_**User**_
+
+ubuntu@10-60-208-44:~/visualforge$ nvidia-smi
+Command 'nvidia-smi' not found, but can be installed with:
+sudo apt install nvidia-utils-510         # version 510.60.02-0ubuntu1, or
+sudo apt install nvidia-utils-510-server  # version 510.47.03-0ubuntu3
+sudo apt install nvidia-utils-390         # version 390.157-0ubuntu0.22.04.2
+sudo apt install nvidia-utils-418-server  # version 418.226.00-0ubuntu5~0.22.04.1
+sudo apt install nvidia-utils-450-server  # version 450.248.02-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-470         # version 470.256.02-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-470-server  # version 470.256.02-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-535         # version 535.309.01-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-535-server  # version 535.309.01-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-550-server  # version 550.163.01-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-580         # version 580.159.03-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-580-server  # version 580.159.03-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-545         # version 545.29.06-0ubuntu0.22.04.2
+sudo apt install nvidia-utils-565-server  # version 565.57.01-0ubuntu0.22.04.4
+sudo apt install nvidia-utils-595         # version 595.71.05-0ubuntu0.22.04.1
+sudo apt install nvidia-utils-595-server  # version 595.71.05-0ubuntu0.22.04.1
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+nvidia-smi is missing from the system. Several NVIDIA driver packages are available for installation.
+
+Installing nvidia-utils alone will not provide the actual GPU driver. I should verify whether a GPU exists with lspci, then recommend installing the full NVIDIA driver via ubuntu-drivers autoinstall instead.
+
+I cannot execute apt commands remotely from this workspace. The user should run these commands directly on their machine:
+
+- Check for a GPU with `lspci | grep -i nvidia`
+- Update package lists with `sudo apt-get update`
+- Install `ubuntu-drivers-common`
+- Run `ubuntu-drivers devices` to identify the correct driver
+
+Blindly installing `nvidia-utils-510` is not recommended.
+
+After selecting the correct driver, run `sudo ubuntu-drivers autoinstall` and reboot. Cloud GPU instances may require vendor-specific driver installation instead.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+不要按提示去装 `nvidia-utils-*`。那只是命令行工具，没有内核驱动，装完 `nvidia-smi` 多半还是失败。
+
+先确认这台机有没有 NVIDIA 卡：
+
+```bash
+lspci | grep -i nvidia
+```
+
+**没有输出**：不是 GPU 机型，换带 GPU 的实例。装 utils 也没用。
+
+**有 NVIDIA**：装驱动（会带上 `nvidia-smi`），然后重启：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-drivers-common
+sudo ubuntu-drivers autoinstall
+sudo reboot
+```
+
+重启后再 SSH 上去：
+
+```bash
+nvidia-smi
+```
+
+能列出显卡后，刷新 ComfyManager 概览，加速应变为 CUDA。若已经按 CPU 装过 ComfyUI，再点「同步模型路径 / CUDA 依赖」。
+
+云厂商若有自己的 GPU 驱动文档，优先按他们的装。本工具不代装 NVIDIA 驱动。
+
+---
+
+_**User**_
+
+ubuntu@10-60-208-44:~/visualforge$ lspci | grep -i nvidia
+00:03.0 VGA compatible controller: NVIDIA Corporation Device 2684 (rev a1)
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+An NVIDIA GPU is present on the system, identified as device 2684.
+
+Device 2684 is the RTX 4090. No NVIDIA driver is installed yet. Run `sudo ubuntu-drivers autoinstall` and reboot. Do not install only `nvidia-utils`. A newer driver such as 535, 550, or 580 is recommended instead of the older 390 or 510 series.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+有 NVIDIA 卡（`2684`，一般是 **RTX 4090**），缺的是驱动，所以没有 `nvidia-smi`。
+
+不要装 `nvidia-utils-*`。在这台机上执行：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ubuntu-drivers-common
+ubuntu-drivers devices
+sudo ubuntu-drivers autoinstall
+sudo reboot
+```
+
+重启后再 SSH 上去：
+
+```bash
+nvidia-smi
+```
+
+能列出 RTX 4090 后，刷新 ComfyManager 概览，加速应变成 CUDA。若已经按 CPU 装过 ComfyUI，再点「同步模型路径 / CUDA 依赖」。
+
+`ubuntu-drivers devices` 会列出推荐驱动版本；4090 用 535 / 550 / 580 这类即可，不要选 390、470。云厂商若有自己的驱动安装文档，优先按他们的来。
+
+---
+
+_**User**_
+
+这些的安装也放到安装cuda的流程里

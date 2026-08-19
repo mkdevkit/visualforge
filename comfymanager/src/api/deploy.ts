@@ -1,7 +1,7 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { appendFileSync, createWriteStream, existsSync, rmSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
-import { homedir } from "node:os";
+import { homedir, release } from "node:os";
 import { formatOsPath, loadSettings, PACKAGE_ROOT, saveSettings } from "./config.ts";
 import { pingComfy } from "./ping.ts";
 import { MODEL_FOLDERS } from "./types.ts";
@@ -318,6 +318,49 @@ function displayMaybePath(p: string) {
   return p;
 }
 
+function nvidiaSmiPath() {
+  const cands = process.platform === "win32"
+    ? [
+        "C:\\Windows\\System32\\nvidia-smi.exe",
+        "C:\\Windows\\Sysnative\\nvidia-smi.exe",
+        "C:\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe",
+      ]
+    : ["/usr/bin/nvidia-smi", "/usr/local/bin/nvidia-smi", "/usr/local/cuda/bin/nvidia-smi"];
+  return cands.find((p) => existsSync(p)) || "nvidia-smi";
+}
+
+function runNvidiaSmi(args: string[]) {
+  const bin = nvidiaSmiPath();
+  const abs = bin.includes("/") || bin.includes("\\");
+  return spawnSync(bin, args, {
+    encoding: "utf8",
+    timeout: 8000,
+    windowsHide: true,
+    shell: process.platform === "win32" && !abs,
+    env: {
+      ...process.env,
+      PATH: process.platform === "win32"
+        ? process.env.PATH
+        : `${process.env.PATH || "/usr/bin:/bin"}:/usr/bin:/usr/local/bin:/usr/sbin`,
+    },
+  });
+}
+
+function nvidiaHardwarePresent() {
+  if (process.platform === "darwin") return false;
+  if (existsSync("/dev/nvidia0") || existsSync("/proc/driver/nvidia/version")) return true;
+  if (process.platform === "linux") {
+    const pci = spawnSync("lspci", ["-nn"], {
+      encoding: "utf8",
+      timeout: 5000,
+      env: { ...process.env, PATH: `${process.env.PATH || ""}:/usr/bin:/bin:/usr/sbin` },
+    });
+    const text = `${pci.stdout || ""}\n${pci.stderr || ""}`;
+    return /NVIDIA|10de:/i.test(text) && /VGA|3D|Display/i.test(text);
+  }
+  return false;
+}
+
 export function detectAccel() {
   const override = (process.env.COMFYUI_CUDA || "").trim().toLowerCase();
   if (override === "cpu") {
@@ -328,6 +371,7 @@ export function detectAccel() {
       label: "CPU",
       gpu: "",
       cudaVersion: "",
+      hint: "",
     };
   }
   if (/^cu\d+$/.test(override)) {
@@ -335,9 +379,10 @@ export function detectAccel() {
       kind: "cuda" as const,
       tag: override,
       extraIndexUrl: `https://download.pytorch.org/whl/${override}`,
-      label: `CUDA ${override}`,
+      label: `CUDA ${override}（环境变量 COMFYUI_CUDA）`,
       gpu: "",
       cudaVersion: "",
+      hint: "",
     };
   }
   if (process.platform === "darwin") {
@@ -348,39 +393,31 @@ export function detectAccel() {
       label: "Apple Silicon / MPS",
       gpu: "",
       cudaVersion: "",
+      hint: "",
     };
   }
 
-  const smiBin = process.platform === "win32" && existsSync("C:\\Windows\\System32\\nvidia-smi.exe")
-    ? "C:\\Windows\\System32\\nvidia-smi.exe"
-    : "nvidia-smi";
-  const gpuInfo = spawnSync(smiBin, ["--query-gpu=name", "--format=csv,noheader"], {
-    encoding: "utf8",
-    timeout: 8000,
-    windowsHide: true,
-    shell: process.platform === "win32",
-  });
+  const gpuInfo = runNvidiaSmi(["--query-gpu=name", "--format=csv,noheader"]);
   const gpu = String(gpuInfo.stdout || "")
     .split(/\r?\n/)
     .map((s) => s.trim())
-    .filter(Boolean)[0] || "";
-  const header = spawnSync(smiBin, [], {
-    encoding: "utf8",
-    timeout: 8000,
-    windowsHide: true,
-    shell: process.platform === "win32",
-  });
+    .filter((s) => s && !/^NVIDIA-SMI has failed/i.test(s) && !/failed/i.test(s))[0] || "";
+  const header = runNvidiaSmi([]);
   const cudaVersion = `${header.stdout || ""}\n${header.stderr || ""}`.match(/CUDA Version:\s*([\d.]+)/i)?.[1] || "";
   const nvidiaOk = Boolean(gpu) || (header.status === 0 && cudaVersion);
 
   if (!nvidiaOk) {
+    const hasCard = nvidiaHardwarePresent();
     return {
       kind: "cpu" as const,
       tag: "cpu",
       extraIndexUrl: "https://download.pytorch.org/whl/cpu",
-      label: "CPU（未检测到 NVIDIA GPU）",
+      label: hasCard ? "CPU（有 NVIDIA 卡，但 nvidia-smi 不可用）" : "CPU（未检测到 NVIDIA GPU）",
       gpu: "",
       cudaVersion: "",
+      hint: hasCard
+        ? "有 NVIDIA 卡，但驱动还没就绪。点安装时会用 sudo 安装 ubuntu-drivers；装完若提示重启，执行 sudo reboot 后再点一次。需要免密 sudo。"
+        : "这台机现在没有可用的 NVIDIA GPU。云主机请换成 GPU 机型。没有 GPU 只能走 CPU，会非常慢。",
     };
   }
 
@@ -392,6 +429,7 @@ export function detectAccel() {
     label: [gpu, cudaVersion ? `驱动 CUDA ${cudaVersion}` : "", tag].filter(Boolean).join(" · "),
     gpu,
     cudaVersion,
+    hint: "",
   };
 }
 
@@ -412,7 +450,64 @@ async function torchCudaReady(cwd: string) {
   return /\bCUDA\b/.test(r.log);
 }
 
+function canSudoN() {
+  if (process.getuid?.() === 0) return true;
+  const r = spawnSync("sudo", ["-n", "true"], { encoding: "utf8", timeout: 8000, windowsHide: true });
+  return r.status === 0;
+}
+
+function rootCmd(args: string[]) {
+  if (process.getuid?.() === 0) return { cmd: args[0], args: args.slice(1) };
+  return { cmd: "sudo", args: ["-n", ...args] };
+}
+
+async function ensureNvidiaDriver() {
+  if (process.platform !== "linux") return;
+  if ((process.env.COMFYUI_CUDA || "").trim().toLowerCase() === "cpu") return;
+  if (detectAccel().kind === "cuda") return;
+  if (!nvidiaHardwarePresent()) {
+    appendLog("未发现 NVIDIA 设备，跳过驱动安装");
+    return;
+  }
+  appendLog("发现 NVIDIA 显卡，但 nvidia-smi 不可用，开始安装驱动");
+  if (!canSudoN()) {
+    throw new Error(
+      "安装 NVIDIA 驱动需要 root 或免密 sudo。请配置免密 sudo 后重试，或手动执行：sudo apt-get update && sudo apt-get install -y ubuntu-drivers-common linux-headers-$(uname -r) && sudo ubuntu-drivers autoinstall && sudo reboot",
+    );
+  }
+  const env = { DEBIAN_FRONTEND: "noninteractive" };
+  const cwd = loadSettings().dataDir;
+  mkdirSync(cwd, { recursive: true });
+  const update = rootCmd(["apt-get", "update"]);
+  const upd = await run(update.cmd, update.args, cwd, env);
+  if (upd.code !== 0) appendLog("apt-get update 未完全成功，继续尝试安装驱动");
+  const commonCmd = rootCmd(["apt-get", "install", "-y", "ubuntu-drivers-common"]);
+  const common = await run(commonCmd.cmd, commonCmd.args, cwd, env);
+  if (common.code !== 0) {
+    throw new Error(`安装 ubuntu-drivers-common 失败。\n${common.log.slice(-1200)}`);
+  }
+  const headersCmd = rootCmd(["apt-get", "install", "-y", `linux-headers-${release()}`]);
+  const headers = await run(headersCmd.cmd, headersCmd.args, cwd, env);
+  if (headers.code !== 0) appendLog("内核头文件安装未完全成功，继续尝试 ubuntu-drivers autoinstall");
+  const list = rootCmd(["ubuntu-drivers", "devices"]);
+  await run(list.cmd, list.args, cwd, env);
+  const auto = rootCmd(["ubuntu-drivers", "autoinstall"]);
+  const inst = await run(auto.cmd, auto.args, cwd, env);
+  if (inst.code !== 0) {
+    throw new Error(`安装 NVIDIA 驱动失败。\n${inst.log.slice(-1200)}`);
+  }
+  const probe = rootCmd(["modprobe", "nvidia"]);
+  await run(probe.cmd, probe.args, cwd, env);
+  const ready = detectAccel();
+  if (ready.kind === "cuda") {
+    appendLog(`NVIDIA 驱动已生效：${ready.label}`);
+    return;
+  }
+  throw new Error("NVIDIA 驱动已写入，需要重启后才能加载。请执行 sudo reboot，重启后再点「安装 ComfyUI」或「同步模型路径 / CUDA 依赖」。");
+}
+
 async function installCudaDeps(cwd: string, alsoRequirements: boolean) {
+  await ensureNvidiaDriver();
   const accel = detectAccel();
   appendLog(`加速：${accel.label}`);
   const torchArgs = ["-m", "pip", "install", "--upgrade", "--progress-bar", "on", "torch", "torchvision", "torchaudio"];
@@ -464,7 +559,7 @@ export async function comfyStatus() {
   };
 }
 
-function run(cmd: string, args: string[], cwd: string) {
+function run(cmd: string, args: string[], cwd: string, extraEnv: NodeJS.ProcessEnv = {}) {
   return new Promise<{ code: number; log: string }>((resolve, reject) => {
     const line = `$ ${cmd} ${args.join(" ")}\n`;
     appendLog(line.trimEnd());
@@ -472,7 +567,7 @@ function run(cmd: string, args: string[], cwd: string) {
       cwd,
       shell: true,
       windowsHide: true,
-      env: { ...process.env, PYTHONUNBUFFERED: "1", PYTHONIOENCODING: "utf-8" },
+      env: { ...process.env, PYTHONUNBUFFERED: "1", PYTHONIOENCODING: "utf-8", ...extraEnv },
     });
     let log = line;
     const onChunk = (d: Buffer | string) => {

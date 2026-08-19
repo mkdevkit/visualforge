@@ -36,7 +36,7 @@ comfymanager/tools/       可选工具：UniRig 官方仓库（gitignore）
 
 ## 安装
 
-支持 **Windows** 与 **Ubuntu**。Git、Python 由你自行安装，ComfyManager **不代装**。ComfyUI 可在管理端一键克隆；本机已有安装则复用，权重仍下到配置的模型目录。
+支持 **Windows** 与 **Ubuntu**。Git、Python 由你自行安装，ComfyManager **不代装**。Ubuntu 上若有 NVIDIA 卡但没有驱动，安装 ComfyUI / 同步 CUDA 时会用 `sudo` 代装 `ubuntu-drivers`（需要免密 sudo；装完可能要重启）。ComfyUI 可在管理端一键克隆；本机已有安装则复用，权重仍下到配置的模型目录。
 
 ### 1. 自行准备
 
@@ -45,7 +45,7 @@ comfymanager/tools/       可选工具：UniRig 官方仓库（gitignore）
 | Node.js | **20 或 22** | 不要用 Ubuntu `apt install nodejs`（经常是 v12，会报 `Unexpected token '.'`） |
 | Git | 任意近期版 | 克隆 ComfyUI 需要，须在 PATH 里 |
 | Python | **3.10+** | 须在 PATH 里；Ubuntu 还需对应版本的 venv 包（3.10 为 `python3.10-venv`） |
-| NVIDIA 驱动 | 能跑 `nvidia-smi` | 可选。有独显时管理端会装 CUDA 版 PyTorch |
+| NVIDIA 驱动 | Ubuntu 可代装 | 有独显时管理端会装驱动 + CUDA 版 PyTorch。Windows 请自行装好驱动。需要免密 `sudo` |
 
 ### 2. Windows
 
@@ -112,11 +112,17 @@ npm run manager
 
 浏览器打开 http://127.0.0.1:18788 。云主机从外网访问：`http://<公网IP>:18788`，并在安全组 / `ufw` 放行 **18788**。默认监听 `0.0.0.0`；仅本机可设 `COMFYMANAGER_HOST=127.0.0.1`。管理端无登录，不要对不信任的网络裸奔。
 
+概览若显示 **加速：CPU**，点「安装 ComfyUI」或「同步模型路径 / CUDA 依赖」时，Ubuntu 会先检测显卡并尝试安装 NVIDIA 驱动（`ubuntu-drivers autoinstall`），再装 CUDA 版 PyTorch。需要 **免密 sudo**（或用 root 跑管理端）。驱动写入后若还不能 `nvidia-smi`，日志会要求 `sudo reboot`，重启后再点一次安装。
+
+- 没有 NVIDIA 卡：只能 CPU（很慢），请换 GPU 实例。
+- Windows：请自行安装驱动，管理端不代装。
+- 已经按 CPU 装过 ComfyUI：驱动就绪后点「同步模型路径 / CUDA 依赖」，会改装 CUDA 版 PyTorch。
+
 ### 4. 在 ComfyManager 里装 ComfyUI
 
 1. 打开概览页，确认系统、Git、Python 已检测到。
 2. 本机已有 ComfyUI：点「使用已有安装」。没有：点「安装 ComfyUI（含 CUDA）」。
-3. 管理端会在安装目录创建 `.venv`，再按显卡安装 CUDA 版 PyTorch（20 系及以上默认 `cu130`，10 系 `cu126`），然后 `requirements.txt`。PyTorch 较大，可能要几分钟。
+3. Ubuntu 若有 NVIDIA 卡会先装驱动（可能要重启后再点一次）。然后创建 `.venv`，按显卡安装 CUDA 版 PyTorch（20 系及以上默认 `cu130`，10 系 `cu126`），再 `requirements.txt`。PyTorch 较大，可能要几分钟。
 4. 点「启动」。接口默认 http://127.0.0.1:8188 。
 5. 到「模型」页下载权重（文件落在配置的模型目录，与 ComfyUI 是否复用无关）。
 6. 到「工作流」页把库里的 json 加入工位。

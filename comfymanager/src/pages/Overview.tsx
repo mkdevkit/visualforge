@@ -49,7 +49,7 @@ export function Overview() {
 
   return (
     <section className="mx-auto max-w-3xl px-8 py-10">
-      <PageHead kicker="ComfyUI" title="部署与接口" desc="支持 Windows 与 Ubuntu。Git、Python 3.10+ 请自行安装并加入 PATH。本工具会建虚拟环境并安装 CUDA 版 PyTorch。" />
+      <PageHead kicker="ComfyUI" title="部署与接口" desc="支持 Windows 与 Ubuntu。Git、Python 3.10+ 请自行安装并加入 PATH。Ubuntu 上有 NVIDIA 卡时会用 sudo 装驱动，再建虚拟环境并安装 CUDA 版 PyTorch。" />
       <div className="space-y-3 rounded-2xl border border-line bg-panel p-6 text-sm">
         <div>
           安装：{status?.installed
@@ -74,7 +74,14 @@ export function Overview() {
             ? `${prereqs.python.version} · ${prereqs.python.executable}`
             : prereqs.python?.hint || "未检测到（请自行安装 3.10+）"}
         </div>
-        <div>加速：{String((status?.accel as { label?: string } | undefined)?.label || "检测中")}</div>
+        <div>
+          加速：{String((status?.accel as { label?: string } | undefined)?.label || "检测中")}
+          {(status?.accel as { hint?: string } | undefined)?.hint ? (
+            <p className="mt-1 text-xs leading-relaxed text-mute">
+              {(status?.accel as { hint?: string }).hint}
+            </p>
+          ) : null}
+        </div>
         <div>进程：{status?.processRunning ? `运行中 PID ${status.pid}` : "未启动"}</div>
         <div>接口：{String(status?.baseUrl || "")} · {apiInfo.ok ? "已连通" : apiInfo.error || "未连通"}</div>
       </div>
