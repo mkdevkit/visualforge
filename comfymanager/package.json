@@ -11,6 +11,7 @@
   "dependencies": {
     "@hono/node-server": "^1.19.0",
     "hono": "^4.9.0",
+    "jszip": "^3.10.1",
     "nanoid": "^5.1.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

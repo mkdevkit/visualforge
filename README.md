@@ -83,17 +83,82 @@ npm run dev:all
 
 1. 打开 ComfyManager，安装并启动 ComfyUI（启动参数会带 `--enable-cors-header`）。
 2. 在「模型」页下载权重，指定各工位「当前生效模型」。
-3. 在「工作流」页为每个工位粘贴 ComfyUI **Save (API Format)** JSON。该页会自动列出该工位相关模型（主模型 + 配套）。
+3. 在「工作流」页把一份或多份图加入工位并勾选「生效」（也可粘贴 API JSON）。该页支持 zip / json 批量导入导出。
 4. 打开视铸，设置里只填写 ComfyManager 地址（可选改成品目录）。
-5. 回工位生成。模型下拉、默认模型、工作流、Comfy 地址都从管理端 `/api/runtime` 读取。
+5. 回工位生成：指定工作流和模型。默认值、下拉选项、Comfy 地址都从管理端读取。
 
 ## 工位与工作流
 
 视铸工位：生图、生视频、生音乐、音频（配音 / 音色设计 / 音效）、生 3D。角色动画走生视频工位（Wan Animate 2）。生 3D / 资源库可预览 GLB，并对静网格绑骨导出新 GLB，见下节。内置预览角色 Robot Expressive 为 CC0。
 
-工作流在 **ComfyManager → 工作流** 配置，不在视铸设置里粘贴。JSON 可用占位符：
+**用 ComfyUI 做生成必须给工位配至少一份生效工作流**（安装、启动、下模型不用配）。图在 ComfyUI 里可视化编辑；ComfyManager 列出本机工作流并**追加**到工位，不会覆盖已有的份。点「生成」时视铸按你指定的那份 API JSON 填占位符，POST 到 `/prompt`。没配的工位会报错。
 
-`{{prompt}}` `{{model}}` `{{negative}}` `{{image}}` `{{image2}}` `{{width}}` `{{height}}` `{{text}}` `{{voice}}` `{{duration}}` `{{lyrics}}` `{{instructions}}` `{{name}}` `{{n}}` `{{seed}}` `{{resolution}}` `{{ratio}}` `{{instrumental}}`
+**模型和份数互不绑定。** 同一份工作流可以换主模型：视铸把所选模型的文件名填进 `{{model}}`。若图里把 Checkpoint 写死、没有 `{{model}}`，换模型不会生效。一份工作流也可以只服务一种架构（例如只适 SDXL），换到不兼容的权重会在 Comfy 里报错。
+
+需要工作流：生图、生视频、生音乐、配音、音效、音色设计、生 3D、3D 动画。
+
+不经过 ComfyUI、也不要工作流：UniRig / Mixamo / 几何估骨、资源库预览下载。
+
+### 如何配置
+
+工作流在 **ComfyManager → 工作流**，不在视铸设置里粘贴。图本身在 **ComfyUI 里可视化编辑**，管理端负责库管理和配到工位。
+
+推荐：
+
+1. 在 ComfyUI 里搭好图并保存（会落到 `comfymanager/comfy/user/default/workflows/` 等目录）。图里要有 Save Image / Save Video / 导出 GLB 一类节点。
+2. 打开 ComfyManager「工作流」页，上方 **ComfyUI 工作流库** 会列出本机所有 `.json`（画布格式或 API Format 都可以）。
+3. 选工位后点「加入」，或在下方工位卡片里从库选择后加入。同一工位可加入多份。不必粘贴 JSON。
+4. 勾选「生效」，需要时「设为默认」。视铸刷新后指定工作流和模型即可生成。生成时会重新读取库文件；画布 JSON 会转成 `/prompt` 并尽量套上 `{{prompt}}` / `{{model}}`（ComfyUI 在跑时转换更准）。
+
+粘贴 API JSON 只在「高级」里，给没有库文件的情况。
+
+批量：
+
+- **上传 JSON / ZIP**：导入到 `user/default/workflows/`（zip 可带目录）。
+- **下载 ZIP**：勾选若干个，或一个不选则打包全部。
+
+扫描目录：`user/default/workflows`、`user/workflows`、`workflows`（均相对 ComfyUI 安装目录）。
+
+`{{image}}` 填在 LoadImage 的 `image` 字段，不要填成本机路径；视铸会先 `/upload/image`。
+
+### 页面字段
+
+| 字段 | 意思 |
+|---|---|
+| **本工位模型** | 只读清单，来自 `models.json`。主模型是权重，配套是 VAE / 编码器等。需先在「模型」页下载。 |
+| **默认模型** | 视铸该工位模型下拉的默认值。生成时仍可另选；会替换工作流里的 `{{model}}`（一般变成文件名，如 `xxx.safetensors`）。 |
+| **本工位工作流** | 可多份，优先从库里的 json 加入。勾选「生效」会出现在视铸下拉里；「默认」是未指定时用的那份。 |
+| **调用方式** | `官方 /prompt`：把库文件转成 ComfyUI 图，POST 到 `/prompt`（默认）。`自定义 HTTP`：请求体 JSON，打到下面的 URL。 |
+| **地址覆盖 / 接口 URL** | `/prompt` 模式下可空，默认用本机 Comfy（`http://127.0.0.1:8188`）。`http` 模式必填完整接口地址。 |
+| **手动粘贴（高级）** | 没有库文件时才用。`/prompt`：粘贴 API Format。`http`：请求体 JSON。 |
+
+数据里还有 `timeoutMs`（默认 5 分钟）和 `extraHeaders`，页面上没暴露，一般不用改。
+
+### 占位符
+
+生成时视铸会整份 JSON 做替换。单独写成 `"{{width}}"` 时会变成数字，不是字符串。
+
+| 占位符 | 来源 | 常用工位 |
+|---|---|---|
+| `{{prompt}}` | 描述 / 音色描述 | 几乎全部 |
+| `{{model}}` | 工位所选模型（或管理端「默认模型」）的文件名。与工作流独立，同一份图可换兼容权重 | 几乎全部 |
+| `{{negative}}` | 负向提示 | 生图 |
+| `{{image}}` | 第一张参考图在 Comfy 里的文件名 | 图生图、图生视频、生 3D |
+| `{{image2}}` | 第二张 / 尾帧 | 视频、3D 动画 |
+| `{{width}}` `{{height}}` | 分辨率 | 生图 |
+| `{{n}}` `{{seed}}` | 张数、种子（未填则随机） | 生图 |
+| `{{duration}}` | 时长，默认 5 | 视频、音效 |
+| `{{resolution}}` `{{ratio}}` | 默认 `720P`、`16:9` | 视频 |
+| `{{lyrics}}` `{{instrumental}}` | 歌词、是否伴奏 | 音乐 |
+| `{{text}}` `{{voice}}` `{{instructions}}` | 台词、音色、指示 | 配音 |
+| `{{name}}` | 音色名 | 音色设计 |
+
+生图 `/prompt` 最小改法：在导出的 JSON 里找到 CLIP 文本和 Checkpoint：
+
+```json
+"3": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{prompt}}", "clip": ["4", 1] } },
+"4": { "class_type": "CheckpointLoaderSimple", "inputs": { "ckpt_name": "{{model}}" } }
+```
 
 ## 3D 绑骨（UniRig / Mixamo）
 
@@ -178,7 +243,7 @@ POST /api/3d/rig
 
 - `comfy`：baseUrl、apiKey、是否连通
 - `activeModels`：各工位当前生效模型 id
-- `features`：各工位工作流（mode / workflow / url）
+- `features`：各工位工作流列表（`workflows` / `activeWorkflowId` / mode / url）
 - `catalog`：按工位列出的**主模型**下拉项，以及 `related` 配套文件（VAE、编码器等）
 
 | 方法 | 路径 | 说明 |
@@ -189,6 +254,11 @@ POST /api/3d/rig
 | POST | `/api/comfy/install` | 克隆并安装 ComfyUI |
 | POST | `/api/comfy/start` | 启动 ComfyUI |
 | POST | `/api/comfy/stop` | 停止 ComfyUI |
+| GET | `/api/comfy/workflows` | 列出本机 ComfyUI 工作流 |
+| GET | `/api/comfy/workflows/file` | 读取一份工作流 JSON |
+| POST | `/api/comfy/workflows/assign` | 把库里的 json 配到工位（画布会转 API）；生成时再读文件 |
+| POST | `/api/comfy/workflows/zip` | 打包选中或全部为 zip |
+| POST | `/api/comfy/workflows/import` | 上传 json / zip |
 | POST | `/api/tools/unirig/install` | 克隆官方 UniRig 仓库（不装 Python 依赖） |
 | GET | `/api/tools/unirig` | UniRig 是否已克隆、解释器路径、是否在跑 |
 | POST | `/api/tools/unirig/run` | 上传 GLB，本进程拉起 Python 子进程绑骨，返回 rigged.glb |
@@ -231,7 +301,7 @@ POST /api/3d/rig
 
 ## MCP（Cursor 等）
 
-视铸生成 API 提供 MCP，给 Cursor 等工具调用生图/视频/音乐/配音/音效/3D。模型和工位工作流仍由 ComfyManager 提供，MCP 只调视铸生成。
+视铸生成 API 提供 MCP，给 Cursor 等工具调用生图/视频/音乐/配音/音效/3D。模型和工位工作流仍由 ComfyManager 提供，MCP 只调视铸生成。可用 `list_models`、`list_workflows`，生成时同时传 `model` 与 `workflowId`。
 
 先启动：
 

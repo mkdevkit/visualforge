@@ -5,7 +5,8 @@ export function ProviderHint({ feature }: { feature: FeatureId }) {
   const catalog = useCatalog();
   const cfg = catalog.features?.[feature];
   const active = catalog.activeModels?.[feature];
-  const ready = Boolean(cfg?.workflow);
+  const workflows = (cfg?.workflows || []).filter((w) => w.enabled !== false);
+  const ready = workflows.length > 0 || Boolean(cfg?.workflow);
   const options = catalog[feature] || [];
   return (
     <div className="rounded-xl border border-brass/40 bg-brass/10 px-3 py-3 text-xs leading-relaxed">
@@ -21,11 +22,12 @@ export function ProviderHint({ feature }: { feature: FeatureId }) {
           </p>
           <p className="mt-1 text-mute">
             模型选项来自 ComfyManager{options.length ? ` · ${options.length} 个` : ""}。
+            {workflows.length ? ` 生效工作流 ${workflows.length} 份。` : ""}
           </p>
           {ready ? (
-            <p className="mt-1 text-mute">工作流来自 ComfyManager。</p>
+            <p className="mt-1 text-mute">可在本页指定工作流和模型。</p>
           ) : (
-            <p className="mt-1 text-mute">请在 ComfyManager「工作流」页粘贴该工位的 API JSON。</p>
+            <p className="mt-1 text-mute">请在 ComfyManager「工作流」页为该工位加入至少一份并勾选生效。</p>
           )}
         </>
       )}

@@ -49,4 +49,48 @@ export const api = {
     ),
   saveFeatures: (features: Record<string, unknown>) =>
     req("/api/features", { method: "PUT", body: JSON.stringify({ features }) }),
+  workflows: () =>
+    req<{
+      ok: boolean;
+      root: string;
+      defaultDir: string;
+      items: Array<{
+        path: string;
+        name: string;
+        size: number;
+        mtime: string;
+        format: "api" | "ui" | "unknown";
+        assignedTo: string[];
+      }>;
+    }>("/api/comfy/workflows"),
+  assignWorkflow: (path: string, featureId: string) =>
+    req("/api/comfy/workflows/assign", { method: "POST", body: JSON.stringify({ path, featureId }) }),
 };
+
+export async function downloadWorkflowZip(paths?: string[]) {
+  const res = await fetch("/api/comfy/workflows/zip", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ paths: paths || [] }),
+  });
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({ error: `下载失败 ${res.status}` }));
+    throw new Error((json as { error?: string }).error || `下载失败 ${res.status}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "comfy-workflows.zip";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function importWorkflows(files: File[]) {
+  const form = new FormData();
+  for (const f of files) form.append("file", f);
+  const res = await fetch("/api/comfy/workflows/import", { method: "POST", body: form });
+  const json = await res.json();
+  if (!res.ok || json.ok === false) throw new Error(json.error || "导入失败");
+  return json as { imported: string[]; skipped: string[]; items: unknown[] };
+}

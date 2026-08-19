@@ -3,7 +3,7 @@ import { NavLink, Outlet } from "react-router-dom";
 const items = [
   { to: "/overview", label: "概览", kicker: "ComfyUI" },
   { to: "/models", label: "模型", kicker: "Weights" },
-  { to: "/workflows", label: "工作流", kicker: "Studios" },
+  { to: "/workflows", label: "工作流", kicker: "Comfy · 工位" },
   { to: "/settings", label: "设置", kicker: "Settings" },
 ];
 

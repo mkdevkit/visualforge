@@ -128,12 +128,24 @@ export function createVisualForgeMcp() {
   );
 
   server.registerTool(
+    "list_workflows",
+    {
+      description: "列出工位已生效的工作流。生成时可把返回的 id 作为 workflowId，与 model 独立选择。",
+      inputSchema: {
+        feature: z.enum(["image", "video", "music", "tts", "sfx", "voiceDesign", "model3d", "anim3d"]).optional(),
+      },
+    },
+    async ({ feature }) => jsonResult(await workflowsSnapshot(feature)),
+  );
+
+  server.registerTool(
     "generate_image",
     {
       description: "文生图或图生图。参考图可传本机绝对路径或已上传的 relPath。",
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         negativePrompt: z.string().optional(),
         size: z.string().optional().describe("如 1024*1024"),
         n: z.number().optional(),
@@ -161,6 +173,7 @@ export function createVisualForgeMcp() {
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         negativePrompt: z.string().optional(),
         duration: z.number().optional(),
         resolution: z.string().optional(),
@@ -196,6 +209,7 @@ export function createVisualForgeMcp() {
         prompt: z.string().optional(),
         lyrics: z.string().optional(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         isInstrumental: z.boolean().optional(),
         title: z.string().optional(),
       },
@@ -217,6 +231,7 @@ export function createVisualForgeMcp() {
       inputSchema: {
         text: z.string(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         voice: z.string().optional(),
         languageType: z.string().optional(),
         instructions: z.string().optional(),
@@ -240,6 +255,7 @@ export function createVisualForgeMcp() {
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         duration: z.number().optional(),
         title: z.string().optional(),
       },
@@ -261,6 +277,7 @@ export function createVisualForgeMcp() {
       inputSchema: {
         voicePrompt: z.string(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         targetModel: z.string().optional(),
         previewText: z.string().optional(),
         preferredName: z.string().optional(),
@@ -283,6 +300,7 @@ export function createVisualForgeMcp() {
       inputSchema: {
         prompt: z.string().optional(),
         model: z.string().optional(),
+        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
         image: z.string().optional().describe("参考图：本机路径或 relPath"),
         title: z.string().optional(),
       },
@@ -453,7 +471,11 @@ async function modelsSnapshot() {
       {
         label: FEATURE_LABELS[id],
         active: runtime.activeModels?.[id] || "",
+        activeWorkflowId: runtime.features?.[id]?.activeWorkflowId || "",
         models: runtime.catalog?.[id] || [],
+        workflows: (runtime.features?.[id]?.workflows || [])
+          .filter((w) => w.enabled !== false)
+          .map((w) => ({ id: w.id, name: w.name, source: w.source })),
       },
     ]),
   );
@@ -462,6 +484,12 @@ async function modelsSnapshot() {
     activeModels: runtime.activeModels,
     stations,
   };
+}
+
+async function workflowsSnapshot(feature?: (typeof FEATURE_IDS)[number]) {
+  const snap = await modelsSnapshot();
+  if (!feature) return snap.stations;
+  return snap.stations[feature] || {};
 }
 
 export function mcpEndpoint(host = "127.0.0.1", port = 18787) {

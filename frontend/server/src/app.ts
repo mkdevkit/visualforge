@@ -72,7 +72,7 @@ app.get("/api/models", async (c) => {
       ok: true,
       ...runtime.catalog,
       activeModels: runtime.activeModels,
-      features: runtime.features,
+      features: runtime.catalog?.features || runtime.features,
       featureLabels: runtime.featureLabels,
       managerUrl: managerUrl(),
     });

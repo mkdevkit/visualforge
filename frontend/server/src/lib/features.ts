@@ -1,4 +1,4 @@
-import type { ComfyFeatureConfig, FeatureId } from "../types.js";
+import type { ComfyFeatureConfig, FeatureId, StationWorkflow } from "../types.js";
 
 export const FEATURE_IDS: FeatureId[] = [
   "image",
@@ -44,6 +44,9 @@ export function defaultComfyFeature(): ComfyFeatureConfig {
     url: "",
     model: "",
     workflow: "",
+    workflowSource: "",
+    workflows: [],
+    activeWorkflowId: "",
     extraHeaders: {},
     timeoutMs: 300000,
   };
@@ -63,16 +66,64 @@ export function mergeFeatures(stored?: Partial<Record<FeatureId, Partial<ComfyFe
     const merged = { ...base[id], ...fromOld, ...patch };
     if (!merged.extraHeaders || typeof merged.extraHeaders !== "object") merged.extraHeaders = {};
     if (!merged.timeoutMs) merged.timeoutMs = 300000;
+    const workflows = Array.isArray(merged.workflows)
+      ? merged.workflows.filter((w): w is StationWorkflow => Boolean(w && w.id))
+      : [];
+    if (!workflows.length && merged.workflow) {
+      workflows.push({
+        id: "legacy",
+        name: "默认",
+        source: (merged as { workflowSource?: string }).workflowSource || "manual",
+        workflow: merged.workflow,
+        enabled: true,
+      });
+    }
     base[id] = {
       mode: merged.mode === "http" ? "http" : "prompt",
       url: merged.url || "",
       model: merged.model || "",
       workflow: merged.workflow || "",
+      workflowSource: (merged as { workflowSource?: string }).workflowSource || "",
+      workflows,
+      activeWorkflowId: merged.activeWorkflowId || workflows[0]?.id || "",
       extraHeaders: merged.extraHeaders,
       timeoutMs: merged.timeoutMs,
     };
   }
   return base;
+}
+
+export function applyStationWorkflow(cfg: ComfyFeatureConfig, workflowId?: string): ComfyFeatureConfig {
+  const list = (cfg.workflows?.length
+    ? cfg.workflows
+    : cfg.workflow
+      ? [
+          {
+            id: cfg.activeWorkflowId || "legacy",
+            name: "默认",
+            source: cfg.workflowSource || "manual",
+            workflow: cfg.workflow,
+            enabled: true,
+          },
+        ]
+      : []) as StationWorkflow[];
+  const enabled = list.filter((w) => w.enabled !== false && w.workflow);
+  if (!enabled.length) {
+    if (cfg.workflow) return cfg;
+    throw new Error("该工位没有生效的工作流。请在 ComfyManager「工作流」页加入至少一份并勾选生效。");
+  }
+  const requested = (workflowId || cfg.activeWorkflowId || "").trim();
+  const hit = enabled.find((w) => w.id === requested) || enabled[0];
+  if (requested && !enabled.some((w) => w.id === requested) && workflowId) {
+    throw new Error(`找不到生效工作流 ${workflowId}`);
+  }
+  return {
+    ...cfg,
+    workflow: hit.workflow,
+    workflowSource: hit.source,
+    activeWorkflowId: hit.id,
+    workflows: list,
+  };
 }
 
 export const HTTP_BODY_TEMPLATES: Record<FeatureId, string> = {

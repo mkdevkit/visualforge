@@ -9,6 +9,15 @@ import { cancelDownload, loadDownloads, startDownload } from "./download.ts";
 import { comfyStatus, installComfy, startComfy, stopComfy, writeExtraModelPaths } from "./deploy.ts";
 import { installUniRig, runUniRigFromBuffer, unirigStatus } from "./unirig.ts";
 import { pingComfy } from "./ping.ts";
+import {
+  assignWorkflowToFeature,
+  hydrateFeatures,
+  importWorkflowJson,
+  importWorkflowZip,
+  listComfyWorkflows,
+  readWorkflowJson,
+  zipWorkflows,
+} from "./comfy-workflows.ts";
 
 ensureLayout(loadSettings().dataDir, loadSettings().comfy.modelsDir);
 
@@ -67,6 +76,53 @@ app.post("/api/tools/unirig/run", async (c) => {
       "Content-Disposition": "attachment; filename=rigged.glb",
     },
   });
+});
+
+app.get("/api/comfy/workflows", (c) => c.json({ ok: true, ...listComfyWorkflows() }));
+app.get("/api/comfy/workflows/file", (c) => {
+  const path = String(c.req.query("path") || "");
+  if (!path) return c.json({ ok: false, error: "缺少 path" }, 400);
+  return c.json({ ok: true, ...readWorkflowJson(path) });
+});
+app.post("/api/comfy/workflows/assign", async (c) => {
+  const body = await c.req.json();
+  const path = String(body.path || "");
+  const featureId = String(body.featureId || "");
+  if (!path || !featureId) return c.json({ ok: false, error: "需要 path 和 featureId" }, 400);
+  return c.json(await assignWorkflowToFeature(path, featureId, body.inject !== false));
+});
+app.post("/api/comfy/workflows/zip", async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const paths = Array.isArray((body as { paths?: string[] }).paths) ? (body as { paths: string[] }).paths : undefined;
+  const buf = await zipWorkflows(paths);
+  return new Response(new Uint8Array(buf), {
+    headers: {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="comfy-workflows.zip"`,
+    },
+  });
+});
+app.post("/api/comfy/workflows/import", async (c) => {
+  const form = await c.req.formData();
+  const files = form.getAll("file").filter((f) => f && typeof f === "object" && typeof (f as File).arrayBuffer === "function") as File[];
+  if (!files.length) return c.json({ ok: false, error: "请选择 .json 或 .zip" }, 400);
+  const imported: string[] = [];
+  const skipped: string[] = [];
+  for (const file of files) {
+    const name = file.name || "upload";
+    const buf = Buffer.from(await file.arrayBuffer());
+    if (name.toLowerCase().endsWith(".zip")) {
+      const r = await importWorkflowZip(buf);
+      imported.push(...r.imported);
+      skipped.push(...r.skipped);
+    } else if (name.toLowerCase().endsWith(".json")) {
+      imported.push(importWorkflowJson(name, buf.toString("utf8")));
+    } else {
+      skipped.push(name);
+    }
+  }
+  if (!imported.length) return c.json({ ok: false, error: "没有导入任何工作流" }, 400);
+  return c.json({ ok: true, imported, skipped, ...listComfyWorkflows() });
 });
 
 app.get("/api/endpoint", async (c) => {
@@ -128,7 +184,7 @@ app.get("/api/runtime", async (c) => {
       processRunning: status.processRunning,
     },
     activeModels: s.activeModels,
-    features: s.features,
+    features: await hydrateFeatures(s.features),
     featureLabels: FEATURE_LABELS,
     catalog,
     unirig: unirigStatus(),

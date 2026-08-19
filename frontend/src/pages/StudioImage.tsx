@@ -6,10 +6,12 @@ import { Button, Dropzone, ErrorBox, Field, Input, Select, Spinner, Textarea } f
 import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { ProviderHint } from "../components/ProviderHint";
+import { WorkflowSelect } from "../components/WorkflowSelect";
 
 export function StudioImage() {
   const catalog = useCatalog();
   const [model, setModel] = useState("");
+  const [workflowId, setWorkflowId] = useState("");
   const [prompt, setPrompt] = useState("一只铜锈质感的机械狐狸蹲在雨后的石板巷，暖黄窗光，胶片颗粒，竖构图");
   const [negative, setNegative] = useState("");
   const [size, setSize] = useState("1024*1024");
@@ -25,7 +27,7 @@ export function StudioImage() {
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <PageHead kicker="ComfyUI" title="生图工位" desc="模型列表和工作流来自 ComfyManager。请先在管理端下载权重并保存该工位 API 工作流。" />
+      <PageHead kicker="ComfyUI" title="生图工位" desc="在本页指定工作流和模型。列表来自 ComfyManager，请先下载权重并给工位配上生效工作流。" />
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <Field label="提示词">
@@ -44,7 +46,7 @@ export function StudioImage() {
               try {
                 const images = await uploadAll(files);
                 const r = await api.generateImage({
-                  model, prompt, negativePrompt: negative || undefined, size, n, images,
+                  model, workflowId, prompt, negativePrompt: negative || undefined, size, n, images,
                 });
                 setAssets(r.assets);
               } catch (e) {
@@ -59,6 +61,7 @@ export function StudioImage() {
           {busy ? <Spinner label="正在调用 ComfyUI" /> : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
+          <WorkflowSelect feature="image" value={workflowId} onChange={setWorkflowId} />
           <Field label="模型">
             <Select value={model} onChange={(e) => setModel(e.target.value)}>
               {(catalog.image || []).map((m) => (

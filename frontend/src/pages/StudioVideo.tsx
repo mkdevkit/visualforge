@@ -5,10 +5,12 @@ import { Button, Dropzone, ErrorBox, Field, Input, Select, Spinner, Textarea } f
 import { PageHead } from "../components/PageHead";
 import { modelLabel, pickDefault, relatedHint, uploadAll, useCatalog } from "../lib/catalog";
 import { ProviderHint } from "../components/ProviderHint";
+import { WorkflowSelect } from "../components/WorkflowSelect";
 
 export function StudioVideo() {
   const catalog = useCatalog();
   const [model, setModel] = useState("");
+  const [workflowId, setWorkflowId] = useState("");
   const [prompt, setPrompt] = useState("第1个镜头[0-3秒] 雨夜巷口，铜灯摇晃。第2个镜头[3-6秒] 机械狐狸抬头看向镜头，耳尖滴水。");
   const [resolution, setResolution] = useState("720P");
   const [ratio, setRatio] = useState("16:9");
@@ -57,7 +59,7 @@ export function StudioVideo() {
                 const firstIds = await uploadAll(first);
                 const lastIds = await uploadAll(last);
                 const r = await api.generateVideo({
-                  model, prompt, resolution, ratio, duration,
+                  model, workflowId, prompt, resolution, ratio, duration,
                   firstFrame: firstIds[0],
                   lastFrame: lastIds[0],
                 });
@@ -80,6 +82,7 @@ export function StudioVideo() {
           ) : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
+          <WorkflowSelect feature="video" value={workflowId} onChange={setWorkflowId} />
           <Field label="模型">
             <Select value={model} onChange={(e) => setModel(e.target.value)}>
               {(catalog.video || []).map((m) => (

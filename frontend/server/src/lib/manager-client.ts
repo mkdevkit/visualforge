@@ -1,6 +1,6 @@
 import { loadSettings, saveSettings } from "../config.js";
 import type { ComfyFeatureConfig, FeatureId } from "../types.js";
-import { defaultComfyFeature } from "./features.js";
+import { applyStationWorkflow, defaultComfyFeature } from "./features.js";
 
 export function managerUrl() {
   return (loadSettings().managerUrl || process.env.COMFYMANAGER_URL || "http://127.0.0.1:18788").replace(/\/+$/, "");
@@ -110,11 +110,11 @@ export async function runManagerUniRig(glb: Buffer): Promise<Buffer> {
   return Buffer.from(await res.arrayBuffer());
 }
 
-export async function featureFromManager(feature: FeatureId): Promise<ComfyFeatureConfig> {
+export async function featureFromManager(feature: FeatureId, workflowId?: string): Promise<ComfyFeatureConfig> {
   const runtime = await fetchManagerRuntime();
   const fromMgr = runtime.features?.[feature];
   const next = { ...defaultComfyFeature(), ...(fromMgr || {}) };
   if (!next.url) next.url = runtime.comfy?.baseUrl || loadSettings().comfy.baseUrl;
   if (!next.model) next.model = runtime.activeModels?.[feature] || "";
-  return next;
+  return applyStationWorkflow(next, workflowId);
 }

@@ -6,10 +6,12 @@ import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { modelLabel, pickDefault, useCatalog } from "../lib/catalog";
 import { ProviderHint } from "../components/ProviderHint";
+import { WorkflowSelect } from "../components/WorkflowSelect";
 
 export function StudioMusic() {
   const catalog = useCatalog();
   const [model, setModel] = useState("");
+  const [workflowId, setWorkflowId] = useState("");
   const [prompt, setPrompt] = useState("雨夜铜灯下的民谣，木吉他与低音提琴，缓慢、温暖、带着一点锈蚀感");
   const [lyrics, setLyrics] = useState("");
   const [gender, setGender] = useState("female");
@@ -46,6 +48,7 @@ export function StudioMusic() {
               try {
                 const r = await api.generateMusic({
                   model,
+                  workflowId,
                   prompt: prompt || undefined,
                   lyrics: lyrics || undefined,
                   gender,
@@ -64,6 +67,7 @@ export function StudioMusic() {
           {busy ? <Spinner label="ComfyUI 正在生成" /> : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
+          <WorkflowSelect feature="music" value={workflowId} onChange={setWorkflowId} />
           <Field label="模型">
             <Select value={model} onChange={(e) => setModel(e.target.value)}>
               {(catalog.music || []).map((m) => (

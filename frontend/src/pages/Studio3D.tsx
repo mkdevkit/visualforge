@@ -5,6 +5,7 @@ import { Button, Dropzone, ErrorBox, Field, Select, Spinner, Textarea } from "..
 import { PageHead } from "../components/PageHead";
 import { modelLabel, pickDefault, relatedHint, uploadAll, useCatalog } from "../lib/catalog";
 import { ProviderHint } from "../components/ProviderHint";
+import { WorkflowSelect } from "../components/WorkflowSelect";
 import { ModelPreview } from "../components/ModelPreview";
 import { MOTION_DEMO, MOTION_LIBRARIES } from "../lib/motions";
 
@@ -13,6 +14,7 @@ type RigEngine = "auto" | "unirig" | "mixamo" | "bbox";
 export function Studio3D() {
   const catalog = useCatalog();
   const [model, setModel] = useState("");
+  const [workflowId, setWorkflowId] = useState("");
   const [prompt, setPrompt] = useState("一只坐着的机械狐狸，铜与黑铁拼接，可直接用于游戏资产");
   const [files, setFiles] = useState<File[]>([]);
   const [quality, setQuality] = useState("standard");
@@ -68,6 +70,7 @@ export function Studio3D() {
                 const images = await uploadAll(files);
                 const r = await api.generate3d({
                   model,
+                  workflowId,
                   prompt: images.length ? undefined : prompt,
                   image: images.length === 1 ? images[0] : undefined,
                   images: images.length >= 2 ? images : undefined,
@@ -143,6 +146,7 @@ export function Studio3D() {
           ) : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
+          <WorkflowSelect feature="model3d" value={workflowId} onChange={setWorkflowId} />
           <Field label="模型">
             <Select value={model} onChange={(e) => setModel(e.target.value)}>
               {(catalog.model3d || []).map((m) => <option key={m.id} value={m.id}>{modelLabel(m)}</option>)}

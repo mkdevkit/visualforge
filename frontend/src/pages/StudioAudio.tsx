@@ -6,6 +6,7 @@ import { Button, ErrorBox, Field, Input, Select, Spinner, Textarea } from "../co
 import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { ProviderHint } from "../components/ProviderHint";
+import { WorkflowSelect } from "../components/WorkflowSelect";
 
 type Tab = "tts" | "design" | "sfx";
 
@@ -18,17 +19,20 @@ export function StudioAudio() {
   const [designed, setDesigned] = useState<DesignedVoice[]>([]);
 
   const [ttsModel, setTtsModel] = useState("");
+  const [ttsWorkflowId, setTtsWorkflowId] = useState("");
   const [text, setText] = useState("雨停了。铜灯还亮着，巷子里只剩下水滴敲打石板的声音。");
   const [voice, setVoice] = useState("default");
   const [lang, setLang] = useState("Chinese");
   const [instructions, setInstructions] = useState("沉稳、略带故事感，语速偏慢。");
 
   const [designModel, setDesignModel] = useState("");
+  const [designWorkflowId, setDesignWorkflowId] = useState("");
   const [voicePrompt, setVoicePrompt] = useState("三十岁左右的女铸剑师，声线低、干燥、带着金属余韵，不甜美，吐字干净。");
   const [preferredName, setPreferredName] = useState("forge");
   const [targetModel, setTargetModel] = useState("");
 
   const [sfxModel, setSfxModel] = useState("");
+  const [sfxWorkflowId, setSfxWorkflowId] = useState("");
   const [sfx, setSfx] = useState("暴雨敲打铸铁屋顶，远处一声低雷，近处有水滴落入铜盆。");
   const [duration, setDuration] = useState(6);
 
@@ -131,11 +135,12 @@ export function StudioAudio() {
               setError("");
               try {
                 if (tab === "tts") {
-                  const r = await api.tts({ model: ttsModel, text, voice, languageType: lang, instructions });
+                  const r = await api.tts({ model: ttsModel, workflowId: ttsWorkflowId, text, voice, languageType: lang, instructions });
                   setAssets(r.assets);
                 } else if (tab === "design") {
                   const r = await api.designVoice({
                     model: designModel,
+                    workflowId: designWorkflowId,
                     voicePrompt,
                     preferredName,
                     prefix: preferredName,
@@ -154,7 +159,7 @@ export function StudioAudio() {
                     });
                   }
                 } else {
-                  const r = await api.sfx({ model: sfxModel, prompt: sfx, duration });
+                  const r = await api.sfx({ model: sfxModel, workflowId: sfxWorkflowId, prompt: sfx, duration });
                   setAssets(r.assets);
                 }
               } catch (e) {
@@ -171,6 +176,7 @@ export function StudioAudio() {
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           {tab === "tts" ? (
             <>
+              <WorkflowSelect feature="tts" value={ttsWorkflowId} onChange={setTtsWorkflowId} />
               <Field label="模型">
                 <Select value={ttsModel} onChange={(e) => setTtsModel(e.target.value)}>
                   {(catalog.tts || []).map((m) => <option key={m.id} value={m.id}>{modelLabel(m)}</option>)}
@@ -213,6 +219,7 @@ export function StudioAudio() {
           ) : null}
           {tab === "design" ? (
             <>
+              <WorkflowSelect feature="voiceDesign" value={designWorkflowId} onChange={setDesignWorkflowId} />
               <Field label="设计模型">
                 <Select value={designModel} onChange={(e) => setDesignModel(e.target.value)}>
                   {(catalog.voiceDesign.length ? catalog.voiceDesign : catalog.tts).map((m) => (
@@ -233,6 +240,7 @@ export function StudioAudio() {
           ) : null}
           {tab === "sfx" ? (
             <>
+              <WorkflowSelect feature="sfx" value={sfxWorkflowId} onChange={setSfxWorkflowId} />
               <Field label="模型">
                 <Select value={sfxModel} onChange={(e) => setSfxModel(e.target.value)}>
                   {(catalog.sfx || []).map((m) => <option key={m.id} value={m.id}>{modelLabel(m)}</option>)}

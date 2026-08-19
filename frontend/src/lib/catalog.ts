@@ -82,6 +82,21 @@ export function pickDefault(list: ModelDef[] | undefined, activeId?: string) {
   return inst?.id || items[0]?.id || "";
 }
 
+export function stationWorkflows(catalog: Catalog, feature: FeatureId) {
+  const cfg = catalog.features?.[feature];
+  const list = cfg?.workflows || [];
+  const enabled = list.filter((w) => w.enabled !== false);
+  return enabled.length ? enabled : list;
+}
+
+export function pickDefaultWorkflow(catalog: Catalog, feature: FeatureId, current?: string) {
+  const list = stationWorkflows(catalog, feature);
+  if (current && list.some((w) => w.id === current)) return current;
+  const active = catalog.features?.[feature]?.activeWorkflowId;
+  if (active && list.some((w) => w.id === active)) return active;
+  return list[0]?.id || "";
+}
+
 export function relatedHint(catalog: Catalog, feature: FeatureId, selectedId?: string) {
   const all = catalog.related?.[feature] || [];
   const extras = all.filter((m) => m.id !== selectedId && !m.primary);

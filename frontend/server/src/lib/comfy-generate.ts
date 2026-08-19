@@ -8,8 +8,8 @@ import { harvestComfy, queueComfyPrompt, runComfyHttp, runComfyPrompt, type Comf
 import { HTTP_BODY_TEMPLATES } from "./features.js";
 import { activeModel, featureFromManager, fetchManagerRuntime, resolveModelName } from "./manager-client.js";
 
-export async function featureCfg(feature: FeatureId) {
-  return { comfy: await featureFromManager(feature) };
+export async function featureCfg(feature: FeatureId, workflowId?: string) {
+  return { comfy: await featureFromManager(feature, workflowId) };
 }
 
 function resolveLocal(value?: string) {
@@ -115,8 +115,8 @@ function assetMeta(feature: FeatureId): { type: AssetRecord["type"]; prefer: str
 }
 
 async function runSync(feature: FeatureId, body: AnyBody) {
-  await fetchManagerRuntime().catch(() => undefined);
-  const route = await featureCfg(feature);
+  await fetchManagerRuntime(true).catch(() => undefined);
+  const route = await featureCfg(feature, typeof body.workflowId === "string" ? body.workflowId : undefined);
   const model = resolveModelName(String(body.model || activeModel(feature) || ""), route.comfy.model) || "comfyui";
   const vars = varsFrom(feature, body, model);
   const uploads = uploadsOf(body);
@@ -185,8 +185,8 @@ export async function generate3dComfy(body: Generate3dBody) {
 }
 
 async function enqueueOrSync(feature: FeatureId, body: AnyBody, prompt: string) {
-  await fetchManagerRuntime().catch(() => undefined);
-  const route = await featureCfg(feature);
+  await fetchManagerRuntime(true).catch(() => undefined);
+  const route = await featureCfg(feature, typeof body.workflowId === "string" ? body.workflowId : undefined);
   const model = resolveModelName(String(body.model || activeModel(feature) || ""), route.comfy.model) || "comfyui";
   if (route.comfy.mode === "http") {
     const r = await runSync(feature, body);
@@ -208,7 +208,7 @@ async function enqueueOrSync(feature: FeatureId, body: AnyBody, prompt: string) 
     model,
     prompt,
     remoteTaskId: queued.promptId,
-    payload: { ...body, remoteKind: "comfy", feature, model },
+    payload: { ...body, remoteKind: "comfy", feature, model, workflowId: body.workflowId },
   });
   return { task, raw: queued.raw };
 }
@@ -218,7 +218,8 @@ export async function pollComfyTask(localId: string) {
   const task = getTask(localId);
   if (!task?.remoteTaskId) return task;
   const feature = (task.payload.feature as FeatureId) || (task.type === "video" ? "video" : "model3d");
-  const cfg = (await featureCfg(feature)).comfy;
+  const workflowId = typeof task.payload.workflowId === "string" ? task.payload.workflowId : undefined;
+  const cfg = (await featureCfg(feature, workflowId)).comfy;
   try {
     const files = await harvestComfy(cfg, task.remoteTaskId);
     if (!files.length) return patchTask(localId, { status: "running", progress: Math.min(90, (task.progress || 10) + 8) });

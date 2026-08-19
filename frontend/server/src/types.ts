@@ -5,11 +5,22 @@ export type TaskStatus = "queued" | "running" | "succeeded" | "failed" | "cancel
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
 
+export interface StationWorkflow {
+  id: string;
+  name: string;
+  source: string;
+  workflow: string;
+  enabled: boolean;
+}
+
 export interface ComfyFeatureConfig {
   mode: ComfyMode;
   url: string;
   model: string;
   workflow: string;
+  workflowSource: string;
+  workflows: StationWorkflow[];
+  activeWorkflowId: string;
   extraHeaders: Record<string, string>;
   timeoutMs: number;
 }
@@ -108,6 +119,7 @@ export interface GenerateImageBody {
   images?: string[];
   title?: string;
   tags?: string[];
+  workflowId?: string;
 }
 
 export interface GenerateVideoBody {
@@ -128,6 +140,7 @@ export interface GenerateVideoBody {
   sizeHint?: string;
   title?: string;
   tags?: string[];
+  workflowId?: string;
 }
 
 export interface GenerateMusicBody {
@@ -140,6 +153,7 @@ export interface GenerateMusicBody {
   watermark?: boolean;
   title?: string;
   tags?: string[];
+  workflowId?: string;
 }
 
 export interface GenerateTtsBody {
@@ -152,6 +166,7 @@ export interface GenerateTtsBody {
   instructions?: string;
   title?: string;
   tags?: string[];
+  workflowId?: string;
 }
 
 export interface VoiceDesignBody {
@@ -162,6 +177,7 @@ export interface VoiceDesignBody {
   preferredName?: string;
   prefix?: string;
   language?: string;
+  workflowId?: string;
 }
 
 export interface GenerateSfxBody {
@@ -171,6 +187,7 @@ export interface GenerateSfxBody {
   format?: string;
   title?: string;
   tags?: string[];
+  workflowId?: string;
 }
 
 export interface Generate3dBody {
@@ -184,4 +201,5 @@ export interface Generate3dBody {
   texture?: boolean;
   title?: string;
   tags?: string[];
+  workflowId?: string;
 }

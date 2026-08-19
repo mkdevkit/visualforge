@@ -58,11 +58,21 @@ export interface DesignedVoice {
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
 
+export interface StationWorkflowRef {
+  id: string;
+  name: string;
+  source?: string;
+  enabled?: boolean;
+}
+
 export interface ComfyFeatureConfig {
   mode: ComfyMode;
   url: string;
   model: string;
   workflow: string;
+  workflowSource?: string;
+  workflows?: StationWorkflowRef[];
+  activeWorkflowId?: string;
   extraHeaders: Record<string, string>;
   timeoutMs: number;
 }

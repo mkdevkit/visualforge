@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { loadSettings, modelsConfigPath, saveSettings } from "./config.ts";
 import type { FeatureId, OpenModelDef } from "./types.ts";
 import { FEATURE_IDS, FEATURE_LABELS } from "./types.ts";
-import { isPrimaryModel } from "./features.ts";
+import { isPrimaryModel, publicFeatures } from "./features.ts";
 import { loadJson } from "./json.ts";
 
 export function loadOpenModels(): OpenModelDef[] {
@@ -86,7 +86,7 @@ export function modelCatalog() {
     languages: ["Chinese", "English", "Japanese", "Korean", "Auto"],
     catalogFile: modelsConfigPath(),
     activeModels: s.activeModels,
-    features: s.features,
+    features: publicFeatures(s.features),
     featureLabels: FEATURE_LABELS,
     comfy: { baseUrl: s.comfy.baseUrl, modelsDir: s.comfy.modelsDir },
     openModels: all.map((m) => ({
