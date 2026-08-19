@@ -35,7 +35,7 @@ export function readInstallLog(maxChars = 80_000) {
   if (!existsSync(path)) {
     return { text: "", path: formatOsPath(path), installing: installRunning, truncated: false };
   }
-  const raw = readFileSync(path, "utf8");
+  const raw = normalizeLog(readFileSync(path, "utf8"));
   const truncated = raw.length > maxChars;
   return {
     text: truncated ? raw.slice(-maxChars) : raw,
@@ -465,7 +465,7 @@ function run(cmd: string, args: string[], cwd: string) {
     });
     let log = line;
     const onChunk = (d: Buffer | string) => {
-      const t = d.toString();
+      const t = normalizeLog(d.toString());
       log += t;
       appendLogChunk(t);
     };
@@ -479,14 +479,18 @@ function run(cmd: string, args: string[], cwd: string) {
   });
 }
 
+function normalizeLog(text: string) {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
 function appendLog(text: string) {
   mkdirSync(loadSettings().dataDir, { recursive: true });
-  appendFileSync(installLogFile(), `${text}\n`, "utf8");
+  appendFileSync(installLogFile(), `${normalizeLog(text)}\n`, "utf8");
 }
 
 function appendLogChunk(text: string) {
   mkdirSync(loadSettings().dataDir, { recursive: true });
-  appendFileSync(installLogFile(), text, "utf8");
+  appendFileSync(installLogFile(), normalizeLog(text), "utf8");
 }
 
 function venvPythonPath(installDir: string) {

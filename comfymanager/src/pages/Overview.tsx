@@ -10,7 +10,7 @@ export function Overview() {
   const [installLog, setInstallLog] = useState("");
   const [installing, setInstalling] = useState(false);
   const [logPath, setLogPath] = useState("");
-  const logRef = useRef<HTMLPreElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
 
   const refresh = () => api.status().then(setStatus).catch((e) => setError(e.message));
   const refreshLog = () =>
@@ -149,12 +149,17 @@ export function Overview() {
             {busy === "install" || installing ? "实时输出中" : logPath || "尚未开始"}
           </span>
         </div>
-        <pre
+        <div
           ref={logRef}
-          className="forge-scroll max-h-80 overflow-auto whitespace-pre-wrap break-all px-4 py-3 font-mono text-[11px] leading-relaxed text-foam/90"
+          className="forge-scroll max-h-80 overflow-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-foam/90"
+          style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
         >
-          {installLog.trim() ? installLog : "点击「安装 ComfyUI」后，git clone / venv / pip 输出会显示在这里。"}
-        </pre>
+          {(installLog.trim() ? installLog : "点击「安装 ComfyUI」后，git clone / venv / pip 输出会显示在这里。")
+            .split("\n")
+            .map((line, i) => (
+              <div key={i}>{line || "\u00a0"}</div>
+            ))}
+        </div>
       </div>
 
       <div className="mt-8 space-y-3 rounded-2xl border border-line bg-panel p-6 text-sm">

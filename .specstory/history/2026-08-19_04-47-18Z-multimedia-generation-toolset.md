@@ -37224,8 +37224,20 @@ _**User**_
 
 _**Agent (grok-4.6)**_
 
+<think><details><summary>Thought Process</summary>
+用户询问安装过程中是否能看到安装日志。
+
+正在检查安装流程的实现方式。目前可能仅显示忙状态，没有实时流式输出日志。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先看安装流程现在怎么把进度和日志回给界面。
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
 
 </details></tool-use>
 
@@ -37233,21 +37245,63 @@ _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-Status: **loading**
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "installComfy|installLog|logs|spawn|stdio"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "installComfy|installLog|logs|spawn|stdio",
+  "topFiles": [
+    {
+      "matchCount": 10,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "comfymanager\\src\\api\\unirig.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 15
+}
+```
+Status: **completed**
 
 </details></tool-use>
 
 _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
 
 </details></tool-use>
 
 _**Agent (grok-4.6)**_
 
+<think><details><summary>Thought Process</summary>
+正在检查 installComfy 与 runCommand 的实现。当前命令可能在后台完成，不会实时向界面流式输出日志。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
 
 </details></tool-use>
 
@@ -37255,13 +37309,502 @@ _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-Status: **loading**
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "installUniRig|installLog|appendFile|run\\("
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "installUniRig|installLog|appendFile|run\\(",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\pages\\Overview.tsx"
+    },
+    {
+      "matchCount": 7,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\unirig.ts"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 12
+}
+```
+Status: **completed**
 
 </details></tool-use>
 
 _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
 
 </details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问安装过程中是否能看到安装日志。
+
+当前安装日志是阻塞式的。命令执行完毕后才会写入文件，因此安装期间看不到实时输出。需要改为流式传输，并提供接口实时获取日志。
+
+考虑在 Overview 页面增加实时日志面板，安装期间轮询获取日志内容。正在权衡使用独立的 install.log 文件还是复用现有的 comfyui.log 来区分安装日志与运行时日志。
+
+决定复用现有的 comfyui.log，不单独创建安装日志文件。计划新增 GET /api/comfy/log 接口返回日志尾部内容，Overview 页面将每秒轮询一次，实时展示安装日志。
+
+关键在于让安装请求保持非阻塞，这样浏览器才能在等待期间并行轮询日志。需要修改 `run()`，在子进程输出数据到达时立即追加到日志文件，而不是等命令结束后再写入。同时需要为日志追加添加原始片段写入方法，避免重复换行。还计划在安装开始时写入头部标记，并考虑是否统一处理 UniRig 的安装日志。
+
+还需要确保 Python 和 pip 的输出不被缓冲，以便实时写入日志。pip 在非 TTY 环境下会静默输出，因此考虑显式开启进度条或使用 `-v` 参数来保证日志可见。
+
+已确定具体实现方案：通过环境变量设置 `PYTHONUNBUFFERED=1`，并将 `stdbuf` 改为 `pipe`，确保子进程输出能实时流式写入日志文件。对于 pip 命令，将添加 `--progress-bar raw` 参数，使其在无 TTY 环境下也能向标准输出输出进度信息，从而保证安装过程中的下载状态可见。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\index.css</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将启用 PYTHONUNBUFFERED 实现实时日志输出，使安装过程中的日志能够即时查看。
+
+将单独创建 install.log 记录安装过程。通过 GET /api/comfy/install-log 接口暴露日志内容。同时会记录安装状态，避免页面刷新导致日志丢失。
+
+POST 请求仍会阻塞，但 UI 会并行轮询日志接口。新增 `installing` 内存标志，让前端实时感知安装状态。日志区域使用预格式文本并开启滚动，轮询间隔设为 800 毫秒。同时重构 `appendLog`，避免重复追加已实时写入的日志内容。
+
+具体实现上，`appendLog` 将直接写入文件并确保目录存在；`run` 中的命令头和子进程输出流会实时追加到日志，不再重复追加内存中的完整日志。pip 和 git 命令也会启用进度条以提升可见性。另外考虑在每次安装开始时清空日志文件，保证各次尝试的日志独立。
+
+改用时间戳分隔符记录每次安装开始，方便区分重试记录。日志面板保持常驻并自动滚动到底部。接口将只返回最近 80KB 日志，避免传输过大的文件。
+
+后端接口将返回日志截断标记，告知前端内容已被截断。installComfy 的 installing 状态会在 finally 块中正确清理。前端轮询改为 500 毫秒间隔，并在页面挂载时立即拉取日志。comfyStatus 也会同步安装状态，确保刷新后 Overview 能显示“正在安装”。
+
+服务端将添加 `installRunning` 标志位，使 Overview 在安装期间禁用按钮并显示安装中状态。同时会在 `run()` 的子进程环境变量中注入 `PYTHONUNBUFFERED=1` 与 `PYTHONIOENCODING=utf-8`，确保 Python 输出实时刷新。Windows 下的 shell 启动逻辑保持不变。
+
+pip 进度条将加在 torch 与 requirements 的安装命令之后，git clone 也会启用 `--progress` 与 `--depth 1`。UniRig 的安装暂不纳入本次范围，仅聚焦 ComfyUI。
+
+Overview 区域的布局调整为：按钮区下方放置日志框，最大高度 80 像素，溢出自动滚动，字体等宽小号。自动滚动策略简化为：只要安装过程中日志有更新，就直接滚到底部。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+现在点安装只会转圈，日志等命令结束后才写入。会改成边装边写、界面上实时滚动显示。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在实施相关更改。
+
+正在添加安装日志功能。将实时记录安装进度，支持通过 API 实时读取日志内容，并在前端展示安装状态。
+
+正在实现安装日志的写入逻辑。计划新增独立的日志文件来存储安装过程，避免与 ComfyUI 运行时日志混杂。
+
+已确定安装日志文件路径为 dataDir/install.log。appendLog 将统一写入该文件，与 ComfyUI 运行时日志分离。run() 会实时向 install.log 输出安装进度，同时移除 run 结束后重复追加日志的代码。
+
+正在梳理所有需要清理的重复日志追加点，包括虚拟环境创建、pip 升级、torch 加速、requirements 安装和 git clone 等场景。run() 将改为流式输出并自动前缀命令行。
+
+前端 Overview 面板会添加滚动引用以支持自动滚动。comfyStatus 的轮询接口也会返回 installing 状态，使前端能实时显示安装进度。
+
+新增 GET /api/comfy/install-log 接口，供前端高频轮询安装日志。安装期间每 500 毫秒拉取一次，空闲时每 2 秒拉取一次，确保日志面板始终可见并可读取。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+之前遗漏了路径参数，正在重新执行所有 StrReplace 调用。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 doInstallComfy 函数的闭合括号是否正确。该函数已替换为包装器和 doInstallComfy，后者以 const current 开头。
+
+确认原始函数的闭合括号现在应正确关闭 doComfy。接下来将更新 api.ts 和 Overview.tsx.Install。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 appendLog 存在 bug。当文本包含换行符时，会额外添加一个换行符，导致日志显示为两行。
+
+还发现安装失败日志会重复截取日志末尾内容。改为仅提取错误信息的第一行作为提示，避免重复输出。接下来处理前端部分。
+
+还需检查 requirements 后的 pip.code 部分。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在更新 Overview.tsx 的按钮逻辑。安装期间将禁用操作并轮询日志，同时添加日志面板。
+
+安装按钮将在启动后自动刷新日志。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+安装期间可能也需要禁用启动和停止功能。
+
+检查了 Overview 中未使用的 installing 状态。确认了 pip --progress-bar 在旧版本 pip 上的兼容性。验证了 installCudaDeps 的 pip.code 检查。查看了 Overview 和 Hono CORS 的相关逻辑。确认 Vite 仅转发 /api 路径。发现 appendLog 对含换行符的日志文本会额外添加换行，但无影响。准备读取 lint 结果。
+
+正在修复 Overview 中启动和停止按钮的禁用逻辑，使其在安装进行时也能正确禁用。同时确认 appendLog 对含换行符日志的处理行为，并准备检查 Overview 组件结构。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\lib\\api.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\lib\\api.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+之前不能查看安装日志，现在可以了。
+
+需要重启管理器才能看到日志面板。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+以前看不到。点安装后按钮只显示「安装中」，`git` / `pip` 的输出要等整段跑完才写进文件，界面上没有日志。
+
+现在概览页按钮下方有 **安装日志**：clone、建 venv、装 CUDA 版 PyTorch、`requirements.txt` 都会边跑边刷，并自动滚到最新一行。完整内容也写在 `comfymanager/data/install.log`。
+
+拉最新代码后重启 `npm run manager`，再点「安装 ComfyUI（含 CUDA）」即可看到。
+
+---
+
+_**User**_
+
+日志没有换行。
