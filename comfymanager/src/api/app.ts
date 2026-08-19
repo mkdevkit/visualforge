@@ -9,6 +9,7 @@ import { cancelDownload, loadDownloads, startDownload } from "./download.ts";
 import { comfyStatus, isInstallRunning, readInstallLog, startComfy, startInstallComfy, stopComfy, writeExtraModelPaths } from "./deploy.ts";
 import { installUniRig, runUniRigFromBuffer, unirigStatus } from "./unirig.ts";
 import { pingComfy } from "./ping.ts";
+import { parseGenerateRequest, runGenerate, harvestPrompt } from "./generate.ts";
 import {
   assignWorkflowToFeature,
   hydrateFeatures,
@@ -204,6 +205,12 @@ app.get("/api/runtime", async (c) => {
     unirig: unirigStatus(),
   });
 });
+
+app.post("/api/generate", async (c) => {
+  const req = await parseGenerateRequest(c);
+  return c.json(await runGenerate(req));
+});
+app.get("/api/generate/:promptId", async (c) => c.json(await harvestPrompt(c.req.param("promptId"))));
 
 app.get("/api/features", (c) => {
   const s = loadSettings();

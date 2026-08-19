@@ -1,3 +1,5 @@
+import { basename } from "node:path";
+import { readFileSync } from "node:fs";
 import { loadSettings, saveSettings } from "../config.js";
 import type { ComfyFeatureConfig, FeatureId } from "../types.js";
 import { applyStationWorkflow, defaultComfyFeature } from "./features.js";
@@ -108,6 +110,80 @@ export async function runManagerUniRig(glb: Buffer): Promise<Buffer> {
     throw new Error(message);
   }
   return Buffer.from(await res.arrayBuffer());
+}
+
+export async function runManagerGenerate(opts: {
+  feature: FeatureId;
+  workflowId?: string;
+  model?: string;
+  wait: boolean;
+  vars: Record<string, unknown>;
+  uploads: string[];
+}): Promise<{ promptId: string; model: string; files: Array<{ buffer: Buffer; mime: string; ext: string; filename?: string }>; raw: unknown; voice?: string }> {
+  const form = new FormData();
+  form.set("feature", opts.feature);
+  if (opts.workflowId) form.set("workflowId", opts.workflowId);
+  if (opts.model) form.set("model", opts.model);
+  form.set("wait", opts.wait ? "true" : "false");
+  form.set("vars", JSON.stringify(opts.vars));
+  for (const p of opts.uploads) {
+    const buf = readFileSync(p);
+    const name = basename(p);
+    const ext = name.split(".").pop()?.toLowerCase() || "png";
+    const mime =
+      ext === "jpg" || ext === "jpeg" ? "image/jpeg"
+      : ext === "webp" ? "image/webp"
+      : ext === "mp4" ? "video/mp4"
+      : "image/png";
+    form.append("image", new Blob([new Uint8Array(buf)], { type: mime }), name);
+  }
+  const res = await fetch(`${managerUrl()}/api/generate`, { method: "POST", body: form });
+  const raw = await res.text();
+  let json: {
+    ok?: boolean;
+    error?: string;
+    promptId?: string;
+    model?: string;
+    voice?: string;
+    raw?: unknown;
+    files?: Array<{ name?: string; mime?: string; ext?: string; data?: string }>;
+  };
+  try {
+    json = raw ? JSON.parse(raw) : {};
+  } catch {
+    throw new Error(raw?.slice(0, 180) || `ComfyManager 生成失败 (${res.status})`);
+  }
+  if (!res.ok || json.ok === false) throw new Error(json.error || `ComfyManager 生成失败 (${res.status})`);
+  return {
+    promptId: json.promptId || "",
+    model: json.model || opts.model || "",
+    voice: json.voice,
+    raw: json.raw,
+    files: (json.files || []).map((f) => ({
+      buffer: Buffer.from(f.data || "", "base64"),
+      mime: f.mime || "application/octet-stream",
+      ext: f.ext || "bin",
+      filename: f.name,
+    })),
+  };
+}
+
+export async function runManagerHarvest(promptId: string) {
+  const res = await fetch(`${managerUrl()}/api/generate/${encodeURIComponent(promptId)}`);
+  const json = (await res.json()) as {
+    ok?: boolean;
+    error?: string;
+    ready?: boolean;
+    files?: Array<{ name?: string; mime?: string; ext?: string; data?: string }>;
+  };
+  if (!res.ok || json.ok === false) throw new Error(json.error || `ComfyManager 取结果失败 (${res.status})`);
+  if (!json.ready) return [];
+  return (json.files || []).map((f) => ({
+    buffer: Buffer.from(f.data || "", "base64"),
+    mime: f.mime || "application/octet-stream",
+    ext: f.ext || "bin",
+    filename: f.name,
+  }));
 }
 
 export async function featureFromManager(feature: FeatureId, workflowId?: string): Promise<ComfyFeatureConfig> {

@@ -38543,3 +38543,2518 @@ g.js:14133:148)
 RB/invalidate_subdata.py',
   filename: '/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/OpenGL/raw/
 GL/ARB/invalidate_subdata.py'
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Vite hit the system's file watcher limit (ENOSPC).
+
+Vite is watching the ComfyUI directory including `.venv` and `site-packages`. That directory contains tens of thousands of files. This exhausts the inotify watcher limit. The fix is to add `server.watch.ignored` patterns in `vite.config.ts` to exclude `comfy/`, `models/`, `data/`, `.venv`, and `site-packages`. A system-level workaround via `sysctl` is also possible.
+
+The frontend Vite configuration needs the same fix. The `server.watch.ignored` patterns should be relative to the `comfymanager/` root. `tools/` should also be excluded. Polling is a slower fallback. Ignoring the directories is the correct approach.
+
+`dist/` should also be added to the ignored list. `CHOKIDAR_USEPOLLING` is unnecessary. The user should not be told to increase inotify limits; ignoring directories is the proper fix. Vite may already skip `comfy/` because it is listed in `.gitignore`.
+
+Vite normally ignores gitignored files automatically. Since Vite is still watching the `comfy/` directory despite it being gitignored, the cause may be Vite 7 failing to apply that rule, the `.gitignore` entry being at the wrong level, or the files being created after Vite started.
+
+Chokidar likely began watching the parent `comfy/` directory before it existed. When git cloned the repository and created `.venv`, chokidar recursively added watches to every file inside. The `server.watch.ignored` default may also fail to catch directories created after Vite started.
+
+The exact `vite.config.ts` snippet should use `server.watch.ignored` with glob patterns like `**/comfy/**`, `**/models/**`, `**/data/**`, `**/tools/**`, `**/.venv/**`, `**/site-packages/**`, and `**/.git/**`. `server.fs.deny` is another possible safeguard. The frontend Vite configuration and `.gitignore` also need review.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+Vite 在监视 ComfyUI 的 `.venv`（成千上万个文件），把 inotify 限额打满了。应让开发服务器忽略这些目录。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\vite.config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (2 files)
+
+| File |
+|------|
+| `../.\.gitignore` |
+| `../.\frontend\src-tauri\.gitignore` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (2 files)
+
+| File |
+|------|
+| `../.\comfymanager\vite.config.ts` |
+| `../.\frontend\vite.config.ts` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Checking .gitignore for the Comfy path and the frontend Vite configuration.
+
+Considering whether to add the Comfy directory to both .gitignore and the Vite config.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\.gitignore</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\vite.config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Vite may not respect .gitignore rules, causing it to watch files inside the virtual environment.
+
+The nested `comfymanager/comfy/` path likely breaks chokidar matching. I'll explicitly ignore `**/comfy/**`, `**/.venv/**`, and `**/site-packages/**` in `server.watch.ignored`. Disabling symlinks and polling should also help.
+
+A regex function is the safest way to match directories like `comfy` and `.venv` in `server.watch.ignored`, since Vite passes this directly to chokidar.
+
+Existing file watchers may already be at the system limit, so restarting the manager is required after applying the fix. I will keep the README change minimal and focus the solution in the Vite configuration.
+
+No `optimizeDeps.exclude` changes are needed. I will also set `awaitWriteFinish` to `undefined` in the watch options. The ignored directory list will be extracted as a shared constant used in both server and preview configurations.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\vite.config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Vite 7 and Chokidar 4 may need paths relative to the project root.
+
+A regex-based ignore pattern will be added alongside the glob rule to prevent Vite from watching the virtual environment's Python packages directory.
+
+The regex ignores directories named `comfy`, `models`, `.venv`, `site-packages`, or `tools`. Restart the manager after applying the fix. If the error persists, kill leftover Vite processes and restart. Alternatively, raise the Linux inotify watcher limit.
+
+Apply the raised watcher limit with `sudo sysctl -p`.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+Vite 把 ComfyUI 的 `.venv`（几万个 `.py`）也纳入了文件监视，Linux 的 inotify 限额被打满，于是进程直接崩了。管理端现在会忽略 `comfy/`、`.venv`、`models/` 这些目录。
+
+重启管理端（先清掉旧进程）：
+
+```bash
+pkill -f "vite" || true
+cd ~/visualforge
+npm run manager
+```
+
+装依赖可以继续，不必重装 Python。
+
+---
+
+_**User**_
+
+模型下载完成后，目前 下载按钮需要刷新才显示为“删除”，没有在完成后就改
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望模型下载完成后，下载按钮能立即变为“删除”状态，无需刷新页面。
+
+正在查看 Models 页面的下载状态逻辑与轮询机制。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Models.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\download.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "download|installed|删除"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "download|installed|删除",
+  "topFiles": [
+    {
+      "matchCount": 8,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "comfymanager\\src\\pages\\Overview.tsx"
+    },
+    {
+      "matchCount": 5,
+      "uri": "comfymanager\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 6,
+      "uri": "comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\catalog.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\unirig.ts"
+    },
+    {
+      "matchCount": 8,
+      "uri": "comfymanager\\src\\pages\\Models.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\download.ts"
+    }
+  ],
+  "totalFiles": 9,
+  "totalMatches": 42
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+问题已定位。轮询仅检查 API 状态，导致下载完成后按钮未即时更新。
+
+根因已明确：轮询只更新 jobs，未同步 models 的 installed 状态。下载成功后按钮仍显示“下载”，需等待刷新或手动重载才能变为“删除”。修复方案是在轮询中检测任务完成并同步刷新 models，或同时轮询 models 与 downloads。
+
+已确定具体实现方案。轮询每 2 秒检查一次下载状态，当任务状态从运行中转为成功时，立即调用 refresh() 同步 models 的 installed 标记和下拉框数据。这样按钮就能在下载完成后即时显示为“删除”，无需等待页面刷新。
+
+发现直接检测 succeeded 状态会误判历史已完成的任务。改为通过对比前后 jobs 数组，精确识别刚从运行中转为成功或失败的瞬间，再触发 models 刷新。
+
+正在完善实现细节。对比前后 jobs 数组时，通过 Set 提取刚结束的任务，避免误判历史记录。同时意识到在 `setJobs` 更新器内调用 `refresh()` 属于副作用，准备改用 `useRef` 缓存 jobs 状态，使轮询逻辑更干净。
+
+已将 jobsRef.current 赋值到 jobs，确保轮询能读取最新状态。实现上通过对比前后 jobs 数组，提取刚从运行中转为非运行状态的任务，再触发 refresh() 同步 models 数据。这样按钮就能在下载完成后即时显示为“删除”。
+
+进一步简化方案。与其在轮询中对比 jobs 数组来检测任务完成，不如直接每 2 秒调用一次 `refresh()`。这样能同时更新 jobs 和 models 的 installed 状态，逻辑更简洁，且对本地或云管理器的性能开销可忽略。
+
+最终方案定为：每 2 秒调用一次 `refresh()`，同时更新 models 和 downloads。这样能一次性同步
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+原因是轮询只更新了下载进度，没刷新模型的 `installed` 状态。完成后会把模型和任务一起拉一遍。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Models.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Models.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现了一个竞态条件：下载任务可能在点击后立即刷新与首次轮询之间完成，导致运行状态被遗漏。
+
+进一步分析了两种场景。若刷新后轮询前任务已完成，prevRunning 为空会导致检测失败。但点击下载后会先执行一次刷新，使任务进入运行队列；随后轮询即可正常捕获状态变化并触发刷新。
+
+已验证两种边界场景：小文件下载在刷新前完成时，按钮会直接显示为删除；若刷新后轮询中任务成功，也能正确触发刷新。整体逻辑没有问题。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+下载完成后，页面只更新了进度，没有重新拉模型列表，所以 `installed` 还是 false，按钮会停在「下载」，要手动刷新才变成「删除」。
+
+现在任务从进行中变为完成时会立刻刷新列表，按钮会马上改成「删除」，工位下拉里也会出现刚下好的模型。
+
+---
+
+_**User**_
+
+frontend中工位右侧，工作流三个字一行没有显示完，换行了。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户反馈前端 Studio 页面中，工位右侧的“工作流”文字因宽度不足而自动换行。
+
+正在 Studio 页面中定位 WorkflowSelect 组件，排查其导致文字换行的原因。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\WorkflowSelect.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{tsx,css}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "工作流"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "工作流",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\components\\ProviderHint.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\components\\WorkflowSelect.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\ApiDocs.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\Settings.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\Models.tsx"
+    }
+  ],
+  "totalFiles": 9,
+  "totalMatches": 17
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Field 组件采用 flex 布局，标签在左、提示在右。"工作流" 因大写样式和宽字符间距导致换行。
+
+正在查看 Field 在 studio 侧边栏中的具体使用方式。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/Studio*.tsx",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "WorkflowSelect|aside|sidebar|w-72|w-80|Field label"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "WorkflowSelect|aside|sidebar|w-72|w-80|Field label",
+  "topFiles": [
+    {
+      "matchCount": 19,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 8,
+      "uri": "frontend\\src\\pages\\Studio3D.tsx"
+    },
+    {
+      "matchCount": 8,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 9,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    },
+    {
+      "matchCount": 9,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 53
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/*.{tsx,css}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "function Field|label.*hint"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "function Field|label.*hint",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\Studio3D.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\components\\WorkflowSelect.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\Settings.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\components\\ui.tsx"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 9
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在分析该 flex 布局容器的结构，以定位工作流文字换行的原因。
+
+已定位到具体原因：标签文字设置了 `tracking-[0.18em]` 和 `uppercase`，其中 `tracking` 在 11px 字号下会产生约 2px 的额外字符间距，导致“工作流”三字宽度超出容器；同时右侧较长的 hint 文本也在同一行占用了空间，共同导致文字换行。
+
+建议给标签添加 `whitespace-nowrap shrink-0`，防止“工作流”换行。提示文本应允许换行或单独堆叠，避免挤压标签宽度。
+
+决定将提示文本缩短，避免在窄侧边栏里与标签同排拥挤。标签仍保持 `whitespace-nowrap shrink-0` 防止换行，提示改用 `min-w-0 leading-relaxed` 自动换行。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/StudioImage.tsx",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "grid.*aside|lg:grid"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "grid.*aside|lg:grid",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Field 组件的标签与长提示文字位于同一 flex 行，导致右侧空间不足，"工作流" 被截断并换行。
+
+将 Field 标签设为不换行、不可收缩，提示文字允许折行。WorkflowSelect 的长提示将移至下拉框下方，避免与标题同行竞争空间。
+
+改用 flex-wrap 布局：标签强制单行，提示文字自动换行。这比单独调整 WorkflowSelect 更通用。准备修改 frontend/ui.tsx 中的 Field 组件。
+
+正在确认该 Field 组件是否仅存在于前端，以避免误改后端代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+右侧栏太窄，标题和长提示挤在同一行，`工作流` 被撑换行了。让标签不换行，提示不够宽时再另起一行。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\WorkflowSelect.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在准备简短的中文回复。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+工位右侧栏比较窄，「工作流」和后面那句长提示挤在同一行，三个字就被拆开了。
+
+现在标题固定同一行，提示不够宽会自己换行，文案也缩短了。刷新视铸页面即可。
+
+---
+
+_**User**_
+
+工作流json，使用上传的时，是怎么应用的？是读json传给/prompt的prompt字段吗？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问上传的工作流JSON如何应用。具体想知道是否将JSON读取后作为`prompt`字段传给ComfyUI的`/prompt`接口。
+
+需要查看实际代码路径：uploadimport、hydration、placeholder替换，以及向ComfyUI发送生成请求的逻辑。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+对，核心就是把工作流 JSON 填好占位符后交给 ComfyUI 的 `/prompt`。我按代码把上传到真正提交的路径核对一遍。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "/prompt|prompt:"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "/prompt|prompt:",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": ".\\comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\comfymanager\\src\\pages\\Workflows.tsx"
+    },
+    {
+      "matchCount": 8,
+      "uri": ".\\frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\components\\ProviderHint.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": ".\\frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\pages\\Studio3D.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": ".\\frontend\\src\\lib\\types.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": ".\\frontend\\server\\src\\types.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\comfymanager\\src\\api\\workflow-convert.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\server\\src\\lib\\auto-rig.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\frontend\\server\\src\\lib\\comfy.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\frontend\\server\\src\\lib\\storage.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\server\\src\\lib\\voices.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\frontend\\server\\src\\lib\\tasks.ts"
+    }
+  ],
+  "totalFiles": 16,
+  "totalMatches": 40
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+rg: regex parse error:
+    (?:importWorkflow|hydrate|{{model}}|api json|prompt)
+                              ^
+error: repetition operator missing expression
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看 generate 路径中 hydrateFeatures、assign workflow、queueComfyPrompt 和 inject placeholders 的处理逻辑。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已理清整体逻辑。接下来会检查 applyVars 和 injectPlaceholders 的实现，确认 {{prompt}}、{{model}} 等变量占位符的具体处理方式。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\comfy.ts",
+  "pattern": "function applyVars|function parseJsonTemplate"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\comfy.ts",
+  "pattern": "function applyVars|function parseJsonTemplate",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\lib\\comfy.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+rg: regex parse error:
+    (?:export function injectPlaceholders|PLACEHOLDER|{{)
+                                                      ^
+error: repetition operator missing expression
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已掌握足够信息，将用中文清晰回答。
+
+上传的JSON会保存到ComfyUI工作流库。分配给站点后，系统将UI格式转换为API图结构，并注入{{prompt}}、{{model}}等占位符。生成时，系统重新读取该文件并替换变量，最终将生成的API图作为`prompt`字段提交给`/prompt`接口。
+
+补充一个细节：用户文本提示会被替换到节点图中的`{{prompt}}`占位符里。如果JSON外层包裹了`{ "prompt": { ... } }`，系统会先将其展开。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+是的，最终会 **POST 到 ComfyUI 的 `/prompt`**，请求体是：
+
+```json
+{ "prompt": <API 格式节点图>, "client_id": "visualforge" }
+```
+
+这里的 `prompt` **不是用户输入的那句提示词**，而是整张工作流图（ComfyUI 官方 API Format）。用户的提示词、模型名等会先填进图里的占位符。
+
+流程是：
+
+1. **上传**  
+   JSON / ZIP 落到 ComfyUI 工作流库（例如 `comfy/user/default/workflows/`），只是入库，还不会拿去生成。
+
+2. **加入工位**  
+   读这份文件：若是画布（UI）JSON，会转成 `/prompt` 用的 API 图；若已是 API 格式就直接用。然后尽量注入 `{{prompt}}`、`{{model}}` 等占位符，并挂到该工位。
+
+3. **点生成**  
+   再按文件 mtime 重读库里的 json（源文件为准），转成 API 图，把工位里的值替换进去，例如：
+   - `{{prompt}}` → 提示词 / 台词  
+   - `{{model}}` → 所选权重文件名  
+   - `{{width}}` / `{{height}}` / `{{image}}` 等  
+
+   再 `POST { prompt: 填好的图 }`。
+
+参考图会先 `upload` 到 ComfyUI，文件名填进 `{{image}}`。图里如果把 Checkpoint 写死、没有 `{{model}}`，换模型不会生效。工作流模式若改成自定义 HTTP，就不再走 `/prompt`。
+
+---
+
+_**User**_
+
+占位符是谁替换的？comfymanager吗?
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问占位符是否由 ComfyManager 替换。
+
+ComfyManager 注入占位符，但实际替换工作由前端服务器完成。ComfyManager 负责注入，generate 时前端替换 {{prompt}}、{{model}} 等变量。hydrateFeatures 在 manager 服务端处理。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\workflow-convert.ts",
+  "pattern": "injectPlaceholders|applyVars"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\workflow-convert.ts",
+  "pattern": "injectPlaceholders|applyVars",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\workflow-convert.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "applyVars|hydrateFeatures|fetchManagerRuntime"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "applyVars|hydrateFeatures|fetchManagerRuntime",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\app.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\lib\\manager-client.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend\\server\\src\\lib\\comfy.ts"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 16
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+ComfyManager 仅在分配时将占位符字符串注入图中，例如写入 CLIP 文本节点。它并不负责后续的替换操作。
+
+实际替换由 VisualForge 的 generate API 完成。applyVars 在发送 /prompt 请求前执行替换。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+**真正替换占位符的是视铸生成端**（`frontend/server`），不是 ComfyManager。
+
+两步别混：
+
+1. **ComfyManager（只负责写入占位符）**  
+   把工作流加入工位时，会尽量把图里的文本/模型槽改成 `{{prompt}}`、`{{model}}` 这种字符串。生成时它再把这份（可能带占位符的）API JSON 交给视铸。**它不会填用户提示词。**
+
+2. **视铸生成 API（真正替换）**  
+   点生成后，`frontend/server` 的 `applyVars` 把 `{{prompt}}`、`{{model}}`、`{{width}}` 等换成这次请求的值，再 `POST` 到 ComfyUI `/prompt`。
+
+所以：ComfyManager 提供「带 `{{...}}` 的图」；视铸在提交 `/prompt` 前完成替换。ComfyUI 收到的已经是填好的节点图，它本身不认识这些占位符。
+
+---
+
+_**User**_
+
+这个不是应该在ComfyManger里做吗？视铸只传参数就行啦？ComfyManger读带 {{...}} 的图,然后替换后，再 POST 到 ComfyUI /prompt？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望调整架构：将占位符替换和 POST /prompt 的逻辑从 VisualForge 移到 ComfyManager。ComfyManager 读取包含 {{...}} 的图，完成替换后再提交给 ComfyUI。
+
+当前流程是 VisualForge 直接处理变量替换、上传图片并调用 /prompt。改为由 ComfyManager 完成这些步骤，VisualForge 只负责传递参数。
+
+正在梳理迁移后的职责边界。ComfyManager 将接管图片上传与结果收集，VisualForge 仅传递参数。HTTP 模式与 MCP 路径仍需确认。
+
+考虑让 ComfyManager 暴露 `/api/generate` 端点，统一完成变量替换与 `/prompt` 提交。VisualForge 不再需要自行收集结果，只需传递参数即可。接下来将深入代码库，设计并实现该端点。
+
+正在细化迁移方案。VisualForge 将不再直接调用 ComfyUI，而是改由 ComfyManager 处理。图片上传、等待历史记录等逻辑都需要一并迁移。HTTP 模式的具体归属仍在权衡，可能也交给 ComfyManager 统一处理。接下来会继续阅读代码库以确定实现细节。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+对，生成时应由 ComfyManager 填占位符并提交 `/prompt`，视铸只传参数。我按这个改调用链。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在规划 ComfyManager API 的实现方案。
+
+已确定 ComfyManager API 的两个端点：生成提示时应用变量、上传图片并转发到 /prompt；历史记录端点用于提取文件。
+
+VisualForge 的提示模式将改为调用 Manager，不再直接请求 ComfyUI。HTTP 自定义模式暂时保留在 VisualForge 内，保持一致性。
+
+图片数据将由 VisualForge 直接上传至 ComfyManager，再由 Manager 转发给 ComfyUI。Manager 的 /prompt 接口会返回 prompt_id，供后续轮询历史记录。
+
+已细化 ComfyManager 的 /api/generate 接口结构。
+
+请求体支持 JSON 或 multipart 格式，包含 feature、workflowId、model、vars 及可选的 images。同步等待（wait=true）时返回 base64 文件数据；异步场景仅返回 promptId，后续由 VisualForge 轮询结果。
+
+已确定 /api/generate/:promptId/outputs 端点返回 JSON 数组，包含 filename、mime 和 base64 数据。视频文件较大，因此采用 JSON base64 而非 multipart，以简化实现并匹配 UniRig 模式。
+
+计划将 applyVars、comfy fetch、upload、harvest 等逻辑统一收拢到 comfymanager/src/api/generate.ts，避免重复代码。
+
+还需在 Manager 内部解析模型文件名。准备查看 Manager 中的 findOpenModel、applyStationWorkflow 和 pingComfy 等现有函数。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\ping.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "queueComfyPrompt|runComfyPrompt|runComfyHttp|harvestComfy|applyVars|comfyBase"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "queueComfyPrompt|runComfyPrompt|runComfyHttp|harvestComfy|applyVars|comfyBase",
+  "topFiles": [
+    {
+      "matchCount": 5,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 16,
+      "uri": "frontend\\server\\src\\lib\\comfy.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 21
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要在 manager 的 features.ts 中添加 applyStationWorkflow。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "applyStationWorkflow"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "applyStationWorkflow",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备将前端的 applyStationWorkflow 复制到 ComfyManager 的 features.ts 中。
+
+正在设计 `/api/generate` 接口。采用 multipart/form-data 传输文件和参数，支持 feature、workflowId、model、wait、vars 等字段。计划在 `comfymanager/src/api/generate.ts` 中实现 `applyVars`、`queuePrompt`、`harvest` 和 `runGenerate` 等辅助函数。
+
+新增 GET /api/generate/:promptId 接口，返回任务状态与生成的图片文件。
+
+ComfyManager 将同时处理 prompt 模式和 http 模式。若模式为 http，ComfyManager 会自行将填充后的模板 POST 到 cfg.url，由 VF 不再直接调用 ComfyUI。
+
+用户确认视铸只需传入参数，因此 ComfyManager 需要完整接管生成逻辑。
+
+确定了视铸端的调用链路：runSync 直接等待并持久化结果；enqueue 仅入队并获取 promptId；poll 轮询 manager 输出。HTTP 模式因无 promptId，始终以 wait=true 运行。确认 bodyLimit 80MB 可容纳大体积 base64 图片。generate.ts 中的 applyStationWorkflow 将通过 hydrateFeatures 加载并填充工作流文本。
+
+模型解析将优先使用配置中的 model 字段，否则回退到 activeModels。Comfy 请求头会携带 apiKey。前端 managerGenerate 将读取本地文件路径并组装 FormData 发送。
+
+已确定视铸端将完全弃用 queueComfyPrompt、runComfyPrompt 和 harvestComfy，改用 managerGenerate 及其输出接口。
+
+ComfyManager 的 generate 入口将按模式分流：http 模式直接对模板应用变量并 POST 到目标地址；prompt 模式则上传图片、应用变量后调用 /prompt，并在 wait 时自动 harvest。
+
+视铸端的具体调用方式也已明确：runSync 传 wait=true 直接等待并获取结果；enqueue 传 wait=false 入队并返回 promptId；poll 通过 GET /api/generate/:promptId 轮询输出。
+
+发现 /api/runtime 当前仍向视铸端发送完整的已填充工作流 JSON。这会导致视铸端不再需要该字段，因此 runtime 的 payload 可能需要精简，仅保留目录、活跃模型和工作流列表等元数据。视铸端将不再依赖 workflow JSON 来生成提示词。
+
+publicFeatures 已在目录路径中剥离了 workflow body，但 runtime 仍会下发完整的工作流 JSON。迁移后，视铸端的 featureFromManager 仅用于 HTTP 地址和模式校验，生成请求将统一走 /api/generate。
+
+视铸端的 runSync 将简化为直接调用 manager，不再经过本地的 comfy.ts。comfy.ts 中的 harvest、queue 等函数暂时保留，但后续会将其清理为死代码或薄包装。
+
+ComfyManager 的 `/api/generate` 将同时支持 multipart/form-data（含图片）和 JSON（无文件场景，例如 MCP）。Hono 侧通过 `c.req.formData()` 解析表单。README 暂不补充说明。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将更新 README 占位符章节，说明 ComfyManager 负责替换逻辑。
+
+正在实现 `applyStationWorkflow` 与 `generate.ts`。`generate.ts` 将处理 HTTP 模式回退、FormData 变量传递、ComfyUI 请求头及语音响应。
+
+确认 FEATURE_IDS 已导出。若任务未就绪，harvestComfy 返回空数组并递增进度；输出接口仅在首次获取时 harvest，空结果返回 ready:false。开始编写代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+把替换和提交 `/prompt` 挪到 ComfyManager；视铸只传工位、工作流、模型和参数。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现了一处错误：`applyStationWorkflow` 的调用逻辑有误。
+
+修正后的调用应为 `applyStationWorkflow(hydrated[feature], workflowId)`。若缺少 feature，需回退到 defaultFeature。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 app.ts 中的 pingComfy 导入是否仍有必要，并已替换该导入行。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts",
+  "pattern": "pingComfy"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts",
+  "pattern": "pingComfy",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+误删了 pingComfy 导入。
+
+需要把 pingComfy 导入加回来。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要为 manager-client.ts 添加 readFileSync 和 basename 导入，并保留 featureFromManager 函数。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+featureFromManager 的函数签名丢失了。
+
+需要修复 manager-client.ts 末尾的损坏代码并补充 fs 导入。openModels 在运行时目录中可能缺少 filename，但 VF 端的 resolveModelName 不再关键，因为 manager 已负责解析。同时需要修复 catalog 相关问题。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+修复了 HTTP 模式下 `enqueueOrSync` 的逻辑。当 `wait=false` 时，管理器会立即返回文件，但不会提供 `promptId`。
+
+发现 HTTP 模式下 `enqueueOrSync` 会重复生成，因为 `runSync` 被再次调用。应直接从 `queued.files` 持久化，避免二次执行。同时需要修复 `pollComfyTask` 中仍在使用 `featureCfg` 的问题，并清理 `comfy-generate.ts` 中未使用的导入。另外，`generate.ts` 在 `hydrated[feature]` 为 undefined 时也需要处理。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+enqueueOrSync 不应重复调用 runSync。任务需要持久化到队列。
+
+pollComfyTask 需要移除未使用的 featureCfg。comfy-generate 中的未使用导入也应清理。
+
+HTTP 模式下 wait=false 时，manager 会立即返回文件。这些文件需要持久化到队列，因此需要新增 persistFromQueued 辅助函数。
+
+generate.ts 中 HTTP 模板的 JSON.parse(cfg.workflow || "{}") 存在隐患：如果 workflow 不是合法 JSON 对象，解析会出错。
+
+parseGenerateRequest 的 vars 处理没有问题。即使 JSON body 包含额外键值，多余的字段会被忽略。
+
+applyStationWorkflow 可能因 feature 为 undefined 而崩溃。但 hydrateFeatures 始终包含所有 FEATURE_IDS，因此该风险实际不存在。
+
+HTTP 模式下 wait=false 时，manager 仍会同步生成完整结果，但返回空的 promptId。这些已生成的文件无需重新生成，直接持久化即可。
+
+对于未使用导入的清理，featureCfg 导出仍可能被 app.ts 引用，因此保留该导出。
+
+persistFiles 的 ComfyFile 类型与 manager harvest 返回的结构兼容。
+
+README 占位符章节需要更新。
+
+generate.ts 中 HTTP 模式下空 workflow 会抛异常。applyStationWorkflow 已要求 workflow 必填，因此该情况不应出现。
+
+features.ts 中插入 applyStationWorkflow 后，原 defaultFeature 函数可能重复，需检查确认。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在修复 enqueue 逻辑，使其持久化文件而非重新运行。
+
+清理了导入并更新了 README。修复了 poll 中未定义配置的处理逻辑，确保 hydrateFeatures 始终设置所有特征。调整了 manager-client 的错误响应处理，避免返回 HTML。修正了 parseGenerateRequest 的变量嵌套问题。确认 Hono 支持 Node 端的 FormData File 和 arrayBuffer。继续编写剩余修复。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要处理生成客户端的 JSON 解析错误。若收到 HTML 错误页面则需单独处理。
+
+generate.ts 中 applyStationWorkflow 需要增加空值保护。HTTP workflow 的 JSON 解析应包裹 try-catch。parseGenerateRequest 优先使用 body.vars，否则提取已知键值。Hono 在 Node 环境下通过 undici 获取 FormData，file.name 可用。wait=false 时仍会上传图片并 POST /prompt。resolveModelName 已兼容用户传入文件名或模型 ID 的情况。
+
+varsFrom 仍按模型 ID 发送，由 ComfyManager 覆盖为文件名。若 hydrated[feature] 缺失则抛错。generate.ts 的 HTTP JSON.parse 需处理空 workflow，applyStationWorkflow 要求 workflow 文本存在。manager-client 应兼容非 JSON 响应。harvest GET 的 promptId 可能包含特殊字符。cfg.workflows 中的空 workflow 字符串会在 hydrate 阶段填充。
+
+generate 先调用 hydrateFeatures。catalog 中 public 仅保留 workflow 名称，运行时 hydrateFeatures 仍发送完整 JSON；VF 生成时不再需要 workflow 内容。parseGenerateRequest 将对无效 vars JSON 增加校验。enqueue wait=false 时 manager 返回空 files 数组，VF 创建任务并轮询 harvest；form 中 wait="false" 可正常解析。正在检查 app.ts 生成路由是否重复。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts",
+  "pattern": "/api/generate"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\app.ts",
+  "pattern": "/api/generate",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要让 runManagerGenerate 在 body 非 JSON 时也能更健壮地解析错误信息。
+
+会在 generate.ts 的 HTTP 模板中为 JSON.parse 加 try/catch，确保请求体是合法 JSON。准备向用户解释架构调整：ComfyManager 负责读取带 {{...}} 的模板并替换变量，再 POST 到 ComfyUI /prompt；视铸只需负责传参。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户建议将模板替换逻辑放在 ComfyManager 中。视铸只需传递参数，由 ComfyManager 读取包含 {{...}} 的图，替换后 POST 到 ComfyUI /prompt。
+
+已按该思路实现。正在解释前后端的职责拆分。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+对，就应该是这样。已经改成这条链路：
+
+**视铸只传参数**：工位、工作流 id、模型、提示词、参考图等。
+
+**ComfyManager 负责**：读带 `{{...}}` 的图 → 替换占位符 → 如有参考图先上传到 ComfyUI → `POST /prompt`。视频/3D 先返回 `prompt_id`，视铸再向管理端取成品。
+
+两边都要重启：`npm run manager` 和 `npm run dev`。之后生成不再由视铸直接打 ComfyUI。
+
+---
+
+_**User**_
+
+另，ComfyManager 上传的json/zip或手工粘贴的json是不是应该是「带 {{...}} 的图」？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问 ComfyManager 上传的 JSON/ZIP 或手动粘贴的 JSON 是否应为「带 {{...}} 的图」。
+
+正在检查 injectPlaceholders 与工作流分配流程，以确认占位符是源文件自带还是由系统自动注入。准备据此给出准确答复，并视情况调整产品逻辑。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Workflows.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问 ComfyManager 上传的 JSON/ZIP 或手动粘贴的 JSON 是否应为包含 {{...}} 占位符的完整图结构。
+
+库文件无需包含 {{...}} 占位符。ComfyManager 在分配到工作站或生成时自动注入占位符。手动粘贴已含占位符的 JSON 同样受支持。
+
+当前行为是：上传原始 ComfyUI JSON 即可，由 ComfyManager 自动注入占位符。若希望上传文件自带模板，可调整产品契约，但目前并非强制要求。
+
+生成时会重新读取库文件并再次注入占位符，因此库文件本身不存储模板。除非明确要求上传文件自带 {{...}}，否则保持现有行为即可。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+**不必。** 上传的 json/zip、手工粘贴的 json，都可以是 ComfyUI **原样导出**的图（画布 JSON 或 API Format），里面不用先写 `{{...}}`。
+
+实际约定是：
+
+| 阶段 | 文件里是什么 |
+|---|---|
+| 入库（上传 / 粘贴） | ComfyUI 工作流原件，一般还是写死的提示词、Checkpoint 名 |
+| 加入工位 / 生成 | ComfyManager 自动注入：第一个 `CLIPTextEncode` → `{{prompt}}`，Checkpoint/UNet → `{{model}}`，`LoadImage` → `{{image}}` 等 |
+| 提交 `/prompt` | 再用视铸传来的参数把 `{{...}}` 换成这次的值 |
+
+如果 json **已经带** `{{prompt}}`、`{{model}}`，注入时会跳过，不会覆盖。适合你自己改好的模板。
+
+推荐还是：在 ComfyUI 里搭图并保存 → 本页库里「加入」工位。只有没有库文件时才粘贴；粘贴也可以是原样 API JSON，不必手写占位符。
+
+---
+
+_**User**_
+
+什么意思？不明白，上传的json里如果没有占位符，还能传参数吗？我现在是需要能传参数？如何选择的主模型
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户对占位符机制感到困惑。
+
+即使JSON里没有{{model}}占位符，ComfyManager也会自动注入。生成或分配时，系统会尝试把checkpoint节点重写为{{model}}，再由VisualForge下拉框选中的主模型进行替换。
+
+但存在限制：如果图里checkpoint节点被硬编码，且节点类型不匹配导致注入失败，切换模型就不会生效。
+
+自动注入的具体规则如下：
+
+- 第一个checkpoint相关字段会被重写为{{model}}
+- 第一个CLIPTextEncode文本会被重写为{{prompt}}
+- 第二个CLIPTextEncode文本会被重写为{{negative}}
+- LoadImage节点会被重写为{{image}}、{{image2}}
+- 宽度、高度、种子、时长、歌词、声音等字段也会被自动识别
+
+生成时，这些占位符会被替换为实际值：主模型下拉框选中的文件名会填入{{model}}，prompt和负向提示词也会同步替换。
+
+主模型的选择位置在VisualForge侧边栏的模型下拉框中。该下拉框的值是模型ID，ComfyManager会将其解析为实际文件名，并填入{{model}}占位符。
+
+上传的JSON里不需要手动添加{{}}。ComfyManager会在生成前自动完成注入。
+
+用户可以点击“加入”后查看备注，确认节点是否已从ckpt重写为{{model}}。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+能传参数。上传的 json **不用自己写** `{{prompt}}`、`{{model}}`。
+
+流程可以记成三步：
+
+1. 你上传的是 ComfyUI 里保存的普通图（提示词、Checkpoint 都是写死的也没关系）。
+2. **加入工位 / 点生成时**，ComfyManager 会改这张图：把第一个文本框改成 `{{prompt}}`，把主模型槽改成 `{{model}}`，有 LoadImage 再改成 `{{image}}`。
+3. 视铸把你在工位上填的提示词、选的模型发给 ComfyManager，管理端把这些值填进占位符，再交给 ComfyUI。
+
+所以：**参数是视铸传的，填进图是 ComfyManager 做的。** json 里没有占位符，只要能被自动改到，照样能传。
+
+**主模型怎么选**
+
+视铸右侧栏「模型」下拉 → 选中的那条（或管理端给该工位设的默认模型）→ 管理端把它变成权重**文件名**（例如 `xxx.safetensors`）→ 填进 `{{model}}` 对应的那个 Checkpoint / UNet 节点。
+
+同一份工作流可以换兼容的权重；换了下拉，不必重新上传 json。
+
+**什么时候换模型会无效**
+
+图里主模型不是常见的 `ckpt_name` / `unet_name` 一类槽，自动注入对不上。这时 json 里仍是写死的那个文件，下拉怎么选都不会变。解决办法：在 ComfyUI 里用标准 Checkpoint/UNet 节点，或自己在 API json 里把模型字段写成 `"{{model}}"` 再加入工位。
+
+生图最小对应关系：
+
+- 工位里的**提示词** → 第一个 CLIP 文本 → `{{prompt}}`
+- 工位里选的**模型** → Checkpoint 的 `ckpt_name` → `{{model}}`
+
+---
+
+_**User**_
+
+就是说，ComfyManager 会自动换改这张图：把第一个文本框改成 {{prompt}}，把主模型槽改成 {{model}}，有 LoadImage 再改成 {{image}}。然后再将参数替换这些占位符是吗？那json是不是也可以有占位符，那ComfyManager 直接不用注入对应的占位符了是吗？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户确认 ComfyManager 会自动替换占位符，并询问若 JSON 已包含这些占位符，是否应跳过 ComfyManager 的注入。
+
+已确认：若字段已包含 {{...}} 占位符，自动注入会跳过该字段，不会覆盖已有内容。流程分为两步——先注入占位符，再替换为实际参数。自动注入仅针对首个 CLIP 文本框映射到 prompt、第二个映射到 negative、首个检查点模型映射到 model。
+
+setIfEmpty 的判断逻辑是：只要字段字符串中包含任何 {{，就跳过该字段的自动注入。因此即使第二个 CLIP 文本框已手动填入 {{prompt}}，第一个 CLIP 仍会被自动注入 {{prompt}}，前提是它本身不含 {{。
+
+promptSet 在调用 setIfEmpty 后即被置为 true，即使该字段因已含 {{ 而跳过注入。因此首个 CLIP 若已手动填入 {{prompt}}，promptSet 仍会标记为 true，第二个 CLIP 将被自动注入 {{negative}}。
+
+若用户只在第二个 CLIP 文本框填入 {{prompt}}，第一个 CLIP 因不含 {{ 仍会被自动注入 {{prompt}}，导致两个 CLIP 都指向 prompt。这是个边界情况。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+对，就是两步：
+
+1. **注入**：把图里还没占位符的槽改成 `{{prompt}}` / `{{model}}` / `{{image}}` 等  
+2. **替换**：用视铸传来的参数填进这些 `{{...}}`，再 POST `/prompt`
+
+json **可以自己带占位符**。某个字段里已经有 `{{...}}` 时，ComfyManager **不会再改这个字段**，保留你写的。
+
+没有 `{{` 的槽仍会自动注入（例如第一个 CLIP 文本、主模型文件名、LoadImage）。所以：
+
+- 全是 ComfyUI 原样导出 → 自动注入再替换  
+- 你已写好 `{{prompt}}`、`{{model}}` → 这两处不再注入，只替换  
+- 混着也可以：有占位符的保留，没有的补上
+
+---
+
+_**User**_
+
+那这个占位符和comfyui的inputs是什么关系？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在分析占位符（如 {{prompt}}、{{model}}）与 ComfyUI 节点输入之间的关系。
+
+占位符是 ComfyUI API 工作流中节点 inputs 字段里的字符串值。API 以 class_type 和 inputs 的格式传递节点数据，injectPlaceholders 与 applyVars 负责将这些占位符替换为实际参数。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+占位符就是写在 ComfyUI 节点 **`inputs` 里的字符串**，用来标明「这个槽生成时要换成视铸传来的值」。
+
+ComfyUI `/prompt` 的图大致是这样：
+
+```json
+{
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "{{prompt}}",
+      "clip": ["4", 1]
+    }
+  },
+  "4": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "ckpt_name": "{{model}}"
+    }
+  },
+  "10": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "{{image}}"
+    }
+  }
+}
+```
+
+关系可以记成：
+
+| ComfyUI | 占位符 |
+|---|---|
+| 节点 `inputs` 里某个**控件值**（文本、文件名、宽高等） | 可以写成 `{{prompt}}`、`{{model}}` 等 |
+| 节点之间的连线（如 `"clip": ["4", 1]`） | **不是**占位符，保持原样 |
+| 生成时填进去的东西 | 必须是这个 input 本来就接受的类型（提示词是字符串，`ckpt_name` 是权重文件名） |
+
+自动注入也是改 `inputs`，不是改节点结构：
+
+- 第一个 `CLIPTextEncode` 的 `inputs.text` → `{{prompt}}`
+- Checkpoint / UNet 的 `ckpt_name` / `unet_name` → `{{model}}`
+- `LoadImage` 的 `inputs.image` → `{{image}}`
+
+替换时只扫字符串：看到 `{{prompt}}` 就换成这次的提示词，`{{model}}` 换成所选权重的文件名。连线、`class_type`、没写占位符的 input 都不动。
+
+所以：**占位符 = 某个 input 的取值模板**；ComfyUI 真正执行时看到的已经是填好的 `inputs`，它不认识 `{{...}}`。
+
+---
+
+_**User**_
+
+自动注入不是改的读取到的上传的json吗?{
+  "id": "qwen2512‑8step‑lightning",
+  "revision": 0,
+  "last_node_id": 13,
+  "last_link_id": 15,
+  "nodes": [
+    {
+      "id":1,
+      "type":"LoadDiffusionModel",
+      "pos":[100,80],
+      "size":[300,100],
+      "flags":{},
+      "order":0,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"MODEL","type":"MODEL","links":[1]}],
+      "properties":{"Node name for S&R":"LoadDiffusionModel"},
+      "widgets_values":["qwen_image_2512_fp8_e4m3fn.safetensors"]
+    },
+    {
+      "id":2,
+      "type":"LoraLoaderModelOnly",
+      "pos":[450,80],
+      "size":[300,120],
+      "flags":{},
+      "order":1,
+      "mode":0,
+      "inputs":[{"name":"model","type":"MODEL","link":1}],
+      "outputs":[{"name":"MODEL","type":"MODEL","links":[2]}],
+      "properties":{"Node name for S&R":"LoraLoaderModelOnly"},
+      "widgets_values":["Qwen-Image-Lightning-8steps-V2.0-bf16.safetensors",1.0]
+    },
+    {
+      "id":3,
+      "type":"CLIPLoader",
+      "pos":[100,250],
+      "size":[300,110],
+      "flags":{},
+      "order":2,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"CLIP","type":"CLIP","links":[3,4]}],
+      "properties":{"Node name for S&R":"CLIPLoader"},
+      "widgets_values":["qwen_2.5_vl_7b_fp8_scaled.safetensors","qwen_image","default"]
+    },
+    {
+      "id":4,
+      "type":"CLIPTextEncode",
+      "pos":[450,220],
+      "size":[420,180],
+      "flags":{},
+      "order":3,
+      "mode":0,
+      "inputs":[{"name":"clip","type":"CLIP","link":3}],
+      "outputs":[{"name":"CONDITIONING","type":"CONDITIONING","links":[5]}],
+      "title":"正向提示词",
+      "properties":{"Node name for S&R":"CLIPTextEncode"},
+      "widgets_values":["一张高清照片，城市黄昏，细腻光影，高质量"]
+    },
+    {
+      "id":5,
+      "type":"CLIPTextEncode",
+      "pos":[450,430],
+      "size":[420,120],
+      "flags":{},
+      "order":4,
+      "mode":0,
+      "inputs":[{"name":"clip","type":"CLIP","link":4}],
+      "outputs":[{"name":"CONDITIONING","type":"CONDITIONING","links":[6]}],
+      "title":"反向提示词",
+      "properties":{"Node name for S&R":"CLIPTextEncode"},
+      "widgets_values":["模糊，低质量，扭曲，水印"]
+    },
+    {
+      "id":6,
+      "type":"EmptySD3LatentImage",
+      "pos":[100,420],
+      "size":[300,140],
+      "flags":{},
+      "order":5,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"LATENT","type":"LATENT","links":[7]}],
+      "properties":{"Node name for S&R":"EmptySD3LatentImage"},
+      "widgets_values":[1024,1024,1]
+    },
+    {
+      "id":7,
+      "type":"VAELoader",
+      "pos":[100,580],
+      "size":[300,100],
+      "flags":{},
+      "order":6,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"VAE","type":"VAE","links":[8]}],
+      "properties":{"Node name for S&R":"VAELoader"},
+      "widgets_values":["qwen_image_vae.safetensors"]
+    },
+    {
+      "id":8,
+      "type":"KSampler",
+      "pos":[880,120],
+      "size":[400,380],
+      "flags":{},
+      "order":7,
+      "mode":0,
+      "inputs":[
+        {"name":"model","type":"MODEL","link":2},
+        {"name":"positive","type":"CONDITIONING","link":5},
+        {"name":"negative","type":"CONDITIONING","link":6},
+        {"name":"latent_image","type":"LATENT","link":7}
+      ],
+      "outputs":[{"name":"LATENT","type":"LATENT","links":[9]}],
+      "properties":{"Node name for S&R":"KSampler"},
+      "widgets_values":[123456,"randomize",8,1.0,"res_multistep","normal",1.0]
+    },
+    {
+      "id":9,
+      "type":"VAEDecode",
+      "pos":[1320,180],
+      "size":[240,100],
+      "flags":{},
+      "order":8,
+      "mode":0,
+      "inputs":[{"name":"samples","type":"LATENT","link":9},{"name":"vae","type":"VAE","link":8}],
+      "outputs":[{"name":"IMAGE","type":"IMAGE","links":[10]}],
+      "properties":{"Node name for S&R":"VAEDecode"},
+      "widgets_values":[]
+    },
+    {
+      "id":10,
+      "type":"SaveImage",
+      "pos":[1600,160],
+      "size":[320,140],
+      "flags":{},
+      "order":9,
+      "mode":0,
+      "inputs":[{"name":"images","type":"IMAGE","link":10}],
+      "outputs":[],
+      "properties":{"Node name for S&R":"SaveImage"},
+      "widgets_values":["qwen‑8step‑out"]
+    }
+  ],
+  "links":[
+    [1,1,0,2,0,"MODEL"],
+    [2,2,0,8,0,"MODEL"],
+    [3,3,0,4,0,"CLIP"],
+    [4,3,0,5,0,"CLIP"],
+    [5,4,0,8,1,"CONDITIONING"],
+    [6,5,0,8,2,"CONDITIONING"],
+    [7,6,0,8,3,"LATENT"],
+    [8,7,0,9,1,"VAE"],
+    [9,8,0,9,0,"LATENT"],
+    [10,9,0,10,0,"IMAGE"]
+  ],
+  "groups":[],
+  "config":{},
+  "extra":{"ds":{"scale":0.7,"offset":[20,20]}},
+  "version":0.4
+}，比如这个，如果我上传这个json，自动注入后是什么内容，发给/prompt时应该是什么样的？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问 ComfyUI 工作流 JSON 上传后的自动注入逻辑。需要说明该 JSON 经自动注入处理后的内容，以及发往 /prompt 接口时应采用的格式。
+
+正在分析该 UI 格式 JSON 的转换链路。uiToApiPrompt 会将节点、连线和 widgets_values 转为 API 格式，随后 injectPlaceholders 填入占位符。需要重点确认 LoadDiffusionModel 等节点的参数映射关系，例如模型文件名对应 unet_name 还是 ckpt_name，以及文本输入如何转为 prompt 字段。
+
+还需确认 EmptySD3LatentImage、VAELoader、KSampler、VAEDecode、SaveImage 等节点的参数映射。injectPlaceholders 按 API 输入字段（如 ckpt_name、unet_name）查找占位符，但 LoadDiffusionModel 的实际输入名可能不同。由于缺少实时 ComfyUI 的 object_info，转换器依赖回退逻辑，因此需要结合 uiToApiPrompt 和 object_info 的映射规则才能给出准确示例。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这份是 ComfyUI 画布 JSON，生成前会先转成 `/prompt` 的 API 图再注入。我按转换逻辑把你这张图逐步还原成注入后、以及真正提交的内容。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在分析 ComfyUI 中 object_info 的缺失情况。
+
+发现 LoadDiffusionModel 节点在缺少 object_info 时，其 widgets 值无法映射为 unet_name 或 lora_name。由于 inputs 数组为空，fallback 逻辑不会将其识别为 Checkpoint 类型，导致 inputs 字段完全丢失。这意味着该节点的权重文件名会丢失，workflow 的自动注入结果可能不完整。
+
+已列出 ComfyUI 中各节点的标准 object_info 字段。假设用户环境已运行 ComfyUI，object_info 应当可用。
+
+确认了自动注入的转换路径：当 ComfyUI 未连通时，系统会按画布结构尽力转换。LoadDiffusionModel 的 unet_name 会被正确映射为模型占位符，因为该字段与 /unet_name/ 正则匹配。但 LoraLoaderModelOnly 的 lora_name 是否能命中 /ckpt_name|unet_name|model_name|checkpoint|ckpt/i 这个正则表达式，目前还在验证中。
+
+LoRA 名称因不包含 "ckpt" 字样而不会被误替换。CLIPLoader 的 clip_name 同样不会命中正则，VAE 和 CLIP 参数保持原样。
+
+具体字段映射如下：
+- CLIPTextEncode 的 text 字段分别对应 {{prompt}} 和 {{negative}}
+- EmptySD3LatentImage 的 width 映射为 {{width}}，height 映射为 {{height}}，batch_size 不在预设列表中
+- KSampler 的 seed 映射为 {{seed}}
+
+KSampler 的 steps、cfg、sampler_name 等字段不在预设占位符列表中。object_info 会将 widgets 中的 seed、steps、cfg、sampler、scheduler、denoise 等值映射为对应参数。
+
+VAELoader 的 vae_name 保持原样。LoadImage 在当前图中无相关节点。
+
+最终发送给 /prompt 的 POST body 包含两个字段：converted graph（占位符已替换）和 client_id（固定为 "visualforge"）。
+
+替换示例：{{model}} 将替换为选中的模型文件名，{{prompt}} 将替换为用户输入的提示词。
+
+{{negative}} 对应负向提示词。{{width}} 与 {{height}} 分别来自宽高尺寸。{{seed}} 若未指定则使用随机值。
+
+LoadDiffusionModel 的 unet_name 会被映射为 {{model}}，因此下拉框需展示 diffusion_models 目录下的该权重文件，而非 checkpoint。
+
+LoRA 参数保持硬编码，不会被注入。
+
+API graph 的节点 ID 将以字符串形式表示，例如 "1" 到 "10"。
+
+上传的 JSON
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+对，改的是**读出来的这份图的一份拷贝**，磁盘上的上传文件**不会被改写**。
+
+你这份是 **画布 JSON**（有 `nodes` / `widgets_values` / `links`），ComfyUI 的 `/prompt` **不吃这种格式**。管理端会先转成 API 图（`class_type` + `inputs`），再注入占位符，最后用参数替换后 POST。
+
+下面按 **ComfyUI 已启动**（能拿到节点定义）来还原。没开 ComfyUI 时，`LoadDiffusionModel` 这类「全是控件、inputs 为空」的节点可能转丢文件名。
+
+---
+
+**注入后的 API 图（还没填参数，准备替换）**
+
+主模型在节点 1 的 `unet_name`（不是 Checkpoint），所以 `{{model}}` 打在这里。LoRA / CLIP / VAE 文件名保持原样。没有 `LoadImage`，不会出现 `{{image}}`。
+
+```json
+{
+  "1": {
+    "class_type": "LoadDiffusionModel",
+    "inputs": { "unet_name": "{{model}}" }
+  },
+  "2": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": ["1", 0],
+      "lora_name": "Qwen-Image-Lightning-8steps-V2.0-bf16.safetensors",
+      "strength_model": 1.0
+    }
+  },
+  "3": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "4": {
+    "class_type": "CLIPTextEncode",
+    "inputs": { "text": "{{prompt}}", "clip": ["3", 0] }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": { "text": "{{negative}}", "clip": ["3", 0] }
+  },
+  "6": {
+    "class_type": "EmptySD3LatentImage",
+    "inputs": { "width": "{{width}}", "height": "{{height}}", "batch_size": 1 }
+  },
+  "7": {
+    "class_type": "VAELoader",
+    "inputs": { "vae_name": "qwen_image_vae.safetensors" }
+  },
+  "8": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": ["2", 0],
+      "positive": ["4", 0],
+      "negative": ["5", 0],
+      "latent_image": ["6", 0],
+      "seed": "{{seed}}",
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "res_multistep",
+      "scheduler": "normal",
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["8", 0], "vae": ["7", 0] }
+  },
+  "10": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["9", 0], "filename_prefix": "qwen-8step-out" }
+  }
+}
+```
+
+连线（`["1", 0]` 这种）不动。
+
+---
+
+**真正 POST `/prompt` 时（参数已替换）**
+
+视铸例如：提示词「一只机械狐狸…」、负向空或你填的、尺寸 `1024*1024`、模型选中 `qwen_image_2512_fp8_e4m3fn.safetensors`：
+
+```json
+{
+  "prompt": {
+    "1": { "class_type": "LoadDiffusionModel", "inputs": { "unet_name": "qwen_image_2512_fp8_e4m3fn.safetensors" } },
+    "4": { "class_type": "CLIPTextEncode", "inputs": { "text": "一只机械狐狸…", "clip": ["3", 0] } },
+    "5": { "class_type": "CLIPTextEncode", "inputs": { "text": "模糊，低质量…", "clip": ["3", 0] } },
+    "6": { "class_type": "EmptySD3LatentImage", "inputs": { "width": 1024, "height": 1024, "batch_size": 1 } }
+  },
+  "client_id": "visualforge"
+}
+```
+
+（其余节点同注入后的图，只是 `{{seed}}` 会变成一个数字。）
+
+工位下拉里选的「主模型」必须是 **UNet 权重文件名**，因为填的是 `LoadDiffusionModel.unet_name`。Lightning LoRA、CLIP、VAE 不会跟着下拉变，除非你在 json 里自己写成 `{{...}}`。
+
+---
+
+_**User**_
+
+两个CLIPTextEncode，你是怎么自动和视铸参数对应的？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问两个 CLIPTextEncode 节点如何自动映射到 VisualForge 的 prompt 与 negative 参数。
+
+自动映射依据节点在图中的插入顺序。Object.entries 遍历按 uiToApiPrompt 中 nodes 数组的顺序处理，因此第一个 CLIPTextEncode 对应 {{prompt}}，第二个对应 {{negative}}。节点标题（如“正向提示词”）并不参与映射，仅靠出现顺序决定。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+靠的是**遇到的先后顺序**，不看节点标题「正向提示词 / 反向提示词」。
+
+转换后的 API 图按节点遍历时：
+
+1. **第一个** `CLIPTextEncode` 的 `inputs.text` → `{{prompt}}`（视铸工位里的提示词）
+2. **第二个** `CLIPTextEncode` 的 `inputs.text` → `{{negative}}`（视铸的反向提示词）
+
+你这份 json 里 `nodes` 数组是先 id 4（正向）再 id 5（反向），所以正好对上。
+
+**不会**根据 `title`、位置或连到 KSampler 的 `positive` / `negative` 口来判断。如果画布 JSON 里两个 CLIP 节点写反了，提示词和负向就会对调。
+
+只有一个 `CLIPTextEncode` 时，只注入 `{{prompt}}`，没有负向。已经写了 `{{prompt}}` / `{{negative}}` 的字段不会被覆盖。要更稳，可以自己在 API json 里写死这两个占位符。
+
+---
+
+_**User**_
+
+也就是说可能会不匹配是吗？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户在确认 CLIPTextEncode 自动映射是否可能不匹配。
+
+确认存在不匹配风险。将简要说明触发条件与规避方法。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+对，**有可能对不上**。
+
+自动注入只按「第几个 `CLIPTextEncode`」，不看标题，也不看接到 KSampler 的 positive / negative。图里节点顺序和视铸「提示词 / 反向」不一致时，就会填反。
+
+要避免：在 json 里自己写好 `{{prompt}}`、`{{negative}}`，或保证画布里正向 CLIP 排在反向前面。
+
+---
+
+_**User**_
+
+那如何在上传的json里加呢？{
+  "id": "qwen2512‑8step‑lightning",
+  "revision": 0,
+  "last_node_id": 13,
+  "last_link_id": 15,
+  "nodes": [
+    {
+      "id":1,
+      "type":"LoadDiffusionModel",
+      "pos":[100,80],
+      "size":[300,100],
+      "flags":{},
+      "order":0,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"MODEL","type":"MODEL","links":[1]}],
+      "properties":{"Node name for S&R":"LoadDiffusionModel"},
+      "widgets_values":["qwen_image_2512_fp8_e4m3fn.safetensors"]
+    },
+    {
+      "id":2,
+      "type":"LoraLoaderModelOnly",
+      "pos":[450,80],
+      "size":[300,120],
+      "flags":{},
+      "order":1,
+      "mode":0,
+      "inputs":[{"name":"model","type":"MODEL","link":1}],
+      "outputs":[{"name":"MODEL","type":"MODEL","links":[2]}],
+      "properties":{"Node name for S&R":"LoraLoaderModelOnly"},
+      "widgets_values":["Qwen-Image-Lightning-8steps-V2.0-bf16.safetensors",1.0]
+    },
+    {
+      "id":3,
+      "type":"CLIPLoader",
+      "pos":[100,250],
+      "size":[300,110],
+      "flags":{},
+      "order":2,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"CLIP","type":"CLIP","links":[3,4]}],
+      "properties":{"Node name for S&R":"CLIPLoader"},
+      "widgets_values":["qwen_2.5_vl_7b_fp8_scaled.safetensors","qwen_image","default"]
+    },
+    {
+      "id":4,
+      "type":"CLIPTextEncode",
+      "pos":[450,220],
+      "size":[420,180],
+      "flags":{},
+      "order":3,
+      "mode":0,
+      "inputs":[{"name":"clip","type":"CLIP","link":3}],
+      "outputs":[{"name":"CONDITIONING","type":"CONDITIONING","links":[5]}],
+      "title":"正向提示词",
+      "properties":{"Node name for S&R":"CLIPTextEncode"},
+      "widgets_values":["一张高清照片，城市黄昏，细腻光影，高质量"]
+    },
+    {
+      "id":5,
+      "type":"CLIPTextEncode",
+      "pos":[450,430],
+      "size":[420,120],
+      "flags":{},
+      "order":4,
+      "mode":0,
+      "inputs":[{"name":"clip","type":"CLIP","link":4}],
+      "outputs":[{"name":"CONDITIONING","type":"CONDITIONING","links":[6]}],
+      "title":"反向提示词",
+      "properties":{"Node name for S&R":"CLIPTextEncode"},
+      "widgets_values":["模糊，低质量，扭曲，水印"]
+    },
+    {
+      "id":6,
+      "type":"EmptySD3LatentImage",
+      "pos":[100,420],
+      "size":[300,140],
+      "flags":{},
+      "order":5,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"LATENT","type":"LATENT","links":[7]}],
+      "properties":{"Node name for S&R":"EmptySD3LatentImage"},
+      "widgets_values":[1024,1024,1]
+    },
+    {
+      "id":7,
+      "type":"VAELoader",
+      "pos":[100,580],
+      "size":[300,100],
+      "flags":{},
+      "order":6,
+      "mode":0,
+      "inputs":[],
+      "outputs":[{"name":"VAE","type":"VAE","links":[8]}],
+      "properties":{"Node name for S&R":"VAELoader"},
+      "widgets_values":["qwen_image_vae.safetensors"]
+    },
+    {
+      "id":8,
+      "type":"KSampler",
+      "pos":[880,120],
+      "size":[400,380],
+      "flags":{},
+      "order":7,
+      "mode":0,
+      "inputs":[
+        {"name":"model","type":"MODEL","link":2},
+        {"name":"positive","type":"CONDITIONING","link":5},
+        {"name":"negative","type":"CONDITIONING","link":6},
+        {"name":"latent_image","type":"LATENT","link":7}
+      ],
+      "outputs":[{"name":"LATENT","type":"LATENT","links":[9]}],
+      "properties":{"Node name for S&R":"KSampler"},
+      "widgets_values":[123456,"randomize",8,1.0,"res_multistep","normal",1.0]
+    },
+    {
+      "id":9,
+      "type":"VAEDecode",
+      "pos":[1320,180],
+      "size":[240,100],
+      "flags":{},
+      "order":8,
+      "mode":0,
+      "inputs":[{"name":"samples","type":"LATENT","link":9},{"name":"vae","type":"VAE","link":8}],
+      "outputs":[{"name":"IMAGE","type":"IMAGE","links":[10]}],
+      "properties":{"Node name for S&R":"VAEDecode"},
+      "widgets_values":[]
+    },
+    {
+      "id":10,
+      "type":"SaveImage",
+      "pos":[1600,160],
+      "size":[320,140],
+      "flags":{},
+      "order":9,
+      "mode":0,
+      "inputs":[{"name":"images","type":"IMAGE","link":10}],
+      "outputs":[],
+      "properties":{"Node name for S&R":"SaveImage"},
+      "widgets_values":["qwen‑8step‑out"]
+    }
+  ],
+  "links":[
+    [1,1,0,2,0,"MODEL"],
+    [2,2,0,8,0,"MODEL"],
+    [3,3,0,4,0,"CLIP"],
+    [4,3,0,5,0,"CLIP"],
+    [5,4,0,8,1,"CONDITIONING"],
+    [6,5,0,8,2,"CONDITIONING"],
+    [7,6,0,8,3,"LATENT"],
+    [8,7,0,9,1,"VAE"],
+    [9,8,0,9,0,"LATENT"],
+    [10,9,0,10,0,"IMAGE"]
+  ],
+  "groups":[],
+  "config":{},
+  "extra":{"ds":{"scale":0.7,"offset":[20,20]}},
+  "version":0.4
+}
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户想了解如何在上传的 UI 格式 JSON 中添加占位符。
+
+injectPlaceholders 只对转换后的 API 格式生效，不处理 UI JSON 的 widgets_values。因此需要直接在 UI JSON 的 widgets_values 中填入 {{变量名}}，例如模型路径、提示词和负向提示等。转换后这些值会变成 inputs 字段，注入时会被识别并替换。
+
+具体修改示例：CLIPTextEncode 的 widgets_values[0] 填入 "{{prompt}}"，LoadDiffusionModel 的 widgets_values[0] 填入 "{{model}}"，节点 6 的宽高和节点 8 的种子分别填入 "{{width}}"、"{{height}}" 和 "{{seed}}"。这些字符串在转换后会映射为 inputs.text、unet_name 等字段，注入时即可被正确替换。
+
+只需修改涉及的几个节点，其余保持原样即可。ComfyUI GUI 打开该模板时会把 {{prompt}} 等占位符显示为原始文本，但 VisualForge 注入时仍能正确解析替换。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+画布 JSON 里，占位符写在对应节点的 **`widgets_values`** 里（控件上显示的值）。转成 `/prompt` 后会变成 `inputs`，已有 `{{...}}` 的槽不会再被自动改。
+
+你这份只需改这几处：
+
+**主模型**（节点 1）
+
+```json
+"widgets_values": ["{{model}}"]
+```
+
+**正向提示词**（节点 4）
+
+```json
+"widgets_values": ["{{prompt}}"]
+```
+
+**反向提示词**（节点 5）
+
+```json
+"widgets_values": ["{{negative}}"]
+```
+
+可选：尺寸（节点 6）、种子（节点 8 第一个数）
+
+```json
+"widgets_values": ["{{width}}", "{{height}}", 1]
+```
+
+```json
+"widgets_values": ["{{seed}}", "randomize", 8, 1.0, "res_multistep", "normal", 1.0]
+```
+
+LoRA、CLIP、VAE 文件名不用动，工位下拉不会换它们。
+
+改完后节点 4 整段是这样：
+
+```json
+{
+  "id": 4,
+  "type": "CLIPTextEncode",
+  "title": "正向提示词",
+  "inputs": [{ "name": "clip", "type": "CLIP", "link": 3 }],
+  "outputs": [{ "name": "CONDITIONING", "type": "CONDITIONING", "links": [5] }],
+  "widgets_values": ["{{prompt}}"],
+  "properties": { "Node name for S&R": "CLIPTextEncode" }
+}
+```
+
+这样正向/反向不再靠「第几个 CLIP」猜测。这是给视铸用的模板；在 ComfyUI 画布里打开会看到字面量 `{{prompt}}`，不是真正提示词。
+
+---
+
+_**User**_
+
+这些关于占位符的信息更新的@README.md 
+
+---
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>

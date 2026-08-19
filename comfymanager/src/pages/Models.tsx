@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { Button, ErrorBox, Select } from "../components/ui";
 import { PageHead } from "../components/PageHead";
@@ -48,6 +48,9 @@ export function Models() {
   const [error, setError] = useState("");
   const [catalogFile, setCatalogFile] = useState("");
 
+  const jobsRef = useRef(jobs);
+  jobsRef.current = jobs;
+
   const refresh = async () => {
     const [m, d] = await Promise.all([api.models(), api.downloads().catch(() => ({ jobs: [] }))]);
     setModels((m.openModels || []) as OpenModel[]);
@@ -59,8 +62,18 @@ export function Models() {
   useEffect(() => {
     refresh().catch((e) => setError(e.message));
     const t = setInterval(() => {
-      api.downloads().then((r) => setJobs((r.jobs || []) as typeof jobs)).catch(() => undefined);
-    }, 2000);
+      api.downloads()
+        .then(async (r) => {
+          const next = (r.jobs || []) as typeof jobs;
+          const prevRunning = new Set(
+            jobsRef.current.filter((j) => j.status === "running" || j.status === "queued").map((j) => j.id),
+          );
+          const finished = next.some((j) => prevRunning.has(j.id) && j.status !== "running" && j.status !== "queued");
+          setJobs(next);
+          if (finished) await refresh();
+        })
+        .catch(() => undefined);
+    }, 1000);
     return () => clearInterval(t);
   }, []);
 

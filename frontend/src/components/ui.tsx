@@ -11,9 +11,9 @@ export function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[11px] tracking-[0.18em] uppercase text-brass">{label}</span>
-        {hint ? <span className="text-xs text-mute">{hint}</span> : null}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="shrink-0 whitespace-nowrap text-[11px] tracking-[0.18em] uppercase text-brass">{label}</span>
+        {hint ? <span className="min-w-0 text-xs leading-relaxed text-mute">{hint}</span> : null}
       </div>
       {children}
     </label>

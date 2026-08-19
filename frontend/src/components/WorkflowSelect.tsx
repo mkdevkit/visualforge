@@ -30,7 +30,7 @@ export function WorkflowSelect({
   }
 
   return (
-    <Field label="工作流" hint="与模型独立。同一份图可换主模型（需含 {{model}}）。">
+    <Field label="工作流" hint="与模型独立，图内需 {{model}} 才能换主模型">
       <Select value={value || list[0]?.id || ""} onChange={(e) => onChange(e.target.value)}>
         {list.map((w) => (
           <option key={w.id} value={w.id}>

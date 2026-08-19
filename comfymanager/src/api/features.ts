@@ -114,6 +114,39 @@ export function upsertStationWorkflow(cfg: ComfyFeatureConfig, item: StationWork
   });
 }
 
+export function applyStationWorkflow(cfg: ComfyFeatureConfig, workflowId?: string): ComfyFeatureConfig {
+  const list = (cfg.workflows?.length
+    ? cfg.workflows
+    : cfg.workflow
+      ? [
+          {
+            id: cfg.activeWorkflowId || "legacy",
+            name: "默认",
+            source: cfg.workflowSource || "manual",
+            workflow: cfg.workflow,
+            enabled: true,
+          },
+        ]
+      : []) as StationWorkflow[];
+  const enabled = list.filter((w) => w.enabled !== false && w.workflow);
+  if (!enabled.length) {
+    if (cfg.workflow) return cfg;
+    throw new Error("该工位没有生效的工作流。请在「工作流」页加入至少一份并勾选生效。");
+  }
+  const requested = (workflowId || cfg.activeWorkflowId || "").trim();
+  const hit = enabled.find((w) => w.id === requested) || enabled[0];
+  if (requested && workflowId && !enabled.some((w) => w.id === requested)) {
+    throw new Error(`找不到生效工作流 ${workflowId}`);
+  }
+  return {
+    ...cfg,
+    workflow: hit.workflow,
+    workflowSource: hit.source,
+    activeWorkflowId: hit.id,
+    workflows: list,
+  };
+}
+
 export function defaultFeature(): ComfyFeatureConfig {
   return {
     mode: "prompt",

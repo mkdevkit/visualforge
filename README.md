@@ -164,9 +164,9 @@ npm run dev
 
 视铸工位：生图、生视频、生音乐、音频（配音 / 音色设计 / 音效）、生 3D。角色动画走生视频工位（Wan Animate 2）。生 3D / 资源库可预览 GLB，并对静网格绑骨导出新 GLB，见下节。内置预览角色 Robot Expressive 为 CC0。
 
-**用 ComfyUI 做生成必须给工位配至少一份生效工作流**（安装、启动、下模型不用配）。图在 ComfyUI 里可视化编辑；ComfyManager 列出本机工作流并**追加**到工位，不会覆盖已有的份。点「生成」时视铸按你指定的那份 API JSON 填占位符，POST 到 `/prompt`。没配的工位会报错。
+**用 ComfyUI 做生成必须给工位配至少一份生效工作流**（安装、启动、下模型不用配）。图在 ComfyUI 里可视化编辑；ComfyManager 列出本机工作流并**追加**到工位，不会覆盖已有的份。点「生成」时视铸只把工位、工作流、模型和参数发给 ComfyManager；由管理端读图、填占位符、POST 到 ComfyUI `/prompt`。没配的工位会报错。
 
-**模型和份数互不绑定。** 同一份工作流可以换主模型：视铸把所选模型的文件名填进 `{{model}}`。若图里把 Checkpoint 写死、没有 `{{model}}`，换模型不会生效。一份工作流也可以只服务一种架构（例如只适 SDXL），换到不兼容的权重会在 Comfy 里报错。
+**模型和份数互不绑定。** 同一份工作流可以换主模型：管理端把所选模型的**文件名**填进 `{{model}}`（Checkpoint 的 `ckpt_name` 或 `LoadDiffusionModel` 的 `unet_name` 等）。图里主模型槽对不上、又没有手写 `{{model}}` 时，换下拉不会生效。一份工作流也可以只服务一种架构（例如只适 SDXL / 只适 Qwen Image），换到不兼容的权重会在 Comfy 里报错。LoRA、CLIP、VAE 等配套文件默认不跟下拉走，除非 json 里自己写了占位符。
 
 需要工作流：生图、生视频、生音乐、配音、音效、音色设计、生 3D、3D 动画。
 
@@ -181,9 +181,11 @@ npm run dev
 1. 在 ComfyUI 里搭好图并保存（会落到 `comfymanager/comfy/user/default/workflows/` 等目录）。图里要有 Save Image / Save Video / 导出 GLB 一类节点。
 2. 打开 ComfyManager「工作流」页，上方 **ComfyUI 工作流库** 会列出本机所有 `.json`（画布格式或 API Format 都可以）。
 3. 选工位后点「加入」，或在下方工位卡片里从库选择后加入。同一工位可加入多份。不必粘贴 JSON。
-4. 勾选「生效」，需要时「设为默认」。视铸刷新后指定工作流和模型即可生成。生成时会重新读取库文件；画布 JSON 会转成 `/prompt` 并尽量套上 `{{prompt}}` / `{{model}}`（ComfyUI 在跑时转换更准）。
+4. 勾选「生效」，需要时「设为默认」。视铸刷新后指定工作流和模型即可生成。生成时管理端会重新读取库文件；画布 JSON 会转成 `/prompt` API 图。**ComfyUI 在跑时转换更准**（要用到 `/object_info`）。
 
 粘贴 API JSON 只在「高级」里，给没有库文件的情况。
+
+上传 / 粘贴的 json **不必**先写 `{{...}}`，可以是 ComfyUI 原样导出。也可以自己写上占位符，已有 `{{` 的字段不会被自动覆盖。
 
 批量：
 
@@ -191,8 +193,6 @@ npm run dev
 - **下载 ZIP**：勾选若干个，或一个不选则打包全部。
 
 扫描目录：`user/default/workflows`、`user/workflows`、`workflows`（均相对 ComfyUI 安装目录）。
-
-`{{image}}` 填在 LoadImage 的 `image` 字段，不要填成本机路径；视铸会先 `/upload/image`。
 
 ### 页面字段
 
@@ -209,7 +209,16 @@ npm run dev
 
 ### 占位符
 
-生成时视铸会整份 JSON 做替换。单独写成 `"{{width}}"` 时会变成数字，不是字符串。
+占位符是 ComfyUI 节点里某个**控件值**的模板，不是连线。API 图写在 `inputs` 里；画布 JSON 写在 `widgets_values` 里。ComfyUI 真正执行时看到的已经是填好的值，它不认识 `{{...}}`。
+
+生成链路：
+
+1. 视铸把工位、工作流 id、所选模型、提示词、尺寸、参考图等参数发给 ComfyManager。
+2. 管理端读取库里的 json（磁盘上的上传文件**不会被改写**）。画布格式先转成 `/prompt` 用的 API 图。
+3. **自动注入**：还没有 `{{...}}` 的槽会被改成占位符（见下表）。字段里已经带 `{{` 的一律跳过。
+4. **替换**：用视铸传来的参数填进 `{{prompt}}`、`{{model}}` 等，再 `POST { "prompt": <图>, "client_id": "visualforge" }` 到 ComfyUI。
+
+单独写成 `"{{width}}"` 时替换成数字，不是字符串 `"1024"`。
 
 | 占位符 | 来源 | 常用工位 |
 |---|---|---|
@@ -226,7 +235,47 @@ npm run dev
 | `{{text}}` `{{voice}}` `{{instructions}}` | 台词、音色、指示 | 配音 |
 | `{{name}}` | 音色名 | 音色设计 |
 
-生图 `/prompt` 最小改法：在导出的 JSON 里找到 CLIP 文本和 Checkpoint：
+`{{image}}` 填的是 Comfy 里的文件名，不要填成本机路径；参考图会先 `/upload/image`。
+
+#### 自动注入规则（json 里没写占位符时）
+
+按转换后的 API 图遍历，**不看节点标题、也不看接到 KSampler 的 positive / negative 口**：
+
+| 匹配 | 注入 |
+|---|---|
+| 第一个含 `ckpt_name` / `unet_name` / `model_name` 的字符串槽 | `{{model}}` |
+| **第一个** `CLIPTextEncode` 的 `text` | `{{prompt}}` |
+| **第二个** `CLIPTextEncode` 的 `text` | `{{negative}}` |
+| 第一个 `LoadImage` 的 `image` | `{{image}}` |
+| 第二个 `LoadImage` 的 `image` | `{{image2}}` |
+| 已有的 `width` / `height` / `seed` 等控件 | 对应 `{{width}}` 等 |
+
+两个 `CLIPTextEncode` **有可能对不上**：画布 `nodes` 数组里若反向节点排在正向前面，提示词和负向会填反。只有一个 CLIP 时只注入 `{{prompt}}`。LoRA、CLIP 编码器、VAE 的文件名默认不注入。
+
+要避免猜错，在上传的 json 里自己写占位符。
+
+#### 画布 JSON 里怎么写
+
+改对应节点的 `widgets_values`，其余连线和配套权重可保持原样。例如 Qwen `LoadDiffusionModel` + 两个 CLIP：
+
+```json
+{ "id": 1, "type": "LoadDiffusionModel", "widgets_values": ["{{model}}"] }
+{ "id": 4, "type": "CLIPTextEncode", "title": "正向提示词", "widgets_values": ["{{prompt}}"] }
+{ "id": 5, "type": "CLIPTextEncode", "title": "反向提示词", "widgets_values": ["{{negative}}"] }
+{ "id": 6, "type": "EmptySD3LatentImage", "widgets_values": ["{{width}}", "{{height}}", 1] }
+```
+
+这是给视铸用的模板；在 ComfyUI 画布里打开会看到字面量 `{{prompt}}`，不是真正提示词。
+
+#### API Format 里怎么写
+
+```json
+"4": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{prompt}}", "clip": ["3", 0] } },
+"5": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{negative}}", "clip": ["3", 0] } },
+"1": { "class_type": "LoadDiffusionModel", "inputs": { "unet_name": "{{model}}" } }
+```
+
+经典 Checkpoint 生图：
 
 ```json
 "3": { "class_type": "CLIPTextEncode", "inputs": { "text": "{{prompt}}", "clip": ["4", 1] } },
