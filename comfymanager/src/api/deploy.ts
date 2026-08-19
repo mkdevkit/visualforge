@@ -1,5 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { appendFileSync, createWriteStream, existsSync, rmSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
+import { appendFileSync, closeSync, existsSync, openSync, rmSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { homedir, release } from "node:os";
 import { formatOsPath, loadSettings, PACKAGE_ROOT, saveSettings } from "./config.ts";
@@ -758,14 +758,24 @@ export function startComfy() {
   writeExtraModelPaths();
   const args = ["main.py", "--listen", s.listenHost, "--port", String(s.listenPort), "--enable-cors-header"];
   if (s.extraArgs.trim()) args.push(...s.extraArgs.trim().split(/\s+/));
-  const out = createWriteStream(logFile(), { flags: "a" });
-  const child: ChildProcess = spawn(pythonBin(), args, {
-    cwd: s.installDir,
-    detached: true,
-    stdio: ["ignore", out, out],
-    windowsHide: true,
-    shell: process.platform === "win32",
-  });
+  mkdirSync(loadSettings().dataDir, { recursive: true });
+  const logFd = openSync(logFile(), "a");
+  let child: ChildProcess;
+  try {
+    child = spawn(pythonBin(), args, {
+      cwd: s.installDir,
+      detached: true,
+      stdio: ["ignore", logFd, logFd],
+      windowsHide: true,
+      shell: process.platform === "win32",
+    });
+  } finally {
+    try {
+      closeSync(logFd);
+    } catch {
+      /* inherited by child */
+    }
+  }
   child.unref();
   if (!child.pid) throw new Error("无法启动 ComfyUI 进程");
   saveJson(procFile(), { pid: child.pid, startedAt: new Date().toISOString() } satisfies ComfyProc);
