@@ -1,5 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { appendFileSync, createWriteStream, existsSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
+import { appendFileSync, createWriteStream, existsSync, rmSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 import { formatOsPath, loadSettings, PACKAGE_ROOT, saveSettings } from "./config.ts";
@@ -134,10 +134,19 @@ function pythonHint() {
   if (os.id === "windows") {
     return "未检测到 Python 3.10+。请自行从 https://www.python.org 安装，并勾选 Add python.exe to PATH。";
   }
-  if (os.id === "ubuntu") {
-    return "未检测到 Python 3.10+。请自行安装，例如：sudo apt install python3 python3-venv python3-pip";
+  if (os.id === "ubuntu" || os.id === "linux") {
+    return "未检测到 Python 3.10+。请自行安装，例如：sudo apt install python3 python3.10-venv python3-pip";
   }
   return "未检测到 Python 3.10+。请自行安装 python3、python3-venv、python3-pip。";
+}
+
+function venvPkgHint(version: string) {
+  const os = hostOs();
+  const pkg = version ? `python${version}-venv` : "python3-venv";
+  if (os.id === "ubuntu" || os.id === "linux") {
+    return `Ubuntu 请自行安装 ${pkg}（本工具不代装）：sudo apt install ${pkg}`;
+  }
+  return "请确认当前 Python 带 venv / ensurepip。";
 }
 
 export function hostPrereqs() {
@@ -495,10 +504,32 @@ function appendLogChunk(text: string) {
   appendFileSync(installLogFile(), normalizeLog(text), "utf8");
 }
 
+function venvDir(installDir: string) {
+  return join(installDir, ".venv");
+}
+
 function venvPythonPath(installDir: string) {
   return process.platform === "win32"
-    ? join(installDir, ".venv", "Scripts", "python.exe")
-    : join(installDir, ".venv", "bin", "python");
+    ? join(venvDir(installDir), "Scripts", "python.exe")
+    : join(venvDir(installDir), "bin", "python");
+}
+
+function venvHasPip(pythonPath: string) {
+  if (!existsSync(pythonPath)) return false;
+  const r = spawnSync(pythonPath, ["-m", "pip", "--version"], {
+    encoding: "utf8",
+    timeout: 15000,
+    windowsHide: true,
+    shell: process.platform === "win32",
+  });
+  return r.status === 0;
+}
+
+function removeBrokenVenv(installDir: string) {
+  const dir = venvDir(installDir);
+  if (!existsSync(dir)) return;
+  appendLog(`删除不完整的虚拟环境：${formatOsPath(dir)}`);
+  rmSync(dir, { recursive: true, force: true });
 }
 
 async function ensureVenv(installDir: string) {
@@ -507,20 +538,19 @@ async function ensureVenv(installDir: string) {
     return portable;
   }
   const existing = venvPythonPath(installDir);
-  if (existsSync(existing)) {
+  if (venvHasPip(existing)) {
     saveSettings({ comfy: { ...loadSettings().comfy, pythonPath: existing } });
     return existing;
   }
+  if (existsSync(venvDir(installDir))) removeBrokenVenv(installDir);
   const sys = resolveSystemPython();
   if (!sys) throw new Error(pythonHint());
   mkdirSync(installDir, { recursive: true });
-  appendLog(`创建虚拟环境：${formatOsPath(join(installDir, ".venv"))}（Python ${sys.version}）`);
-  const created = await run(sys.executable, ["-m", "venv", join(installDir, ".venv")], installDir);
-  if (created.code !== 0 || !existsSync(existing)) {
-    const extra = hostOs().id === "ubuntu" || hostOs().id === "linux"
-      ? " Ubuntu/Debian 请确认已自行安装 python3-venv：sudo apt install python3-venv"
-      : "";
-    throw new Error(`无法创建 Python 虚拟环境。${extra}\n${created.log.slice(-800)}`);
+  appendLog(`创建虚拟环境：${formatOsPath(venvDir(installDir))}（Python ${sys.version}）`);
+  const created = await run(sys.executable, ["-m", "venv", venvDir(installDir)], installDir);
+  if (created.code !== 0 || !venvHasPip(existing)) {
+    removeBrokenVenv(installDir);
+    throw new Error(`无法创建 Python 虚拟环境。${venvPkgHint(sys.version)}\n${created.log.slice(-800)}`);
   }
   const pip = await run(existing, ["-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"], installDir);
   if (pip.code !== 0) throw new Error(`升级 pip 失败。\n${pip.log.slice(-800)}`);

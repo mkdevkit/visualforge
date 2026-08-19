@@ -44,7 +44,7 @@ comfymanager/tools/       可选工具：UniRig 官方仓库（gitignore）
 |---|---|---|
 | Node.js | **20 或 22** | 不要用 Ubuntu `apt install nodejs`（经常是 v12，会报 `Unexpected token '.'`） |
 | Git | 任意近期版 | 克隆 ComfyUI 需要，须在 PATH 里 |
-| Python | **3.10+** | 须在 PATH 里；Ubuntu 还需 `python3-venv` |
+| Python | **3.10+** | 须在 PATH 里；Ubuntu 还需对应版本的 venv 包（3.10 为 `python3.10-venv`） |
 | NVIDIA 驱动 | 能跑 `nvidia-smi` | 可选。有独显时管理端会装 CUDA 版 PyTorch |
 
 ### 2. Windows
@@ -78,7 +78,7 @@ npm run manager
 Git、Python 自己装：
 
 ```bash
-sudo apt-get install -y git python3 python3-venv python3-pip curl ca-certificates
+sudo apt-get install -y git python3 python3.10-venv python3-pip curl ca-certificates
 ```
 
 装 Node 22 前先保证 apt 源目录存在（部分云主机没有 `/etc/apt/sources.list.d/`，NodeSource 脚本会 `tee` 失败却仍打印成功）：
