@@ -69,7 +69,7 @@ npm install
 npm run manager
 ```
 
-浏览器打开 http://127.0.0.1:18788 。
+浏览器打开 http://127.0.0.1:18788 。外网用 `http://<本机IP>:18788`（默认监听 `0.0.0.0`，防火墙放行 18788）。
 
 ### 3. Ubuntu
 
@@ -110,7 +110,7 @@ npm install
 npm run manager
 ```
 
-浏览器打开 http://127.0.0.1:18788 。
+浏览器打开 http://127.0.0.1:18788 。云主机从外网访问：`http://<公网IP>:18788`，并在安全组 / `ufw` 放行 **18788**。默认监听 `0.0.0.0`；仅本机可设 `COMFYMANAGER_HOST=127.0.0.1`。管理端无登录，不要对不信任的网络裸奔。
 
 ### 4. 在 ComfyManager 里装 ComfyUI
 
@@ -145,6 +145,7 @@ npm run dev
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
+| `COMFYMANAGER_HOST` | `0.0.0.0` | 管理端监听。`0.0.0.0` 可外网访问；`127.0.0.1` 仅本机 |
 | `COMFYMANAGER_PORT` | `18788` | 管理端端口 |
 | `COMFYMANAGER_DATA_DIR` | `./comfymanager/data` | 管理端数据 |
 | `COMFYUI_INSTALL_DIR` | `./comfymanager/comfy` | ComfyUI 安装目录（本机已有则可复用） |

@@ -15,6 +15,8 @@ export function Settings() {
     modelsDir: "",
     hfToken: "",
   });
+  const [host, setHost] = useState("0.0.0.0");
+  const [port, setPort] = useState(18788);
   const [dataDir, setDataDir] = useState("");
   const [masked, setMasked] = useState({ apiKey: "", hfToken: "" });
   const [error, setError] = useState("");
@@ -25,8 +27,12 @@ export function Settings() {
     api.settings().then((r) => {
       const s = r.settings as {
         dataDir?: string;
+        host?: string;
+        port?: number;
         comfy?: typeof comfy;
       };
+      setHost(s.host || "0.0.0.0");
+      setPort(s.port || 18788);
       setDataDir(s.dataDir || "");
       setComfy({
         baseUrl: s.comfy?.baseUrl || "http://127.0.0.1:8188",
@@ -80,6 +86,14 @@ export function Settings() {
         <Field label="启动附加参数">
           <Input value={comfy.extraArgs} onChange={(e) => setComfy({ ...comfy, extraArgs: e.target.value })} />
         </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="管理端监听地址" hint="0.0.0.0 允许局域网 / 外网。仅本机：环境变量 COMFYMANAGER_HOST=127.0.0.1。改完需重启。">
+            <Input value={host} onChange={(e) => setHost(e.target.value)} />
+          </Field>
+          <Field label="管理端端口">
+            <Input type="number" value={port} onChange={(e) => setPort(Number(e.target.value))} />
+          </Field>
+        </div>
         <Field label="ComfyManager 数据目录">
           <Input value={dataDir} onChange={(e) => setDataDir(e.target.value)} />
         </Field>
@@ -112,6 +126,8 @@ export function Settings() {
               const { apiKey, hfToken, ...rest } = comfy;
               await api.saveSettings({
                 dataDir,
+                host,
+                port,
                 comfy: {
                   ...rest,
                   ...(apiKey ? { apiKey } : {}),

@@ -83,10 +83,15 @@ export function loadSettings(): AppSettings {
   const dataDir = defaultDataDir();
   mkdirSync(dataDir, { recursive: true });
   const stored = loadJson<Partial<AppSettings>>(settingsPath(dataDir), {});
+  const storedHost = stored.host;
+  const host =
+    process.env.COMFYMANAGER_HOST ||
+    (storedHost && storedHost !== "127.0.0.1" ? storedHost : "") ||
+    "0.0.0.0";
   const nextData = stored.dataDir || dataDir;
   return {
     dataDir: nextData,
-    host: stored.host || process.env.COMFYMANAGER_HOST || "127.0.0.1",
+    host,
     port: Number(stored.port || process.env.COMFYMANAGER_PORT || 18788),
     comfy: defaultComfy(nextData, stored.comfy),
     activeModels: { ...emptyActive(), ...(stored.activeModels || {}) },

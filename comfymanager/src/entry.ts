@@ -10,6 +10,13 @@ const settings = loadSettings();
 const PORT = settings.port;
 const HOST = settings.host;
 
+function logListen(host: string, port: number) {
+  const wan = host === "0.0.0.0" || host === "::";
+  console.log(`ComfyManager  http://127.0.0.1:${port}`);
+  if (wan) console.log(`外网访问      http://<服务器IP>:${port}  （防火墙 / 安全组放行 ${port}）`);
+  else console.log(`监听          ${host}:${port}`);
+}
+
 async function main() {
   const api = getRequestListener(app.fetch);
   const isProd = process.env.NODE_ENV === "production";
@@ -34,13 +41,13 @@ async function main() {
       res.end(html);
     });
     server.listen(PORT, HOST, () => {
-      console.log(`ComfyManager  http://${HOST}:${PORT}`);
+      logListen(HOST, PORT);
     });
     return;
   }
 
   const vite = await createVite({
-    server: { middlewareMode: true },
+    server: { middlewareMode: true, host: HOST, allowedHosts: true },
     appType: "spa",
   });
   const server = http.createServer((req, res) => {
@@ -48,7 +55,7 @@ async function main() {
     vite.middlewares(req, res);
   });
   server.listen(PORT, HOST, () => {
-    console.log(`ComfyManager  http://${HOST}:${PORT}`);
+    logListen(HOST, PORT);
     console.log(`数据目录      ${settings.dataDir}`);
   });
 }

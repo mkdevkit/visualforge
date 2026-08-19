@@ -20,14 +20,20 @@ function apiPlugin(): Plugin {
   };
 }
 
+const listen = loadSettings();
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), apiPlugin()],
   server: {
-    port: 18788,
-    host: "127.0.0.1",
+    port: listen.port,
+    host: listen.host,
+    allowedHosts: true,
+    strictPort: true,
   },
   preview: {
-    port: 18788,
-    host: "127.0.0.1",
+    port: listen.port,
+    host: listen.host,
+    allowedHosts: true,
+    strictPort: true,
   },
 });
