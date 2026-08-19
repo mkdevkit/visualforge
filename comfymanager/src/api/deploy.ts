@@ -1,5 +1,5 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { createWriteStream, existsSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
+import { appendFileSync, createWriteStream, existsSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 import { formatOsPath, loadSettings, PACKAGE_ROOT, saveSettings } from "./config.ts";
@@ -18,6 +18,31 @@ function procFile() {
 
 function logFile() {
   return join(loadSettings().dataDir, "comfyui.log");
+}
+
+function installLogFile() {
+  return join(loadSettings().dataDir, "install.log");
+}
+
+let installRunning = false;
+
+export function isInstallRunning() {
+  return installRunning;
+}
+
+export function readInstallLog(maxChars = 80_000) {
+  const path = installLogFile();
+  if (!existsSync(path)) {
+    return { text: "", path: formatOsPath(path), installing: installRunning, truncated: false };
+  }
+  const raw = readFileSync(path, "utf8");
+  const truncated = raw.length > maxChars;
+  return {
+    text: truncated ? raw.slice(-maxChars) : raw,
+    path: formatOsPath(path),
+    installing: installRunning,
+    truncated,
+  };
 }
 
 function pythonBin() {
@@ -379,24 +404,22 @@ async function torchCudaReady(cwd: string) {
 async function installCudaDeps(cwd: string, alsoRequirements: boolean) {
   const accel = detectAccel();
   appendLog(`加速：${accel.label}`);
-  const torchArgs = ["-m", "pip", "install", "--upgrade", "torch", "torchvision", "torchaudio"];
+  const torchArgs = ["-m", "pip", "install", "--upgrade", "--progress-bar", "on", "torch", "torchvision", "torchaudio"];
   if (accel.kind === "cuda") {
     torchArgs.push("--extra-index-url", accel.extraIndexUrl);
   } else if (accel.kind === "cpu") {
     torchArgs.push("--extra-index-url", accel.extraIndexUrl);
   }
   const torch = await run(pythonBin(), torchArgs, cwd);
-  appendLog(torch.log);
   if (torch.code !== 0) {
     throw new Error(
       `安装 PyTorch 失败${accel.kind === "cuda" ? `（需要 ${accel.tag} CUDA 轮子）` : ""}。请确认已装 NVIDIA 驱动与 Python 3.10+。\n${torch.log.slice(-1200)}`,
     );
   }
   if (alsoRequirements && existsSync(join(cwd, "requirements.txt"))) {
-    const req = ["-m", "pip", "install", "-r", "requirements.txt"];
+    const req = ["-m", "pip", "install", "--progress-bar", "on", "-r", "requirements.txt"];
     if (accel.extraIndexUrl) req.push("--extra-index-url", accel.extraIndexUrl);
     const pip = await run(pythonBin(), req, cwd);
-    appendLog(pip.log);
     if (pip.code !== 0) throw new Error(`安装 Python 依赖失败。请确认已安装 Python 3.10+。\n${pip.log.slice(-800)}`);
   }
   return accel;
@@ -425,27 +448,45 @@ export async function comfyStatus() {
     listenHost: s.listenHost,
     listenPort: s.listenPort,
     logFile: formatOsPath(logFile()),
+    installLog: formatOsPath(installLogFile()),
+    installing: installRunning,
   };
 }
 
 function run(cmd: string, args: string[], cwd: string) {
   return new Promise<{ code: number; log: string }>((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd, shell: true, windowsHide: true });
-    let log = `$ ${cmd} ${args.join(" ")}\n`;
-    child.stdout?.on("data", (d) => {
-      log += d.toString();
+    const line = `$ ${cmd} ${args.join(" ")}\n`;
+    appendLog(line.trimEnd());
+    const child = spawn(cmd, args, {
+      cwd,
+      shell: true,
+      windowsHide: true,
+      env: { ...process.env, PYTHONUNBUFFERED: "1", PYTHONIOENCODING: "utf-8" },
     });
-    child.stderr?.on("data", (d) => {
-      log += d.toString();
-    });
+    let log = line;
+    const onChunk = (d: Buffer | string) => {
+      const t = d.toString();
+      log += t;
+      appendLogChunk(t);
+    };
+    child.stdout?.on("data", onChunk);
+    child.stderr?.on("data", onChunk);
     child.on("error", reject);
-    child.on("close", (code) => resolve({ code: code ?? 1, log }));
+    child.on("close", (code) => {
+      if (!log.endsWith("\n")) appendLogChunk("\n");
+      resolve({ code: code ?? 1, log });
+    });
   });
 }
 
 function appendLog(text: string) {
-  const prev = existsSync(logFile()) ? readFileSync(logFile(), "utf8") : "";
-  writeFileSync(logFile(), `${prev}${text}\n`, "utf8");
+  mkdirSync(loadSettings().dataDir, { recursive: true });
+  appendFileSync(installLogFile(), `${text}\n`, "utf8");
+}
+
+function appendLogChunk(text: string) {
+  mkdirSync(loadSettings().dataDir, { recursive: true });
+  appendFileSync(installLogFile(), text, "utf8");
 }
 
 function venvPythonPath(installDir: string) {
@@ -469,7 +510,6 @@ async function ensureVenv(installDir: string) {
   mkdirSync(installDir, { recursive: true });
   appendLog(`创建虚拟环境：${formatOsPath(join(installDir, ".venv"))}（Python ${sys.version}）`);
   const created = await run(sys.executable, ["-m", "venv", join(installDir, ".venv")], installDir);
-  appendLog(created.log);
   if (created.code !== 0 || !existsSync(existing)) {
     const extra = hostOs().id === "ubuntu" || hostOs().id === "linux"
       ? " Ubuntu/Debian 请确认已自行安装 python3-venv：sudo apt install python3-venv"
@@ -477,7 +517,7 @@ async function ensureVenv(installDir: string) {
     throw new Error(`无法创建 Python 虚拟环境。${extra}\n${created.log.slice(-800)}`);
   }
   const pip = await run(existing, ["-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"], installDir);
-  appendLog(pip.log);
+  if (pip.code !== 0) throw new Error(`升级 pip 失败。\n${pip.log.slice(-800)}`);
   saveSettings({ comfy: { ...loadSettings().comfy, pythonPath: existing } });
   return existing;
 }
@@ -488,6 +528,22 @@ function requireGit() {
 }
 
 export async function installComfy() {
+  if (installRunning) throw new Error("正在安装，请稍候");
+  installRunning = true;
+  appendLog(`======== ${new Date().toISOString()} 开始安装 ========`);
+  try {
+    const result = await doInstallComfy();
+    appendLog("======== 安装完成 ========");
+    return result;
+  } catch (err) {
+    appendLog(`======== 安装失败：${err instanceof Error ? err.message.split("\n")[0] : String(err)} ========`);
+    throw err;
+  } finally {
+    installRunning = false;
+  }
+}
+
+async function doInstallComfy() {
   const current = loadSettings();
   const existing = listExistingComfyInstalls();
   const configured = current.comfy.installDir;
@@ -528,8 +584,7 @@ export async function installComfy() {
   if (!comfyInstalled()) {
     const parent = join(installDir, "..");
     const name = installDir.split(/[/\\]/).pop() || "ComfyUI";
-    const cloned = await run("git", ["clone", "--depth", "1", "https://github.com/comfyanonymous/ComfyUI.git", name], parent);
-    appendLog(cloned.log);
+    const cloned = await run("git", ["clone", "--progress", "--depth", "1", "https://github.com/comfyanonymous/ComfyUI.git", name], parent);
     if (cloned.code !== 0) throw new Error(`${probeGit().ok ? "克隆 ComfyUI 失败。" : probeGit().hint}\n${cloned.log.slice(-800)}`);
   }
   await ensureVenv(installDir);

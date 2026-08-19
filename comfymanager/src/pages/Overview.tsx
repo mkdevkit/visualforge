@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { Button, ErrorBox } from "../components/ui";
 import { PageHead } from "../components/PageHead";
@@ -7,14 +7,36 @@ export function Overview() {
   const [status, setStatus] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
+  const [installLog, setInstallLog] = useState("");
+  const [installing, setInstalling] = useState(false);
+  const [logPath, setLogPath] = useState("");
+  const logRef = useRef<HTMLPreElement>(null);
 
   const refresh = () => api.status().then(setStatus).catch((e) => setError(e.message));
+  const refreshLog = () =>
+    api.installLog().then((r) => {
+      setInstallLog(r.text || "");
+      setInstalling(!!r.installing);
+      setLogPath(r.path || "");
+    }).catch(() => undefined);
 
   useEffect(() => {
     refresh();
+    refreshLog();
     const t = setInterval(refresh, 3000);
     return () => clearInterval(t);
   }, []);
+
+  useEffect(() => {
+    const ms = busy === "install" || installing ? 600 : 4000;
+    const t = setInterval(refreshLog, ms);
+    return () => clearInterval(t);
+  }, [busy, installing]);
+
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [installLog]);
 
   const apiInfo = (status?.api as { ok?: boolean; error?: string; baseUrl?: string }) || {};
   const unirig = (status?.unirig as { installed?: boolean; dir?: string }) || {};
@@ -58,22 +80,25 @@ export function Overview() {
       <ErrorBox error={error} />
       <div className="mt-4 flex flex-wrap gap-2">
         <Button
-          disabled={!!busy}
+          disabled={!!busy || installing}
           onClick={async () => {
             setBusy("install");
             setError("");
+            refreshLog();
             try {
               await api.install();
               await refresh();
+              await refreshLog();
             } catch (e) {
               setError(e instanceof Error ? e.message : String(e));
+              await refreshLog();
             } finally {
               setBusy("");
             }
           }}
         >
-          {busy === "install"
-            ? "安装依赖中（含 CUDA PyTorch，可能要几分钟）…"
+          {busy === "install" || installing
+            ? "安装中（日志见下方，含 CUDA PyTorch）…"
             : status?.installed
               ? "同步模型路径 / CUDA 依赖"
               : Array.isArray(status?.existingInstalls) && (status.existingInstalls as string[]).length
@@ -115,6 +140,21 @@ export function Overview() {
         >
           停止
         </Button>
+      </div>
+
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-ink-2/60">
+        <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2 text-[11px] tracking-[0.18em] uppercase text-brass">
+          <span>安装日志</span>
+          <span className="truncate font-normal tracking-normal text-mute normal-case">
+            {busy === "install" || installing ? "实时输出中" : logPath || "尚未开始"}
+          </span>
+        </div>
+        <pre
+          ref={logRef}
+          className="forge-scroll max-h-80 overflow-auto whitespace-pre-wrap break-all px-4 py-3 font-mono text-[11px] leading-relaxed text-foam/90"
+        >
+          {installLog.trim() ? installLog : "点击「安装 ComfyUI」后，git clone / venv / pip 输出会显示在这里。"}
+        </pre>
       </div>
 
       <div className="mt-8 space-y-3 rounded-2xl border border-line bg-panel p-6 text-sm">

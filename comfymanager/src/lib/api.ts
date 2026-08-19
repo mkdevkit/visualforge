@@ -29,6 +29,8 @@ export const api = {
       `/api/comfy/ping${baseUrl ? `?baseUrl=${encodeURIComponent(baseUrl)}` : ""}`,
     ),
   install: () => req("/api/comfy/install", { method: "POST" }),
+  installLog: () =>
+    req<{ ok: boolean; text: string; path: string; installing: boolean; truncated: boolean }>("/api/comfy/install-log"),
   start: () => req<{ pid: number; baseUrl: string }>("/api/comfy/start", { method: "POST" }),
   stop: () => req("/api/comfy/stop", { method: "POST" }),
   installUniRig: () => req("/api/tools/unirig/install", { method: "POST" }),
