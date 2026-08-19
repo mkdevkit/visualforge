@@ -23,7 +23,13 @@ async function main() {
         : join(dist, "index.html");
       const html = readFileSync(file);
       const ext = file.split(".").pop();
-      const mime = ext === "js" ? "text/javascript" : ext === "css" ? "text/css" : "text/html";
+      const mime =
+        ext === "js" ? "text/javascript"
+        : ext === "css" ? "text/css"
+        : ext === "svg" ? "image/svg+xml"
+        : ext === "png" ? "image/png"
+        : ext === "ico" ? "image/x-icon"
+        : "text/html";
       res.setHeader("Content-Type", mime);
       res.end(html);
     });

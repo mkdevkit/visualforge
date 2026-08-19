@@ -21,11 +21,25 @@ export function Overview() {
 
   return (
     <section className="mx-auto max-w-3xl px-8 py-10">
-      <PageHead kicker="ComfyUI" title="部署与接口" desc="安装、启动本机 ComfyUI，以及可选的 UniRig 自动绑骨仓库。生成工具通过本服务的 API 读取接口地址与当前模型。" />
+      <PageHead kicker="ComfyUI" title="部署与接口" desc="若本机已有 ComfyUI，会直接使用，不必再克隆。模型仍下载到配置的模型目录。" />
       <div className="space-y-3 rounded-2xl border border-line bg-panel p-6 text-sm">
-        <div>安装：{status?.installed ? "已就绪" : "未安装"}</div>
-        <div>目录：{String(status?.installDir || "")}</div>
-        <div>模型目录：{String(status?.modelsDir || "")}</div>
+        <div>
+          安装：{status?.installed
+            ? status?.reusedExisting
+              ? "已就绪（使用本机已有 ComfyUI）"
+              : "已就绪"
+            : Array.isArray(status?.existingInstalls) && (status.existingInstalls as string[]).length
+              ? "发现本机已有 ComfyUI"
+              : "未安装"}
+        </div>
+        <div className="break-all">目录：{String(status?.installDir || "")}</div>
+        <div className="break-all">模型目录：{String(status?.modelsDir || "")}</div>
+        {Array.isArray(status?.existingInstalls) && (status.existingInstalls as string[]).length ? (
+          <div className="break-all text-xs text-mute">
+            已发现：{(status.existingInstalls as string[]).join("；")}
+          </div>
+        ) : null}
+        <div>Python：{String(status?.python || "")}</div>
         <div>进程：{status?.processRunning ? `运行中 PID ${status.pid}` : "未启动"}</div>
         <div>接口：{String(status?.baseUrl || "")} · {apiInfo.ok ? "已连通" : apiInfo.error || "未连通"}</div>
       </div>
@@ -46,7 +60,13 @@ export function Overview() {
             }
           }}
         >
-          {busy === "install" ? "安装中…" : "安装 / 更新依赖"}
+          {busy === "install"
+            ? "处理中…"
+            : status?.installed
+              ? "同步模型路径"
+              : Array.isArray(status?.existingInstalls) && (status.existingInstalls as string[]).length
+                ? "使用已有安装"
+                : "安装 ComfyUI"}
         </Button>
         <Button
           tone="ghost"

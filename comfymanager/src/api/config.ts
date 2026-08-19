@@ -136,12 +136,23 @@ export function modelsConfigPath() {
   return join(PACKAGE_ROOT, "config", "models.json");
 }
 
+export function formatOsPath(p: string) {
+  if (!p) return "";
+  if (!/[\\/]/.test(p) && !existsSync(p)) return p;
+  const n = resolve(p);
+  return process.platform === "win32" ? n.replace(/\//g, "\\") : n.replace(/\\/g, "/");
+}
+
 export function publicSettings() {
   const s = loadSettings();
   return {
     ...s,
+    dataDir: formatOsPath(s.dataDir),
     comfy: {
       ...s.comfy,
+      installDir: formatOsPath(s.comfy.installDir),
+      modelsDir: formatOsPath(s.comfy.modelsDir),
+      pythonPath: s.comfy.pythonPath ? formatOsPath(s.comfy.pythonPath) : "",
       apiKey: s.comfy.apiKey ? `${s.comfy.apiKey.slice(0, 4)}••••` : "",
       hfToken: s.comfy.hfToken ? `${s.comfy.hfToken.slice(0, 4)}••••` : "",
     },

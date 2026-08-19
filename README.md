@@ -24,8 +24,9 @@ comfymanager/tools/       可选工具：UniRig 官方仓库（gitignore）
 
 默认路径：
 
-- ComfyUI 安装目录：`comfymanager/comfy/`（旧设置里的 `data/ComfyUI` 会自动迁到这里）
-- 模型权重目录：`comfymanager/models/<folder>/`（旧设置里的 `data/models` 会自动迁到这里）
+- ComfyUI 安装目录：优先用本机已有安装；没有才克隆到 `comfymanager/comfy/`（旧设置里的 `data/ComfyUI` 会自动迁到这里）
+- 模型权重目录：始终是配置的 `comfymanager/models/<folder>/`（旧设置里的 `data/models` 会自动迁到这里），与 ComfyUI 是否复用无关
+- 界面上的路径按操作系统显示（Windows 反斜杠，macOS / Linux 正斜杠）
 - 管理端数据：`comfymanager/data/`（`settings.json`、下载任务等）
 - 视铸成品：`frontend/data/`（图 / 视频 / 音乐 / 音频 / 3D）
 - UniRig 仓库：`comfymanager/tools/UniRig/`（ComfyManager 概览页克隆）
@@ -81,7 +82,7 @@ npm run dev:all
 
 推荐流程：
 
-1. 打开 ComfyManager，安装并启动 ComfyUI（启动参数会带 `--enable-cors-header`）。
+1. 打开 ComfyManager。若本机已有 ComfyUI，点「使用已有安装」（或「同步模型路径」）；没有才会克隆。然后启动（带 `--enable-cors-header`）。模型仍下载到配置的模型目录。
 2. 在「模型」页下载权重，指定各工位「当前生效模型」。
 3. 在「工作流」页把一份或多份图加入工位并勾选「生效」（也可粘贴 API JSON）。该页支持 zip / json 批量导入导出。
 4. 打开视铸，设置里只填写 ComfyManager 地址（可选改成品目录）。
@@ -251,7 +252,7 @@ POST /api/3d/rig
 | GET | `/api/health` | 健康检查（含 UniRig 状态） |
 | GET/PUT | `/api/settings` | 安装路径、监听、HF Token 等 |
 | GET | `/api/comfy/status` | 安装与进程状态 |
-| POST | `/api/comfy/install` | 克隆并安装 ComfyUI |
+| POST | `/api/comfy/install` | 发现已有 ComfyUI 则复用并写入模型路径；否则克隆安装 |
 | POST | `/api/comfy/start` | 启动 ComfyUI |
 | POST | `/api/comfy/stop` | 停止 ComfyUI |
 | GET | `/api/comfy/workflows` | 列出本机 ComfyUI 工作流 |

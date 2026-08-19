@@ -49,7 +49,7 @@ export function Settings() {
 
   return (
     <section className="mx-auto max-w-3xl px-8 py-10">
-      <PageHead kicker="Settings" title="设置" desc="ComfyUI 安装路径、监听接口、Hugging Face Token。" />
+      <PageHead kicker="Settings" title="设置" desc="ComfyUI 路径按当前操作系统显示。本机已有安装会优先使用；模型仍下载到下面的模型目录。" />
       <div className="space-y-4 rounded-2xl border border-line bg-panel p-6">
         <Field label="ComfyUI 接口地址">
           <Input value={comfy.baseUrl} onChange={(e) => setComfy({ ...comfy, baseUrl: e.target.value })} />
@@ -60,10 +60,10 @@ export function Settings() {
         <Field label="Hugging Face Token" hint={masked.hfToken ? `当前 ${masked.hfToken}` : "下载门禁模型需要"}>
           <Input type="password" value={comfy.hfToken} onChange={(e) => setComfy({ ...comfy, hfToken: e.target.value })} />
         </Field>
-        <Field label="安装目录" hint="默认 comfymanager/comfy">
+        <Field label="安装目录" hint="本机已有 ComfyUI 时会自动用那份，不必再克隆。也可手动指定。">
           <Input value={comfy.installDir} onChange={(e) => setComfy({ ...comfy, installDir: e.target.value })} />
         </Field>
-        <Field label="模型目录" hint="默认 comfymanager/models">
+        <Field label="模型目录" hint="权重装在这里，与 ComfyUI 安装目录分开。">
           <Input value={comfy.modelsDir} onChange={(e) => setComfy({ ...comfy, modelsDir: e.target.value })} />
         </Field>
         <Field label="Python 路径">
