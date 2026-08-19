@@ -36,6 +36,9 @@ const server = http.createServer((req, res) => {
   }
   listener(req, res);
 });
+server.requestTimeout = 0;
+server.headersTimeout = 0;
+server.timeout = 0;
 server.listen(settings.port, settings.host, () => {
   console.log(`VisualForge API  http://${settings.host}:${settings.port}`);
   console.log(`MCP              http://${settings.host}:${settings.port}/mcp`);

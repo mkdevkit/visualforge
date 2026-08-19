@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
-import type { AssetRecord } from "../lib/types";
+import type { TaskRecord } from "../lib/types";
 import { Button, ErrorBox, Field, Select, Spinner, Textarea } from "../components/ui";
 import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { modelLabel, pickDefault, useCatalog } from "../lib/catalog";
 import { ProviderHint } from "../components/ProviderHint";
 import { WorkflowSelect } from "../components/WorkflowSelect";
+import { useTaskPoll } from "../lib/useTaskPoll";
 
 export function StudioMusic() {
   const catalog = useCatalog();
@@ -18,7 +19,8 @@ export function StudioMusic() {
   const [instrumental, setInstrumental] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [assets, setAssets] = useState<AssetRecord[]>([]);
+  const [task, setTask] = useState<TaskRecord | null>(null);
+  const { assets, setAssets } = useTaskPoll(task, setTask, setError);
 
   useEffect(() => {
     if (!model) setModel(pickDefault(catalog.music, catalog.activeModels?.music));
@@ -39,12 +41,13 @@ export function StudioMusic() {
             <input type="checkbox" checked={instrumental} onChange={(e) => setInstrumental(e.target.checked)} />
             纯音乐（无人声）
           </label>
-          <ErrorBox error={error} />
+          <ErrorBox error={error || (task?.status === "failed" ? task.error : "")} />
           <Button
             disabled={busy || (!prompt.trim() && !lyrics.trim())}
             onClick={async () => {
               setBusy(true);
               setError("");
+              setTask(null);
               try {
                 const r = await api.generateMusic({
                   model,
@@ -54,7 +57,8 @@ export function StudioMusic() {
                   gender,
                   isInstrumental: instrumental,
                 });
-                setAssets(r.assets);
+                if (r.assets?.length) setAssets(r.assets);
+                if (r.task) setTask(r.task);
               } catch (e) {
                 setError(e instanceof Error ? e.message : String(e));
               } finally {
@@ -62,9 +66,12 @@ export function StudioMusic() {
               }
             }}
           >
-            {busy ? "谱曲中…" : "开始生成"}
+            {busy ? "提交中…" : "开始生成"}
           </Button>
-          {busy ? <Spinner label="ComfyUI 正在生成" /> : null}
+          {busy ? <Spinner label="正在提交到 ComfyUI" /> : null}
+          {task && task.status !== "succeeded" && task.status !== "failed" ? (
+            <Spinner label="ComfyUI 谱曲中，将自动刷新" />
+          ) : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           <WorkflowSelect feature="music" value={workflowId} onChange={setWorkflowId} />

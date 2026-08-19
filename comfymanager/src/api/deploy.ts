@@ -32,18 +32,24 @@ export function isInstallRunning() {
 }
 
 export function readInstallLog(maxChars = 80_000) {
-  const path = installLogFile();
+  return readTail(installLogFile(), maxChars, { installing: installRunning, error: lastInstallError });
+}
+
+export function readComfyLog(maxChars = 80_000) {
+  return readTail(logFile(), maxChars, { installing: false, error: "" });
+}
+
+function readTail(path: string, maxChars: number, extra: { installing: boolean; error: string }) {
   if (!existsSync(path)) {
-    return { text: "", path: formatOsPath(path), installing: installRunning, truncated: false, error: lastInstallError };
+    return { text: "", path: formatOsPath(path), truncated: false, ...extra };
   }
   const raw = normalizeLog(readFileSync(path, "utf8")).replace(/\u0000/g, "");
   const truncated = raw.length > maxChars;
   return {
     text: truncated ? raw.slice(-maxChars) : raw,
     path: formatOsPath(path),
-    installing: installRunning,
     truncated,
-    error: lastInstallError,
+    ...extra,
   };
 }
 
@@ -759,6 +765,7 @@ export function startComfy() {
   const args = ["main.py", "--listen", s.listenHost, "--port", String(s.listenPort), "--enable-cors-header"];
   if (s.extraArgs.trim()) args.push(...s.extraArgs.trim().split(/\s+/));
   mkdirSync(loadSettings().dataDir, { recursive: true });
+  appendFileSync(logFile(), `\n======== ${new Date().toISOString()} 启动 ComfyUI ========\n`);
   const logFd = openSync(logFile(), "a");
   let child: ChildProcess;
   try {
@@ -768,6 +775,7 @@ export function startComfy() {
       stdio: ["ignore", logFd, logFd],
       windowsHide: true,
       shell: process.platform === "win32",
+      env: { ...process.env, PYTHONUNBUFFERED: "1", PYTHONIOENCODING: "utf-8" },
     });
   } finally {
     try {

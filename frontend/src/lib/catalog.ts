@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { uploadFile } from "./api";
-import { managerBase } from "./manager";
+import { api, uploadFile } from "./api";
 import type { Catalog, FeatureId, ModelDef } from "./types";
 
 const EMPTY_CATALOG: Catalog = {
@@ -26,34 +25,19 @@ const EMPTY_CATALOG: Catalog = {
   activeModels: {},
 };
 
-function looksLikeLegacyCloudCatalog(raw: Record<string, unknown>) {
+function looksLikeLegacyCloudCatalog(raw: Catalog & { priceDisclaimer?: unknown }) {
   if (raw.priceDisclaimer) return true;
-  const image = Array.isArray(raw.image) ? raw.image : [];
-  return image.some((item) => {
-    const id = String((item as { id?: string }).id || "");
-    return /qwen-image-3|wan2\.7|fun-music|cosyvoice|Tripo-H3/i.test(id);
-  });
+  return (raw.image || []).some((item) => /qwen-image-3|wan2\.7|fun-music|cosyvoice|Tripo-H3/i.test(item.id || ""));
 }
 
 export async function fetchStudioCatalog(): Promise<Catalog> {
-  const base = managerBase();
-  const res = await fetch(`${base}/api/models`);
-  let json: Record<string, unknown> = {};
-  try {
-    json = (await res.json()) as Record<string, unknown>;
-  } catch {
-    throw new Error(`ComfyManager ${base} 返回了无法解析的内容`);
-  }
-  if (!res.ok || json.ok === false) {
-    throw new Error(String(json.error || `无法读取 ComfyManager 模型目录 (${res.status})`));
-  }
+  const json = await api.models();
   if (looksLikeLegacyCloudCatalog(json) || !json.catalogFile) {
-    throw new Error(`地址 ${base} 不是当前 ComfyManager。请确认管理端已启动（默认 http://127.0.0.1:18788）`);
+    throw new Error("当前连上的不是 ComfyManager 模型目录。请在设置里填写管理端地址（默认 http://127.0.0.1:18788）并确认 npm run manager 已启动。");
   }
   return {
     ...EMPTY_CATALOG,
     ...json,
-    managerUrl: base,
     catalogFile: String(json.catalogFile || ""),
     loadError: "",
   } as Catalog;

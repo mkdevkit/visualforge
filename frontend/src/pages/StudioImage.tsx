@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { modelLabel, pickDefault, relatedHint, uploadAll, useCatalog } from "../lib/catalog";
-import type { AssetRecord } from "../lib/types";
+import type { TaskRecord } from "../lib/types";
 import { Button, Dropzone, ErrorBox, Field, Input, Select, Spinner, Textarea } from "../components/ui";
 import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { ProviderHint } from "../components/ProviderHint";
 import { WorkflowSelect } from "../components/WorkflowSelect";
+import { useTaskPoll } from "../lib/useTaskPoll";
 
 export function StudioImage() {
   const catalog = useCatalog();
@@ -19,7 +20,8 @@ export function StudioImage() {
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [assets, setAssets] = useState<AssetRecord[]>([]);
+  const [task, setTask] = useState<TaskRecord | null>(null);
+  const { assets, setAssets } = useTaskPoll(task, setTask, setError);
 
   useEffect(() => {
     if (!model) setModel(pickDefault(catalog.image, catalog.activeModels?.image));
@@ -37,18 +39,20 @@ export function StudioImage() {
             <Input value={negative} onChange={(e) => setNegative(e.target.value)} />
           </Field>
           <Dropzone accept="image/*" label="参考图" files={files} onPicked={setFiles} />
-          <ErrorBox error={error} />
+          <ErrorBox error={error || (task?.status === "failed" ? task.error : "")} />
           <Button
             disabled={busy || !prompt.trim()}
             onClick={async () => {
               setBusy(true);
               setError("");
+              setTask(null);
               try {
                 const images = await uploadAll(files);
                 const r = await api.generateImage({
                   model, workflowId, prompt, negativePrompt: negative || undefined, size, n, images,
                 });
-                setAssets(r.assets);
+                if (r.assets?.length) setAssets(r.assets);
+                if (r.task) setTask(r.task);
               } catch (e) {
                 setError(e instanceof Error ? e.message : String(e));
               } finally {
@@ -56,9 +60,12 @@ export function StudioImage() {
               }
             }}
           >
-            {busy ? "生成中…" : "开始生图"}
+            {busy ? "提交中…" : "开始生图"}
           </Button>
-          {busy ? <Spinner label="正在调用 ComfyUI" /> : null}
+          {busy ? <Spinner label="正在提交到 ComfyUI" /> : null}
+          {task && task.status !== "succeeded" && task.status !== "failed" ? (
+            <Spinner label="ComfyUI 出图中，将自动刷新" />
+          ) : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           <WorkflowSelect feature="image" value={workflowId} onChange={setWorkflowId} />

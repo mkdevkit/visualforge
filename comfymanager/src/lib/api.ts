@@ -40,6 +40,8 @@ export const api = {
   install: () => req("/api/comfy/install", { method: "POST" }),
   installLog: () =>
     req<{ ok: boolean; text: string; path: string; installing: boolean; truncated: boolean; error?: string }>("/api/comfy/install-log"),
+  comfyLog: () =>
+    req<{ ok: boolean; text: string; path: string; truncated: boolean; error?: string }>("/api/comfy/log"),
   start: () => req<{ pid: number; baseUrl: string }>("/api/comfy/start", { method: "POST" }),
   stop: () => req("/api/comfy/stop", { method: "POST" }),
   installUniRig: () => req("/api/tools/unirig/install", { method: "POST" }),

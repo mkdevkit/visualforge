@@ -3,6 +3,45 @@ import { api } from "../lib/api";
 import { Button, ErrorBox } from "../components/ui";
 import { PageHead } from "../components/PageHead";
 
+function LogPane({
+  title,
+  path,
+  live,
+  empty,
+  text,
+}: {
+  title: string;
+  path: string;
+  live?: boolean;
+  empty: string;
+  text: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [text]);
+  return (
+    <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-ink-2/60">
+      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2 text-[11px] tracking-[0.18em] uppercase text-brass">
+        <span>{title}</span>
+        <span className="truncate font-normal tracking-normal text-mute normal-case">
+          {live ? "实时输出中" : path || "尚无文件"}
+        </span>
+      </div>
+      <div
+        ref={ref}
+        className="forge-scroll max-h-80 overflow-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-foam/90"
+        style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+      >
+        {(text.trim() ? text : empty).split("\n").map((line, i) => (
+          <div key={i}>{line || "\u00a0"}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Overview() {
   const [status, setStatus] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState("");
@@ -10,7 +49,8 @@ export function Overview() {
   const [installLog, setInstallLog] = useState("");
   const [installing, setInstalling] = useState(false);
   const [logPath, setLogPath] = useState("");
-  const logRef = useRef<HTMLDivElement>(null);
+  const [comfyLog, setComfyLog] = useState("");
+  const [comfyLogPath, setComfyLogPath] = useState("");
 
   const refresh = () => api.status().then(setStatus).catch((e) => setError(e.message));
   const refreshLog = () =>
@@ -20,10 +60,16 @@ export function Overview() {
       setLogPath(r.path || "");
       if (!r.installing && r.error) setError(r.error);
     }).catch(() => undefined);
+  const refreshComfyLog = () =>
+    api.comfyLog().then((r) => {
+      setComfyLog(r.text || "");
+      setComfyLogPath(r.path || "");
+    }).catch(() => undefined);
 
   useEffect(() => {
     refresh();
     refreshLog();
+    refreshComfyLog();
     const t = setInterval(refresh, 3000);
     return () => clearInterval(t);
   }, []);
@@ -35,9 +81,11 @@ export function Overview() {
   }, [busy, installing]);
 
   useEffect(() => {
-    const el = logRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [installLog]);
+    const running = Boolean(status?.processRunning);
+    const ms = busy === "start" || running ? 800 : 4000;
+    const t = setInterval(refreshComfyLog, ms);
+    return () => clearInterval(t);
+  }, [busy, status?.processRunning]);
 
   const apiInfo = (status?.api as { ok?: boolean; error?: string; baseUrl?: string }) || {};
   const unirig = (status?.unirig as { installed?: boolean; dir?: string }) || {};
@@ -122,6 +170,7 @@ export function Overview() {
             try {
               await api.start();
               await refresh();
+              await refreshComfyLog();
             } catch (e) {
               setError(e instanceof Error ? e.message : String(e));
             } finally {
@@ -150,25 +199,20 @@ export function Overview() {
         </Button>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-ink-2/60">
-        <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2 text-[11px] tracking-[0.18em] uppercase text-brass">
-          <span>安装日志</span>
-          <span className="truncate font-normal tracking-normal text-mute normal-case">
-            {busy === "install" || installing ? "实时输出中" : logPath || "尚未开始"}
-          </span>
-        </div>
-        <div
-          ref={logRef}
-          className="forge-scroll max-h-80 overflow-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-foam/90"
-          style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
-        >
-          {(installLog.trim() ? installLog : "点击「安装 ComfyUI」后，git clone / venv / pip 输出会显示在这里。")
-            .split("\n")
-            .map((line, i) => (
-              <div key={i}>{line || "\u00a0"}</div>
-            ))}
-        </div>
-      </div>
+      <LogPane
+        title="安装日志"
+        path={logPath}
+        live={busy === "install" || installing}
+        empty="点击「安装 ComfyUI」后，git clone / venv / pip 输出会显示在这里。"
+        text={installLog}
+      />
+      <LogPane
+        title="ComfyUI 日志"
+        path={comfyLogPath}
+        live={busy === "start" || Boolean(status?.processRunning)}
+        empty="点击「启动」后，ComfyUI 的 stdout / stderr 会写到这里（加载模型、报错、prompt 执行都会出现）。"
+        text={comfyLog}
+      />
 
       <div className="mt-8 space-y-3 rounded-2xl border border-line bg-panel p-6 text-sm">
         <div className="text-[11px] tracking-[0.18em] uppercase text-brass">UniRig 自动绑骨</div>

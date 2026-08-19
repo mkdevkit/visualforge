@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import type { TaskRecord } from "../lib/types";
 import { Button, Dropzone, ErrorBox, Field, Input, Select, Spinner, Textarea } from "../components/ui";
+import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { modelLabel, pickDefault, relatedHint, uploadAll, useCatalog } from "../lib/catalog";
 import { ProviderHint } from "../components/ProviderHint";
 import { WorkflowSelect } from "../components/WorkflowSelect";
+import { useTaskPoll } from "../lib/useTaskPoll";
 
 export function StudioVideo() {
   const catalog = useCatalog();
@@ -20,19 +22,11 @@ export function StudioVideo() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [task, setTask] = useState<TaskRecord | null>(null);
+  const { assets } = useTaskPoll(task, setTask, setError);
 
   useEffect(() => {
     if (!model) setModel(pickDefault(catalog.video, catalog.activeModels?.video));
   }, [catalog, model]);
-
-  useEffect(() => {
-    if (!task || task.status === "succeeded" || task.status === "failed") return;
-    const t = setInterval(async () => {
-      const r = await api.task(task.id);
-      setTask(r.task);
-    }, 4000);
-    return () => clearInterval(t);
-  }, [task]);
 
   const selected = catalog.video.find((m) => m.id === model);
   const hasFrames = first.length > 0 || last.length > 0;
@@ -49,12 +43,13 @@ export function StudioVideo() {
             <Dropzone accept="image/*" label="首帧（可选）" files={first} onPicked={setFirst} multiple={false} />
             <Dropzone accept="image/*" label="尾帧（可选，需同时有首帧）" files={last} onPicked={setLast} multiple={false} />
           </div>
-          <ErrorBox error={error} />
+          <ErrorBox error={error || (task?.status === "failed" ? task.error : "")} />
           <Button
             disabled={busy || !prompt.trim() || (last.length > 0 && first.length === 0)}
             onClick={async () => {
               setBusy(true);
               setError("");
+              setTask(null);
               try {
                 const firstIds = await uploadAll(first);
                 const lastIds = await uploadAll(last);
@@ -63,7 +58,7 @@ export function StudioVideo() {
                   firstFrame: firstIds[0],
                   lastFrame: lastIds[0],
                 });
-                setTask(r.task);
+                if (r.task) setTask(r.task);
               } catch (e) {
                 setError(e instanceof Error ? e.message : String(e));
               } finally {
@@ -77,7 +72,7 @@ export function StudioVideo() {
             <div className="rounded-2xl border border-line bg-panel p-4 text-sm">
               <div>任务 {task.id} · {task.status} · {task.progress}%</div>
               {task.error ? <div className="mt-2 text-red-300">{task.error}</div> : null}
-              {task.status === "succeeded" ? <div className="mt-2 text-brass">已写入资源库，前往「资源库」查看。</div> : <Spinner label="ComfyUI 渲染中，将自动轮询" />}
+              {task.status === "succeeded" ? <div className="mt-2 text-brass">已写入成品。</div> : <Spinner label="ComfyUI 渲染中，将自动轮询" />}
             </div>
           ) : null}
         </div>
@@ -121,6 +116,7 @@ export function StudioVideo() {
           <ProviderHint feature="video" />
         </aside>
       </div>
+      <div className="mt-10"><ResultStrip assets={assets} /></div>
     </section>
   );
 }

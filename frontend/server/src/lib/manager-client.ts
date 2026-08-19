@@ -40,7 +40,14 @@ export async function fetchManagerRuntime(force = false): Promise<ManagerRuntime
   const url = managerUrl();
   if (!force && cache && cache.url === url && Date.now() - cache.at < 2000) return cache.data;
   const res = await fetch(`${url}/api/runtime`);
-  const json = (await res.json()) as ManagerRuntime;
+  const raw = await res.text();
+  if (!raw.trim()) throw new Error(`ComfyManager ${url}/api/runtime 返回空响应（HTTP ${res.status}）`);
+  let json: ManagerRuntime;
+  try {
+    json = JSON.parse(raw) as ManagerRuntime;
+  } catch {
+    throw new Error(`ComfyManager ${url}/api/runtime 返回了非 JSON（HTTP ${res.status}）：${raw.slice(0, 180)}`);
+  }
   if (!res.ok || json.ok === false) {
     throw new Error((json as unknown as { error?: string }).error || `ComfyManager 不可用 (${res.status})`);
   }
@@ -170,12 +177,24 @@ export async function runManagerGenerate(opts: {
 
 export async function runManagerHarvest(promptId: string) {
   const res = await fetch(`${managerUrl()}/api/generate/${encodeURIComponent(promptId)}`);
-  const json = (await res.json()) as {
+  const raw = await res.text();
+  if (!raw.trim()) throw new Error(`ComfyManager 取结果空响应（HTTP ${res.status}）`);
+  let json: {
     ok?: boolean;
     error?: string;
     ready?: boolean;
     files?: Array<{ name?: string; mime?: string; ext?: string; data?: string }>;
   };
+  try {
+    json = JSON.parse(raw) as {
+      ok?: boolean;
+      error?: string;
+      ready?: boolean;
+      files?: Array<{ name?: string; mime?: string; ext?: string; data?: string }>;
+    };
+  } catch {
+    throw new Error(`ComfyManager 取结果非 JSON（HTTP ${res.status}）：${raw.slice(0, 180)}`);
+  }
   if (!res.ok || json.ok === false) throw new Error(json.error || `ComfyManager 取结果失败 (${res.status})`);
   if (!json.ready) return [];
   return (json.files || []).map((f) => ({

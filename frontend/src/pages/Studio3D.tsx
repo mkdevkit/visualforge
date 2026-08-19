@@ -8,6 +8,7 @@ import { ProviderHint } from "../components/ProviderHint";
 import { WorkflowSelect } from "../components/WorkflowSelect";
 import { ModelPreview } from "../components/ModelPreview";
 import { MOTION_DEMO, MOTION_LIBRARIES } from "../lib/motions";
+import { useTaskPoll } from "../lib/useTaskPoll";
 
 type RigEngine = "auto" | "unirig" | "mixamo" | "bbox";
 
@@ -22,6 +23,7 @@ export function Studio3D() {
   const [error, setError] = useState("");
   const [task, setTask] = useState<TaskRecord | null>(null);
   const [preview, setPreview] = useState<AssetRecord | null>(null);
+  const { assets } = useTaskPoll(task, setTask, setError);
   const [rigBusy, setRigBusy] = useState(false);
   const [engine, setEngine] = useState<RigEngine>("auto");
   const [motionFiles, setMotionFiles] = useState<File[]>([]);
@@ -36,19 +38,8 @@ export function Studio3D() {
   }, []);
 
   useEffect(() => {
-    if (!task || task.status === "succeeded" || task.status === "failed") return;
-    const t = setInterval(async () => {
-      const r = await api.task(task.id);
-      setTask(r.task);
-    }, 4000);
-    return () => clearInterval(t);
-  }, [task]);
-
-  useEffect(() => {
-    const id = task?.status === "succeeded" ? task.assetIds?.[0] : "";
-    if (!id) return;
-    api.asset(id).then((r) => setPreview(r.asset)).catch(() => undefined);
-  }, [task]);
+    if (assets[0]) setPreview(assets[0]);
+  }, [assets]);
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
@@ -59,13 +50,14 @@ export function Studio3D() {
             <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} />
           </Field>
           <Dropzone accept="image/*" label="单图或多角度图（2-4 张）" files={files} onPicked={setFiles} />
-          <ErrorBox error={error} />
+          <ErrorBox error={error || (task?.status === "failed" ? task.error : "")} />
           <Button
             disabled={busy}
             onClick={async () => {
               setBusy(true);
               setError("");
               setPreview(null);
+              setTask(null);
               try {
                 const images = await uploadAll(files);
                 const r = await api.generate3d({
@@ -77,7 +69,7 @@ export function Studio3D() {
                   textureQuality: quality,
                   geometryQuality: quality,
                 });
-                setTask(r.task);
+                if (r.task) setTask(r.task);
               } catch (e) {
                 setError(e instanceof Error ? e.message : String(e));
               } finally {

@@ -6,7 +6,7 @@ import { FEATURE_IDS, FEATURE_LABELS } from "./types.ts";
 import type { FeatureId } from "./types.ts";
 import { modelCatalog, deleteModel } from "./catalog.ts";
 import { cancelDownload, loadDownloads, startDownload } from "./download.ts";
-import { comfyStatus, isInstallRunning, readInstallLog, startComfy, startInstallComfy, stopComfy, writeExtraModelPaths } from "./deploy.ts";
+import { comfyStatus, isInstallRunning, readComfyLog, readInstallLog, startComfy, startInstallComfy, stopComfy, writeExtraModelPaths } from "./deploy.ts";
 import { installUniRig, runUniRigFromBuffer, unirigStatus } from "./unirig.ts";
 import { pingComfy } from "./ping.ts";
 import { parseGenerateRequest, runGenerate, harvestPrompt } from "./generate.ts";
@@ -68,6 +68,19 @@ app.get("/api/comfy/install-log", (c) => {
       ok: true,
       text: "",
       installing: isInstallRunning(),
+      truncated: false,
+      path: "",
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+});
+app.get("/api/comfy/log", (c) => {
+  try {
+    return c.json({ ok: true, ...readComfyLog() });
+  } catch (err) {
+    return c.json({
+      ok: true,
+      text: "",
       truncated: false,
       path: "",
       error: err instanceof Error ? err.message : String(err),

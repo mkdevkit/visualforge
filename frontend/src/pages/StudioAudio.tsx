@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { modelLabel, pickDefault, useCatalog } from "../lib/catalog";
-import type { AssetRecord, DesignedVoice } from "../lib/types";
+import type { DesignedVoice, TaskRecord } from "../lib/types";
 import { Button, ErrorBox, Field, Input, Select, Spinner, Textarea } from "../components/ui";
 import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
 import { ProviderHint } from "../components/ProviderHint";
 import { WorkflowSelect } from "../components/WorkflowSelect";
+import { useTaskPoll } from "../lib/useTaskPoll";
 
 type Tab = "tts" | "design" | "sfx";
 
@@ -15,8 +16,10 @@ export function StudioAudio() {
   const [tab, setTab] = useState<Tab>("tts");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [assets, setAssets] = useState<AssetRecord[]>([]);
   const [designed, setDesigned] = useState<DesignedVoice[]>([]);
+  const [task, setTask] = useState<TaskRecord | null>(null);
+  const pendingTab = useRef<Tab>("tts");
+  const designMeta = useRef({ preferredName: "", targetModel: "", designModel: "", voicePrompt: "" });
 
   const [ttsModel, setTtsModel] = useState("");
   const [ttsWorkflowId, setTtsWorkflowId] = useState("");
@@ -55,6 +58,16 @@ export function StudioAudio() {
     if (v.targetModel) setTtsModel(v.targetModel);
     setTab("tts");
   }
+
+  const { assets, setAssets } = useTaskPoll(task, setTask, setError, () => {
+    if (pendingTab.current !== "design") return;
+    api.voices().then((r) => {
+      setDesigned(r.voices || []);
+      const meta = designMeta.current;
+      const hit = (r.voices || []).find((v) => v.id === meta.preferredName || v.name === meta.preferredName);
+      if (hit) applyDesignedVoice(hit);
+    }).catch(() => undefined);
+  });
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "tts", label: "配音" },
@@ -127,17 +140,21 @@ export function StudioAudio() {
               <Textarea value={sfx} onChange={(e) => setSfx(e.target.value)} />
             </Field>
           ) : null}
-          <ErrorBox error={error} />
+          <ErrorBox error={error || (task?.status === "failed" ? task.error : "")} />
           <Button
             disabled={busy}
             onClick={async () => {
               setBusy(true);
               setError("");
+              setTask(null);
+              pendingTab.current = tab;
               try {
                 if (tab === "tts") {
                   const r = await api.tts({ model: ttsModel, workflowId: ttsWorkflowId, text, voice, languageType: lang, instructions });
-                  setAssets(r.assets);
+                  if (r.assets?.length) setAssets(r.assets);
+                  if (r.task) setTask(r.task);
                 } else if (tab === "design") {
+                  designMeta.current = { preferredName, targetModel, designModel, voicePrompt };
                   const r = await api.designVoice({
                     model: designModel,
                     workflowId: designWorkflowId,
@@ -148,19 +165,12 @@ export function StudioAudio() {
                   });
                   if (r.voices) setDesigned(r.voices);
                   if (r.preview) setAssets([r.preview]);
-                  if (r.voice) {
-                    applyDesignedVoice({
-                      id: r.voice,
-                      name: preferredName || r.voice,
-                      prompt: voicePrompt,
-                      targetModel,
-                      designModel,
-                      createdAt: new Date().toISOString(),
-                    });
-                  }
+                  if (r.assets?.length) setAssets(r.assets);
+                  if (r.task) setTask(r.task);
                 } else {
                   const r = await api.sfx({ model: sfxModel, workflowId: sfxWorkflowId, prompt: sfx, duration });
-                  setAssets(r.assets);
+                  if (r.assets?.length) setAssets(r.assets);
+                  if (r.task) setTask(r.task);
                 }
               } catch (e) {
                 setError(e instanceof Error ? e.message : String(e));
@@ -169,9 +179,12 @@ export function StudioAudio() {
               }
             }}
           >
-            {busy ? "生成中…" : tab === "design" ? "创建并用于配音" : "开始生成"}
+            {busy ? "提交中…" : tab === "design" ? "创建并用于配音" : "开始生成"}
           </Button>
-          {busy ? <Spinner label="ComfyUI 音频合成中" /> : null}
+          {busy ? <Spinner label="正在提交到 ComfyUI" /> : null}
+          {task && task.status !== "succeeded" && task.status !== "failed" ? (
+            <Spinner label="ComfyUI 音频合成中，将自动刷新" />
+          ) : null}
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           {tab === "tts" ? (

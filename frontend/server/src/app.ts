@@ -123,40 +123,42 @@ app.post("/api/upload", async (c) => {
   return c.json({ ok: true, file: { ...saved, url: `/api/files/${saved.relPath}` } });
 });
 
+function generatePayload(result: { task?: { assetIds?: string[] }; assets?: unknown[]; raw?: unknown; [key: string]: unknown }) {
+  const { raw: _raw, ...rest } = result;
+  const assets = Array.isArray(rest.assets) && rest.assets.length
+    ? rest.assets
+    : (rest.task?.assetIds || []).map((id) => getAsset(id)).filter(Boolean);
+  return { ...rest, assets };
+}
+
 app.post("/api/images/generate", async (c) => {
   const body = await c.req.json();
-  const result = await generateImage(body);
-  return c.json({ ok: true, ...result });
+  return c.json({ ok: true, ...generatePayload(await generateImage(body)) });
 });
 
 app.post("/api/videos/generate", async (c) => {
   const body = await c.req.json();
-  const result = await generateVideo(body);
-  return c.json({ ok: true, ...result });
+  return c.json({ ok: true, ...generatePayload(await generateVideo(body)) });
 });
 
 app.post("/api/music/generate", async (c) => {
   const body = await c.req.json();
-  const result = await generateMusic(body);
-  return c.json({ ok: true, ...result });
+  return c.json({ ok: true, ...generatePayload(await generateMusic(body)) });
 });
 
 app.post("/api/audio/tts", async (c) => {
   const body = await c.req.json();
-  const result = await generateTts(body);
-  return c.json({ ok: true, ...result });
+  return c.json({ ok: true, ...generatePayload(await generateTts(body)) });
 });
 
 app.post("/api/audio/sfx", async (c) => {
   const body = await c.req.json();
-  const result = await generateSfx(body);
-  return c.json({ ok: true, ...result });
+  return c.json({ ok: true, ...generatePayload(await generateSfx(body)) });
 });
 
 app.post("/api/audio/voices", async (c) => {
   const body = await c.req.json();
-  const result = await designVoice(body);
-  return c.json({ ok: true, ...result, voices: loadVoices() });
+  return c.json({ ok: true, ...generatePayload(await designVoice(body)), voices: loadVoices() });
 });
 
 app.get("/api/audio/voices", (c) => c.json({ ok: true, voices: loadVoices() }));
@@ -168,8 +170,7 @@ app.delete("/api/audio/voices/:voice", (c) => {
 
 app.post("/api/3d/generate", async (c) => {
   const body = await c.req.json();
-  const result = await generate3d(body);
-  return c.json({ ok: true, ...result });
+  return c.json({ ok: true, ...generatePayload(await generate3d(body)) });
 });
 
 app.get("/api/3d/rig-status", async (c) => c.json({ ok: true, ...(await rigEngineStatus()) }));

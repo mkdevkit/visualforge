@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { invalidateCatalog } from "../lib/catalog";
-import { manager, managerBase, setManagerBase } from "../lib/manager";
+import { managerBase, setManagerBase } from "../lib/manager";
 import { Button, ErrorBox, Field, Input } from "../components/ui";
 import { PageHead } from "../components/PageHead";
 
@@ -25,13 +25,18 @@ export function Settings() {
       if (!h.engine) {
         setError("18787 上还是旧版生成服务。工位模型已改从 ComfyManager 读取；请关掉占用该端口的旧进程后重新 npm run dev，否则无法真正生成。");
       }
+      const m = h.manager as {
+        ok?: boolean;
+        comfy?: { api?: { ok?: boolean }; connected?: boolean; processRunning?: boolean };
+        error?: string;
+      } | undefined;
+      if (!m || m.ok === false) {
+        setMgrNote(m?.error ? `ComfyManager 未连通：${m.error}` : "ComfyManager 未启动，请先运行 npm run manager");
+      } else {
+        const comfyOk = Boolean(m.comfy?.connected || m.comfy?.api?.ok);
+        setMgrNote(`ComfyManager 在线 · ComfyUI ${comfyOk ? "已连通" : "未连通"}`);
+      }
     }).catch(() => undefined);
-    manager.health()
-      .then((h) => {
-        const c = h.comfy as { api?: { ok?: boolean }; processRunning?: boolean } | undefined;
-        setMgrNote(`ComfyManager 在线 · ComfyUI ${c?.api?.ok ? "已连通" : "未连通"}`);
-      })
-      .catch(() => setMgrNote("ComfyManager 未启动，请先运行 npm run manager"));
   };
 
   useEffect(() => {
@@ -51,7 +56,7 @@ export function Settings() {
         <Field label="成品根目录" hint="本机保存生成结果，与 Comfy 无关">
           <Input value={dataDir} onChange={(e) => setDataDir(e.target.value)} />
         </Field>
-        <a className="inline-block text-sm text-brass underline" href={managerUrl || manager.url()} target="_blank" rel="noreferrer">
+        <a className="inline-block text-sm text-brass underline" href={managerUrl || managerBase()} target="_blank" rel="noreferrer">
           打开 ComfyManager
         </a>
       </div>

@@ -1,11 +1,9 @@
 import { join } from "node:path";
-import { nanoid } from "nanoid";
 import type { AssetRecord, FeatureId, GenerateImageBody, GenerateMusicBody, GenerateSfxBody, GenerateTtsBody, GenerateVideoBody, Generate3dBody, VoiceDesignBody } from "../types.js";
 import { absPath, saveBuffer } from "./storage.js";
 import { createTask, mark, patchTask } from "./tasks.js";
 import { upsertVoice } from "./voices.js";
 import { type ComfyFile } from "./comfy.js";
-import { HTTP_BODY_TEMPLATES } from "./features.js";
 import { featureFromManager, runManagerGenerate, runManagerHarvest } from "./manager-client.js";
 
 export async function featureCfg(feature: FeatureId, workflowId?: string) {
@@ -114,68 +112,32 @@ function assetMeta(feature: FeatureId): { type: AssetRecord["type"]; prefer: str
   return { type: "image", prefer: ["png", "jpg", "webp", "image"], kind: "t2i" };
 }
 
-async function runSync(feature: FeatureId, body: AnyBody) {
-  const modelHint = String(body.model || "");
-  const vars = varsFrom(feature, body, modelHint);
-  const queued = await runManagerGenerate({
-    feature,
-    workflowId: typeof body.workflowId === "string" ? body.workflowId : undefined,
-    model: modelHint || undefined,
-    wait: true,
-    vars,
-    uploads: uploadsOf(body),
-  });
-  const model = queued.model || modelHint || "comfyui";
-  const meta = assetMeta(feature);
-  const prompt = String(vars.prompt || "");
-  const assets = persistFiles({
-    files: queued.files,
-    type: meta.type,
-    prompt,
-    model,
-    params: { provider: "comfyui", ...vars },
-    title: typeof body.title === "string" ? body.title : undefined,
-    tags: Array.isArray(body.tags) ? (body.tags as string[]) : undefined,
-    kind: meta.kind,
-    prefer: meta.prefer,
-  });
-  if (!assets.length) {
-    throw new Error(`ComfyUI 未返回可用成品。请检查工作流是否包含 Save 节点，或 http 接口是否返回 url / base64。可参考占位符：${Object.keys(HTTP_BODY_TEMPLATES).join(", ")}`);
-  }
-  return { assets, raw: queued.raw, voice: queued.voice, model };
+function taskTypeOf(feature: FeatureId): AssetRecord["type"] {
+  if (feature === "model3d") return "model3d";
+  if (feature === "video" || feature === "anim3d") return "video";
+  if (feature === "music") return "music";
+  if (feature === "tts" || feature === "sfx" || feature === "voiceDesign") return "audio";
+  return "image";
 }
 
 export async function generateImageComfy(body: GenerateImageBody) {
-  const r = await runSync("image", asVarsBody(body));
-  if (body.images?.length && r.assets[0]) r.assets[0].kind = "i2i";
-  return r;
+  return enqueueOrSync("image", asVarsBody(body), body.prompt);
 }
 
 export async function generateMusicComfy(body: GenerateMusicBody) {
-  return runSync("music", asVarsBody(body));
+  return enqueueOrSync("music", asVarsBody(body), String(body.prompt || body.lyrics || ""));
 }
 
 export async function generateTtsComfy(body: GenerateTtsBody) {
-  return runSync("tts", asVarsBody({ ...body, prompt: body.text }));
+  return enqueueOrSync("tts", asVarsBody({ ...body, prompt: body.text }), body.text);
 }
 
 export async function generateSfxComfy(body: GenerateSfxBody) {
-  return runSync("sfx", asVarsBody(body));
+  return enqueueOrSync("sfx", asVarsBody(body), body.prompt);
 }
 
 export async function designVoiceComfy(body: VoiceDesignBody) {
-  const r = await runSync("voiceDesign", asVarsBody({ ...body, prompt: body.voicePrompt }));
-  const voice = r.voice || `comfy-${nanoid(8)}`;
-  upsertVoice({
-    id: voice,
-    name: body.preferredName || body.prefix || voice,
-    prompt: body.voicePrompt,
-    targetModel: body.targetModel || r.model,
-    designModel: r.model,
-    createdAt: new Date().toISOString(),
-    previewAssetId: r.assets[0]?.id,
-  });
-  return { voice, preview: r.assets[0], raw: r.raw, assets: r.assets };
+  return enqueueOrSync("voiceDesign", asVarsBody({ ...body, prompt: body.voicePrompt }), body.voicePrompt);
 }
 
 export async function generateVideoComfy(body: GenerateVideoBody) {
@@ -209,8 +171,20 @@ async function enqueueOrSync(feature: FeatureId, body: AnyBody, prompt: string) 
       kind: meta.kind,
       prefer: meta.prefer,
     });
+    if (feature === "voiceDesign" && assets[0]) {
+      const voice = String(body.preferredName || body.prefix || "").trim() || `comfy-${Date.now()}`;
+      upsertVoice({
+        id: voice,
+        name: String(body.preferredName || body.prefix || voice),
+        prompt: String(body.voicePrompt || prompt),
+        targetModel: String(body.targetModel || ""),
+        designModel: model,
+        createdAt: new Date().toISOString(),
+        previewAssetId: assets[0].id,
+      });
+    }
     const task = createTask({
-      type: feature === "model3d" ? "model3d" : "video",
+      type: taskTypeOf(feature),
       model,
       prompt,
       payload: { ...body, remoteKind: "comfy-done" },
@@ -221,7 +195,7 @@ async function enqueueOrSync(feature: FeatureId, body: AnyBody, prompt: string) 
     };
   }
   const task = createTask({
-    type: feature === "model3d" ? "model3d" : "video",
+    type: taskTypeOf(feature),
     model,
     prompt,
     remoteTaskId: queued.promptId,
@@ -234,7 +208,13 @@ export async function pollComfyTask(localId: string) {
   const { getTask } = await import("./tasks.js");
   const task = getTask(localId);
   if (!task?.remoteTaskId) return task;
-  const feature = (task.payload.feature as FeatureId) || (task.type === "video" ? "video" : "model3d");
+  const feature = (task.payload.feature as FeatureId) || (
+    task.type === "image" ? "image"
+    : task.type === "video" ? "video"
+    : task.type === "music" ? "music"
+    : task.type === "audio" ? "tts"
+    : "model3d"
+  );
   try {
     const files = await runManagerHarvest(task.remoteTaskId);
     if (!files.length) return patchTask(localId, { status: "running", progress: Math.min(90, (task.progress || 10) + 8) });
@@ -249,6 +229,19 @@ export async function pollComfyTask(localId: string) {
       prefer: meta.prefer,
     });
     if (!assets.length) return mark(localId, "failed", { error: "ComfyUI 完成但未找到成品文件" });
+    if (feature === "voiceDesign" && assets[0]) {
+      const p = task.payload || {};
+      const voice = String(p.preferredName || p.prefix || "").trim() || `comfy-${task.id}`;
+      upsertVoice({
+        id: voice,
+        name: String(p.preferredName || p.prefix || voice),
+        prompt: String(p.voicePrompt || task.prompt),
+        targetModel: String(p.targetModel || ""),
+        designModel: task.model,
+        createdAt: new Date().toISOString(),
+        previewAssetId: assets[0].id,
+      });
+    }
     return mark(localId, "succeeded", { assetIds: assets.map((a) => a.id), progress: 100 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

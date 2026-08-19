@@ -36,6 +36,25 @@ function errorResult(err: unknown) {
   };
 }
 
+async function waitForTaskAssets(result: {
+  task?: { id: string; status: string; error?: string; assetIds?: string[] };
+  assets?: AssetRecord[];
+}) {
+  let task = result.task;
+  const start = Date.now();
+  while (task && (task.status === "running" || task.status === "queued") && Date.now() - start < 300000) {
+    await new Promise((r) => setTimeout(r, 2000));
+    task = (await pollRemoteTask(task.id)) || task;
+  }
+  if (task?.status === "failed") throw new Error(task.error || "生成失败");
+  const assets = (
+    Array.isArray(result.assets) && result.assets.length
+      ? result.assets
+      : (task?.assetIds || []).map((id) => getAsset(id)).filter(Boolean)
+  ) as AssetRecord[];
+  return { task, assets };
+}
+
 function fileUrl(relPath: string) {
   const s = loadSettings();
   return `http://${s.host}:${s.port}/api/files/${relPath}`;
@@ -155,11 +174,11 @@ export function createVisualForgeMcp() {
     },
     async (args) => {
       try {
-        const result = await generateImage({
+        const { task, assets } = await waitForTaskAssets(await generateImage({
           ...args,
           images: (args.images || []).map(ingestPath),
-        });
-        return jsonResult({ ok: true, assets: (result.assets || []).map(assetOut) });
+        }));
+        return jsonResult({ ok: true, assets: assets.map(assetOut), task });
       } catch (err) {
         return errorResult(err);
       }
@@ -194,7 +213,7 @@ export function createVisualForgeMcp() {
           referenceImages: (args.referenceImages || []).map(ingestPath),
           referenceVideos: (args.referenceVideos || []).map(ingestPath),
         });
-        return jsonResult({ ok: true, ...result });
+        return jsonResult({ ok: true, task: result.task });
       } catch (err) {
         return errorResult(err);
       }
@@ -216,8 +235,8 @@ export function createVisualForgeMcp() {
     },
     async (args) => {
       try {
-        const result = await generateMusic(args);
-        return jsonResult({ ok: true, assets: (result.assets || []).map(assetOut) });
+        const { task, assets } = await waitForTaskAssets(await generateMusic(args));
+        return jsonResult({ ok: true, assets: assets.map(assetOut), task });
       } catch (err) {
         return errorResult(err);
       }
@@ -240,8 +259,8 @@ export function createVisualForgeMcp() {
     },
     async (args) => {
       try {
-        const result = await generateTts(args);
-        return jsonResult({ ok: true, assets: (result.assets || []).map(assetOut) });
+        const { task, assets } = await waitForTaskAssets(await generateTts(args));
+        return jsonResult({ ok: true, assets: assets.map(assetOut), task });
       } catch (err) {
         return errorResult(err);
       }
@@ -262,8 +281,8 @@ export function createVisualForgeMcp() {
     },
     async (args) => {
       try {
-        const result = await generateSfx(args);
-        return jsonResult({ ok: true, assets: (result.assets || []).map(assetOut) });
+        const { task, assets } = await waitForTaskAssets(await generateSfx(args));
+        return jsonResult({ ok: true, assets: assets.map(assetOut), task });
       } catch (err) {
         return errorResult(err);
       }
@@ -285,8 +304,8 @@ export function createVisualForgeMcp() {
     },
     async (args) => {
       try {
-        const result = await designVoice(args);
-        return jsonResult({ ok: true, ...result, voices: loadVoices() });
+        const { task, assets } = await waitForTaskAssets(await designVoice(args));
+        return jsonResult({ ok: true, assets: assets.map(assetOut), task, voices: loadVoices() });
       } catch (err) {
         return errorResult(err);
       }
@@ -311,7 +330,7 @@ export function createVisualForgeMcp() {
           ...args,
           image: args.image ? ingestPath(args.image) : undefined,
         });
-        return jsonResult({ ok: true, ...result });
+        return jsonResult({ ok: true, task: result.task });
       } catch (err) {
         return errorResult(err);
       }
@@ -342,7 +361,7 @@ export function createVisualForgeMcp() {
   server.registerTool(
     "get_task",
     {
-      description: "查询异步任务（视频 / 3D）",
+      description: "查询异步任务（图 / 视频 / 音乐 / 音频 / 3D）",
       inputSchema: { id: z.string() },
     },
     async ({ id }) => {

@@ -16,7 +16,18 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
   });
-  const json = await res.json();
+  const raw = await res.text();
+  if (!raw.trim()) {
+    throw new Error(
+      `视铸生成接口 ${path} 返回空响应（HTTP ${res.status}）。请确认 npm run dev 在跑。设置里的地址是 ComfyManager（默认 18788），由视铸生成服务去调用，不是浏览器直接打那个地址。`,
+    );
+  }
+  let json: { ok?: boolean; error?: string };
+  try {
+    json = JSON.parse(raw) as { ok?: boolean; error?: string };
+  } catch {
+    throw new Error(`接口 ${path} 返回了非 JSON（HTTP ${res.status}）：${raw.slice(0, 180)}`);
+  }
   if (!res.ok || json.ok === false) throw new Error(json.error || `请求失败 ${res.status}`);
   return json as T;
 }
@@ -32,20 +43,20 @@ export const api = {
       `/api/comfy/ping${baseUrl ? `?baseUrl=${encodeURIComponent(baseUrl)}` : ""}`,
     ),
   generateImage: (body: Record<string, unknown>) =>
-    req<{ assets: AssetRecord[] }>("/api/images/generate", { method: "POST", body: JSON.stringify(body) }),
+    req<{ assets?: AssetRecord[]; task?: TaskRecord }>("/api/images/generate", { method: "POST", body: JSON.stringify(body) }),
   generateVideo: (body: Record<string, unknown>) =>
-    req<{ task: TaskRecord }>("/api/videos/generate", { method: "POST", body: JSON.stringify(body) }),
+    req<{ assets?: AssetRecord[]; task?: TaskRecord }>("/api/videos/generate", { method: "POST", body: JSON.stringify(body) }),
   generateMusic: (body: Record<string, unknown>) =>
-    req<{ assets: AssetRecord[] }>("/api/music/generate", { method: "POST", body: JSON.stringify(body) }),
+    req<{ assets?: AssetRecord[]; task?: TaskRecord }>("/api/music/generate", { method: "POST", body: JSON.stringify(body) }),
   tts: (body: Record<string, unknown>) =>
-    req<{ assets: AssetRecord[] }>("/api/audio/tts", { method: "POST", body: JSON.stringify(body) }),
+    req<{ assets?: AssetRecord[]; task?: TaskRecord }>("/api/audio/tts", { method: "POST", body: JSON.stringify(body) }),
   sfx: (body: Record<string, unknown>) =>
-    req<{ assets: AssetRecord[] }>("/api/audio/sfx", { method: "POST", body: JSON.stringify(body) }),
+    req<{ assets?: AssetRecord[]; task?: TaskRecord }>("/api/audio/sfx", { method: "POST", body: JSON.stringify(body) }),
   designVoice: (body: Record<string, unknown>) =>
-    req<{ voice: string; preview?: AssetRecord; voices: DesignedVoice[] }>("/api/audio/voices", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
+    req<{ voice?: string; preview?: AssetRecord; voices?: DesignedVoice[]; assets?: AssetRecord[]; task?: TaskRecord }>(
+      "/api/audio/voices",
+      { method: "POST", body: JSON.stringify(body) },
+    ),
   voices: () => req<{ voices: DesignedVoice[] }>("/api/audio/voices"),
   deleteVoice: (id: string, targetModel?: string) =>
     req<{ voices: DesignedVoice[] }>(
@@ -53,7 +64,7 @@ export const api = {
       { method: "DELETE" },
     ),
   generate3d: (body: Record<string, unknown>) =>
-    req<{ task: TaskRecord }>("/api/3d/generate", { method: "POST", body: JSON.stringify(body) }),
+    req<{ assets?: AssetRecord[]; task?: TaskRecord }>("/api/3d/generate", { method: "POST", body: JSON.stringify(body) }),
   rigStatus: () =>
     req<{
       ok: boolean;
@@ -77,7 +88,14 @@ export async function uploadFile(file: File) {
   const form = new FormData();
   form.set("file", file);
   const res = await fetch(`${apiBase()}/api/upload`, { method: "POST", body: form });
-  const json = await res.json();
+  const raw = await res.text();
+  if (!raw.trim()) throw new Error(`上传失败：空响应（HTTP ${res.status}）`);
+  let json: { ok?: boolean; error?: string; file?: { id: string; relPath: string; url: string; filename: string } };
+  try {
+    json = JSON.parse(raw) as { ok?: boolean; error?: string; file?: { id: string; relPath: string; url: string; filename: string } };
+  } catch {
+    throw new Error(`上传失败：非 JSON（HTTP ${res.status}）`);
+  }
   if (!res.ok || !json.ok) throw new Error(json.error || "上传失败");
   return json.file as { id: string; relPath: string; url: string; filename: string };
 }
