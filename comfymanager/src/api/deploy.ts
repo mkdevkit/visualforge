@@ -456,7 +456,56 @@ async function torchCudaReady(cwd: string) {
   return /\bCUDA\b/.test(r.log);
 }
 
-function canSudoN() {
+function resolveCompiler(bin: string) {
+  const r = spawnSync(bin, ["-dumpversion"], {
+    encoding: "utf8",
+    timeout: 4000,
+    windowsHide: true,
+    env: { ...process.env, PATH: `${process.env.PATH || "/usr/bin:/bin"}:/usr/bin:/usr/local/bin` },
+  });
+  if (r.status === 0) return bin;
+  const abs = `/usr/bin/${bin}`;
+  return existsSync(abs) ? abs : "";
+}
+
+async function ensureCCompiler() {
+  if (process.platform !== "linux") return;
+  if ((process.env.COMFYUI_CUDA || "").trim().toLowerCase() === "cpu") return;
+  if (!nvidiaHardwarePresent() && detectAccel().kind !== "cuda") return;
+  if (resolveCompiler("gcc")) return;
+  const hint = "sudo apt-get update && sudo apt-get install -y build-essential";
+  if (!canSudoN()) {
+    throw new Error(`未找到 gcc。新版 PyTorch / Qwen 会用 Triton 即时编译 CUDA 内核，需要 C 编译器。请执行：${hint}`);
+  }
+  appendLog("未找到 gcc，正在安装 build-essential（Triton 编译 CUDA 内核需要）");
+  const cwd = loadSettings().dataDir;
+  mkdirSync(cwd, { recursive: true });
+  const env = { DEBIAN_FRONTEND: "noninteractive" };
+  const update = rootCmd(["apt-get", "update"]);
+  await run(update.cmd, update.args, cwd, env);
+  const inst = rootCmd(["apt-get", "install", "-y", "build-essential"]);
+  const r = await run(inst.cmd, inst.args, cwd, env);
+  if (r.code !== 0 || !resolveCompiler("gcc")) {
+    throw new Error(`安装 gcc 失败。请手动执行：${hint}\n${r.log.slice(-1200)}`);
+  }
+  appendLog("已安装 gcc");
+}
+
+function comfyLaunchEnv(): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    PYTHONUNBUFFERED: "1",
+    PYTHONIOENCODING: "utf-8",
+  };
+  if (process.platform === "linux") {
+    env.PATH = `${env.PATH || "/usr/bin:/bin"}:/usr/bin:/usr/local/bin`;
+    const gcc = resolveCompiler("gcc");
+    const gxx = resolveCompiler("g++");
+    if (gcc && !env.CC) env.CC = gcc;
+    if (gxx && !env.CXX) env.CXX = gxx;
+  }
+  return env;
+}
   if (process.getuid?.() === 0) return true;
   const r = spawnSync("sudo", ["-n", "true"], { encoding: "utf8", timeout: 8000, windowsHide: true });
   return r.status === 0;
@@ -514,6 +563,7 @@ async function ensureNvidiaDriver() {
 
 async function installCudaDeps(cwd: string, alsoRequirements: boolean) {
   await ensureNvidiaDriver();
+  await ensureCCompiler();
   const accel = detectAccel();
   appendLog(`加速：${accel.label}`);
   const torchArgs = ["-m", "pip", "install", "--upgrade", "--progress-bar", "on", "torch", "torchvision", "torchaudio"];
@@ -746,7 +796,8 @@ async function doInstallComfy() {
   };
 }
 
-export function startComfy() {
+export async function startComfy() {
+  await ensureCCompiler();
   if (!comfyInstalled()) {
     const found = listExistingComfyInstalls()[0];
     if (!found) throw new Error("尚未安装 ComfyUI");
@@ -775,7 +826,7 @@ export function startComfy() {
       stdio: ["ignore", logFd, logFd],
       windowsHide: true,
       shell: process.platform === "win32",
-      env: { ...process.env, PYTHONUNBUFFERED: "1", PYTHONIOENCODING: "utf-8" },
+      env: comfyLaunchEnv(),
     });
   } finally {
     try {

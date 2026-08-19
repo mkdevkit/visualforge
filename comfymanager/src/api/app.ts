@@ -88,7 +88,7 @@ app.get("/api/comfy/log", (c) => {
   }
 });
 app.post("/api/comfy/install", (c) => c.json(startInstallComfy()));
-app.post("/api/comfy/start", (c) => c.json({ ...startComfy(), ok: true }));
+app.post("/api/comfy/start", async (c) => c.json({ ...(await startComfy()), ok: true }));
 app.post("/api/comfy/stop", (c) => c.json({ ...stopComfy(), ok: true }));
 app.post("/api/tools/unirig/install", async (c) => c.json({ ...(await installUniRig()), ok: true }));
 app.get("/api/tools/unirig", (c) => c.json({ ok: true, ...unirigStatus() }));
