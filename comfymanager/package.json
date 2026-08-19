@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node ../scripts/check-node.cjs && vite",
     "build": "vite build",
     "start": "tsx src/entry.ts"
   },

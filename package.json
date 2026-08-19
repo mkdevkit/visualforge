@@ -9,9 +9,9 @@
   ],
   "scripts": {
     "dev": "npm run dev -w @visualforge/frontend",
-    "manager": "npm run dev -w comfymanager",
+    "manager": "node scripts/check-node.cjs && npm run dev -w comfymanager",
     "mcp": "npm run mcp -w @visualforge/frontend",
-    "dev:all": "concurrently -n app,mgr -c cyan,green \"npm run dev -w @visualforge/frontend\" \"npm run dev -w comfymanager\"",
+    "dev:all": "node scripts/check-node.cjs && concurrently -n app,mgr -c cyan,green \"npm run dev -w @visualforge/frontend\" \"npm run dev -w comfymanager\"",
     "build": "npm run build -w @visualforge/frontend && npm run build -w comfymanager",
     "start": "npm run start -w @visualforge/frontend",
     "tauri": "tauri --config frontend/src-tauri/tauri.conf.json",

@@ -34,22 +34,114 @@ comfymanager/tools/       可选工具：UniRig 官方仓库（gitignore）
 
 相对路径会按各包根目录解析。可用环境变量覆盖，见 `.env.example`。
 
-## 环境要求
+## 安装
 
-- Node.js 20+
-- **自行安装** Git 与 Python 3.10+，并加入 PATH（ComfyManager 不代装）
-  - Windows： [Git](https://git-scm.com)（勾选 PATH）、[Python](https://www.python.org)（勾选 Add python.exe to PATH）
-  - Ubuntu：`sudo apt install git python3 python3-venv python3-pip`
-- NVIDIA 驱动（安装 ComfyUI 时会按 `nvidia-smi` 选择 CUDA 版 PyTorch：20 系及以上默认 cu130，10 系用 cu126）
-- 显卡与显存按所选模型而定（例如 Wan 2.2 TI2V 5B 大约 8GB 显存可跑）
+支持 **Windows** 与 **Ubuntu**。Git、Python 由你自行安装，ComfyManager **不代装**。ComfyUI 可在管理端一键克隆；本机已有安装则复用，权重仍下到配置的模型目录。
 
-复制环境变量示例：
+### 1. 自行准备
 
-```bash
-copy .env.example .env
+| 软件 | 版本 | 说明 |
+|---|---|---|
+| Node.js | **20 或 22** | 不要用 Ubuntu `apt install nodejs`（经常是 v12，会报 `Unexpected token '.'`） |
+| Git | 任意近期版 | 克隆 ComfyUI 需要，须在 PATH 里 |
+| Python | **3.10+** | 须在 PATH 里；Ubuntu 还需 `python3-venv` |
+| NVIDIA 驱动 | 能跑 `nvidia-smi` | 可选。有独显时管理端会装 CUDA 版 PyTorch |
+
+### 2. Windows
+
+1. 安装 [Node.js LTS](https://nodejs.org)（20 或 22）。
+2. 安装 [Git](https://git-scm.com)，勾选加入 PATH。
+3. 安装 [Python 3.10+](https://www.python.org)，**勾选 Add python.exe to PATH**。
+4. 重开终端，确认：
+
+```bat
+node -v
+git --version
+python --version
 ```
 
-常用变量：
+`node -v` 必须是 `v20` 或 `v22`。然后：
+
+```bat
+cd visualforge
+copy .env.example .env
+npm install
+npm run manager
+```
+
+浏览器打开 http://127.0.0.1:18788 。
+
+### 3. Ubuntu
+
+**不要**直接 `sudo apt install nodejs`。Ubuntu 22.04 仓库里的包就是 **v12.22.9**。本项目需要 20+，先加 [NodeSource](https://github.com/nodesource/distributions) 源再装。
+
+Git、Python 自己装：
+
+```bash
+sudo apt-get install -y git python3 python3-venv python3-pip curl ca-certificates
+```
+
+装 Node 22 前先保证 apt 源目录存在（部分云主机没有 `/etc/apt/sources.list.d/`，NodeSource 脚本会 `tee` 失败却仍打印成功）：
+
+```bash
+sudo mkdir -p /etc/apt/sources.list.d
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+ls /etc/apt/sources.list.d/nodesource.sources
+sudo apt-get install -y nodejs
+hash -r
+node -v
+```
+
+`ls` 必须能看到 `nodesource.sources`，`node -v` 必须是 **v22.x**。若 `ls` 报没有该文件，或 `apt-cache policy nodejs` 的 Candidate 仍是 `12.22.9`，把 `mkdir` 补上后再跑一遍 setup，**不要**在源没加上时执行 `apt install nodejs`。
+
+确认 Git / Python：
+
+```bash
+git --version
+python3 --version
+```
+
+然后：
+
+```bash
+cd visualforge
+cp .env.example .env
+npm install
+npm run manager
+```
+
+浏览器打开 http://127.0.0.1:18788 。
+
+### 4. 在 ComfyManager 里装 ComfyUI
+
+1. 打开概览页，确认系统、Git、Python 已检测到。
+2. 本机已有 ComfyUI：点「使用已有安装」。没有：点「安装 ComfyUI（含 CUDA）」。
+3. 管理端会在安装目录创建 `.venv`，再按显卡安装 CUDA 版 PyTorch（20 系及以上默认 `cu130`，10 系 `cu126`），然后 `requirements.txt`。PyTorch 较大，可能要几分钟。
+4. 点「启动」。接口默认 http://127.0.0.1:8188 。
+5. 到「模型」页下载权重（文件落在配置的模型目录，与 ComfyUI 是否复用无关）。
+6. 到「工作流」页把库里的 json 加入工位。
+
+强制指定 PyTorch CUDA 轮子时，在 `.env` 里设 `COMFYUI_CUDA=cu130`（或 `cu126` / `cpu`）。
+
+### 5. 启动视铸
+
+另开一个终端（管理端保持运行）：
+
+```bash
+npm run dev
+```
+
+- 视铸 Web：http://127.0.0.1:5173
+- 生成 API：http://127.0.0.1:18787 （MCP：`/mcp`）
+
+或一次全开：`npm run dev:all`。设置里只填 ComfyManager 地址（默认 http://127.0.0.1:18788）。
+
+## 环境变量
+
+复制示例：
+
+- Windows：`copy .env.example .env`
+- Ubuntu：`cp .env.example .env`
 
 | 变量 | 默认 | 说明 |
 |---|---|---|
@@ -66,31 +158,6 @@ copy .env.example .env
 | `UNIRIG_DIR` | `./comfymanager/tools/UniRig` | UniRig 仓库目录（ComfyManager 使用） |
 | `UNIRIG_PYTHON` | 空 | UniRig 用的 Python（ComfyManager 拉起子进程时使用） |
 | `BLENDER_BIN` | 空 | Mixamo FBX→GLB 用的 Blender 可执行文件 |
-
-## 启动
-
-先开管理端，再开生成端：
-
-```bash
-npm install
-npm run manager    # ComfyManager  http://127.0.0.1:18788
-npm run dev        # 视铸 Web      http://127.0.0.1:5173
-                   # 生成 API      http://127.0.0.1:18787  （MCP：/mcp）
-```
-
-或一次全开：
-
-```bash
-npm run dev:all
-```
-
-推荐流程：
-
-1. 自行装好 Git、Python 3.10+。打开 ComfyManager。若本机已有 ComfyUI，点「使用已有安装」；没有则「安装 ComfyUI（含 CUDA）」（Windows / Ubuntu 都会在安装目录建 `.venv`，再装 CUDA 版 PyTorch）。然后启动。模型仍下载到配置的模型目录。
-2. 在「模型」页下载权重，指定各工位「当前生效模型」。
-3. 在「工作流」页把一份或多份图加入工位并勾选「生效」（也可粘贴 API JSON）。该页支持 zip / json 批量导入导出。
-4. 打开视铸，设置里只填写 ComfyManager 地址（可选改成品目录）。
-5. 回工位生成：指定工作流和模型。默认值、下拉选项、Comfy 地址都从管理端读取。
 
 ## 工位与工作流
 

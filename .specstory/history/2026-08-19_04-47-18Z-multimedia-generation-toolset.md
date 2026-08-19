@@ -35592,3 +35592,833 @@ _**Agent (grok-4.6)**_
 <summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
 
 </details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 hostPrereqs 在 displayMaybePath 定义之前就调用了该函数。
+
+这些函数声明均会被提升。因此即使在定义前调用也无影响。
+
+接下来将添加 ensureVenv，并更新 installComfy 与 comfyStatus。ensureVenv 将置于 installComfy 之前，利用函数声明提升使其调用 run。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+便携式检查有误。detectComfyPython 返回了 python_embeded 或空值。
+
+确认现有逻辑在三种场景下均正确：存在 .venv 时返回现有路径；检测到 python_embeded 时直接返回嵌入式 Python；否则创建虚拟环境。将简化便携式检测逻辑，直接判断嵌入式 Python 路径是否存在。
+
+installComfy 的实现已调整：仅在克隆或缺少 Python 路径时调用 requireGit；ensureVenv 始终用于捆绑安装。
+
+正在修改 installComfy 函数：若未检测到系统 Python 且安装目录无 ComfyPython，则抛出提示并创建目录。随后按需克隆仓库，执行 ensureVenv，并安装 CUDA 依赖。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 `/venv/` 检查可能误匹配 `python_embeded`。
+
+进一步分析了 `/venv/` 与 `.venv` 的匹配关系。确认 `/venv/` 不会误匹配 `.venv`，因为路径格式不同。
+
+确认 `/venv/` 不会误匹配 `.venv`。准备更新 installComfy。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在更新 installComfy 脚本。将添加 Git 检查和虚拟环境支持，并优化克隆错误提示。
+
+startComfy 将优先使用虚拟环境中的 Python。复用现有便携版本时不会强制创建虚拟环境；若捆绑包缺少 Python，则确保创建虚拟环境。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+The string to replace was not found in the file.
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+概述中的 Python 替换可能已成功。
+
+PageHead 失败。正在检查 Overview 中是否存在重复的 Python 行，并考虑用局部变量简化前置条件的显示。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将用类型化的 prereqs 变量清理 Overview，并修复 PageHead。
+
+接下来处理 README。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要确认 `displayMaybePath` 在运行时被调用前已定义（提升作用域）。
+
+确认了 `hostPrereqs` 位于文件顶部并导出，而 `displayMaybePath` 定义在后面，因此提升机制可以正常工作。同时验证了 ensureVenv 的便携性检查逻辑：Windows 路径经替换后不含 `.venv/` 或 `venv/`，返回便携。
+
+已确认函数声明提升在模块作用域内生效。检查了 `pythonBin` 调用 `resolveSystemPython` 的链路，排除了递归风险；自定义的 `pythonPath` 会被优先尝试。接下来将阅读 Overview 和 deploy 中的遗留问题，并检查 lint 结果。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户确认 Git 和 Python 将手动安装。
+
+Windows 与 Ubuntu 均可从干净系统开始。我将创建虚拟环境并安装 CUDA 和 torch。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+Git 和 Python **不会由 ComfyManager 安装**，请在本机先装好并加入 PATH。
+
+干净系统上只要这两样就绪，Windows 和 Ubuntu 都可以点「安装 ComfyUI」：
+
+1. 检测 Git、Python 3.10+（没有会提示怎么自己装）
+2. 在 ComfyUI 目录创建 `.venv`（不污染系统 Python）
+3. 按显卡安装 CUDA 版 PyTorch，再装 `requirements.txt`
+
+Ubuntu 若建虚拟环境失败，需自行再装：`sudo apt install python3-venv`。
+
+概览页会显示当前系统以及 Git / Python 是否已检测到。重启 `npm run manager` 后即可。
+
+---
+
+_**User**_
+
+buntu@10-60-56-22:~/visualforge$ npm run manager
+
+> visualforge@0.1.0 manager
+> npm run dev -w comfymanager
+
+
+> comfymanager@0.1.0 dev
+> vite
+
+file:///home/ubuntu/visualforge/node_modules/vite/bin/vite.js:51
+    module.enableCompileCache?.()
+                              ^
+
+SyntaxError: Unexpected token '.'
+    at Loader.moduleStrategy (internal/modules/esm/translators.js:133:18)
+    at async link (internal/modules/esm/module_job.js:42:21)
+npm ERR! Lifecycle script `dev` failed with error: 
+npm ERR! Error: command failed 
+npm ERR!   in workspace: comfymanager@0.1.0 
+npm ERR!   at location: /home/ubuntu/visualforge/comfymanager 
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+A SyntaxError occurred while running `npm run manager` on Ubuntu.
+
+The `?.` operator in Vite's source requires Node.js 14 or newer. The current runtime appears to be older, causing the SyntaxError.
+
+The manager script should validate Node.js version before launching Vite. This prevents the cryptic SyntaxError on older systems. I will check the package.json engines field and Vite version to determine the exact requirement.
+
+The manager script will run a Node.js version check before launching Vite. A dedicated check script will be placed under `scripts/` and invoked via an npm predev hook. The README already requires Node.js 20+, so this adds a clear validation step.
+
+The check script will print a clear Chinese message telling users they need Node.js 20 or higher, since Ubuntu 20.04 and 22.04 default to older versions. It will include the NodeSource setup command for easy upgrade. I will also update the README to recommend nvm or NodeSource for Ubuntu users.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这是 Node 版本太旧，不支持 Vite 里的 `?.` 语法。我先加上启动前检查，并写明 Ubuntu 上该怎么升到 20+。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (0 files)
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+A CommonJS Node version checker will be added. It will use only ES5 syntax so it can run on very old Node versions.
+
+The script parses the Node major version from `process.versions.node`. If it is below 20, it prints a Chinese error message and provides the exact NodeSource setup command to upgrade to Node 22.
+
+The checker will exit with code 1 when Node is too old. A Windows hint will be added too.
+
+It will be wired into the dev scripts of comfymanager, frontend, and the root manager script. Both root and workspace commands will be protected, since running Vite directly inside a workspace bypasses the check. The frontend dev script currently uses concurrently.
+
+A `predev` script will be added to both workspaces so the Node checker runs automatically before Vite starts. The root manager script will also invoke the checker before launching the workspace dev server. The README will include a NodeSource installation section for Ubuntu users. Engine strictness in `.npmrc` is optional. The reported error is caused by Node 12, which does not support optional chaining.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\scripts\check-node.cjs</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Adding a frontend dev check and updating the README with Ubuntu Node installation instructions.
+
+Also fixing the root `dev` and `dev:all` scripts.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在用中文解释该 Vite ESM 编译错误的原因与修复方法。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这是 **Node.js 太旧**，不是 ComfyManager 本身坏了。Vite 用了 `?.`，Ubuntu 自带的 `apt nodejs` 经常是 v12，就会报 `Unexpected token '.'`。
+
+本项目需要 **Node 20+**。在那台 Ubuntu 上执行：
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+hash -r
+node -v
+```
+
+看到 `v22.x` 之后，在项目目录重新：
+
+```bash
+npm install
+npm run manager
+```
+
+不要用 `sudo apt install nodejs` 来跑视铸。Git、Python 仍按你说的自己装即可。
+
+---
+
+_**User**_
+
+安装写入README.md
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备将安装说明写入 README.md。
+
+先查看现有 README，再补充 Ubuntu 和 Windows 的安装步骤。包括 Node 20+、Git、Python、ComfyManager、CUDA 等依赖说明。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在规划 README.md 的安装章节。将涵盖 Windows 与 Ubuntu 系统的完整安装流程，包括 Node 20+、Git 和 Python 的自安装要求，以及通过管理器安装 ComfyUI 的步骤。
+
+已确定具体结构：以独立的“## 安装”章节替换原有的零散说明，按“需要自行准备 → Windows → Ubuntu → 启动 → ComfyManager 安装 → 常见问题”顺序编排。目录结构将调整为“目录 → 安装 → 环境变量 → 工位”。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+把 Windows / Ubuntu 从干净系统装起的步骤写成独立的「安装」章节，写进 README。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 README 中是否有重复的安装信息或后续的推荐流程需要清理，同时确认剩余内容的逻辑是否通顺。
+
+同时检查 README 中是否在其他位置提到了环境要求。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "环境要求|npm run manager|npm install|推荐流程"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "环境要求|npm run manager|npm install|推荐流程",
+  "topFiles": [
+    {
+      "matchCount": 7,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+README.md 的安装部分已写完，整体看起来不错。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+已把完整安装步骤写进 `README.md`，原先的「环境要求 + 启动」改成独立的 **安装** 章节，可按系统照着做：
+
+1. **自行准备**：Node 20/22、Git、Python 3.10+（Ubuntu 含 `python3-venv`）。Git / Python 不代装。
+2. **Windows**：官网装 Node LTS、Git、Python（勾选 PATH），再 `npm install` → `npm run manager`。
+3. **Ubuntu**：NodeSource 装 Node 22（不要用 apt 的 nodejs），再 `apt` 装 Git/Python，然后同样启动管理端。
+4. **ComfyManager**：概览里「使用已有安装」或「安装 ComfyUI（含 CUDA）」；权重仍下到配置的模型目录。
+5. **视铸**：另开终端 `npm run dev`，或 `npm run dev:all`。
+
+环境变量表单独成节，Windows / Ubuntu 的 `.env` 复制命令都写了。
+
+---
+
+_**User**_
+
+为什么安装的还是Welcome to Node.js v12.22.9.
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问为何安装后仍显示 Node.js v12.22.9。
+
+这是 Ubuntu 上经典的 `apt install nodejs` 安装旧版 Node 12 的问题。也可能是 NodeSource 已安装新版，但系统 PATH 中旧版优先。需要查看终端输出和检查脚本来精确定位原因。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先看你当前终端里实际跑的是哪套 Node，以及 PATH 里谁排在前面。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\10.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\scripts\check-node.cjs</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "package.json",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "node"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "node",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": ".\\package.json"
+    },
+    {
+      "matchCount": 4,
+      "uri": ".\\frontend\\package.json"
+    },
+    {
+      "matchCount": 3,
+      "uri": ".\\comfymanager\\package.json"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 10
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问为何安装后仍显示 Node.js v12.22.9 的欢迎信息。
+
+这通常是 Ubuntu 系统自带的旧版 nodejs 包仍在生效。PATH 可能仍指向 `/usr/bin/node`，导致系统调用的是 v12 而非新版本。也可能是 NodeSource 安装未成功，或存在多个 Node 版本冲突。
+
+Ubuntu 22.04 的默认 apt nodejs 包就是 12.22.9，这与用户看到的完全吻合。用户很可能只执行了 `apt-get install nodejs`，却漏掉了前面的 NodeSource 配置脚本。因此系统直接安装了 Ubuntu 自带的旧版包，而非通过 NodeSource 安装的新版本。
+
+NodeSource 的 setup_22.x 脚本可能已被弃用，当前安装方式或许已变更。若此前执行过该脚本但未成功，系统仍会回退到 Ubuntu 自带的旧版仓库。
+
+旧版 `setup_22.x` 脚本本身可能已失效，运行时仅输出弃用警告，不会正确添加 NodeSource 仓库。因此即使执行了该脚本，系统仍会回退到 Ubuntu 自带的旧版 nodejs 包。
+
+需要先卸载系统自带的旧版 nodejs，再使用当前 NodeSource 安装方法重新安装，并验证 `which node` 和 `dpkg -l nodejs` 确认版本。README 也需要更新为更可靠的安装流程。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "NodeSource setup_22.x Ubuntu 22.04 install nodejs 2026 deb.nodesource.com"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [DEV_README.md](https://github.com/nodesource/distributions/blob/master/DEV_README.md)\n2. [How to Install Node.js and npm on Ubuntu 22.04 | Linuxize](https://linuxize.com/post/how-to-install-node-js-on-ubuntu-22-04/)\n3. [How to Install Node.js on Ubuntu | how7o](https://www.how7o.com/install-nodejs-on-ubuntu/)\n4. [How to Install Node.js on Ubuntu 26.04, 24.04 and 22.04 - LinuxCapable](https://linuxcapable.com/how-to-install-node-js-on-ubuntu-linux/)\n5. [scripts/deb/setup_22.x](https://github.com/nodesource/distributions/blob/master/scripts/deb/setup_22.x)\n\nSynthesis:\nTo install Node.js 22 on Ubuntu 22.04 using the NodeSource repository, ensure curl is installed and run the following commands [1][2][3]:\n\nsudo apt install -y curl\ncurl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh\nsudo -E bash nodesource_setup.sh\nsudo apt install -y nodejs\n\nAfter installation, verify it with node -v [1]. Using sudo -E preserves your environment variables, which ensures the script correctly identifies your system paths and permissions [3]. NodeSource bundles npm with the nodejs package, so no additional installation is required [3][4].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eDEV_README.md\u003c/title\u003e\n\u003curl\u003ehttps://github.com/nodesource/distributions/blob/master/DEV_README.md\u003c/url\u003e\n\u003ccontent\u003e| Distro Name | Node 18x | Node 20x | Node 21x | Node 22x | Node 23x | Node 24x |\n| :------------------- | :------: | :------: | :------: | :------: | :------: | :------: |\n| Ubuntu Bionic ^18.04 | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |\n| Ubuntu Focal ^20.04 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |\n| Ubuntu Jammy ^22.04 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |\n| Ubuntu Noble ^24.04 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |\n...\n**Node.js v22.x**:\n...\n##### Using Ubuntu (Node.js 22)\n...\nBefore you begin, ensure that `curl` is installed on your system. If `curl` is not installed, you can in
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户在询问为何安装后仍显示 Node.js v12.22.9。
+
+这通常是 Ubuntu 22.04 默认 apt 包所致。常见原因包括：未先运行 NodeSource 安装脚本就直接执行了 `apt install nodejs`；NodeSource 脚本因网络或权限问题失败后，系统回退到了默认包；或者安装命令中同时包含了 `nodejs` 参数。
+
+也可能是 NodeSource 源已添加但未生效，或需要手动升级而非重新安装。Ubuntu 22.04 的 `nodejs` 包版本为 12.22.9，而 `npm` 依赖该包，因此直接安装 `nodejs npm` 会得到旧版本。
+
+另外，如果将 NodeSource 安装脚本与 `apt-get install nodejs` 写在同一行并管道给 bash，脚本若因网络或权限问题失败，bash 不会执行任何操作，随后 apt 只能安装 Ubuntu 默认的 12.22.9 版本。
+
+用户看到的 "Welcome to Node.js v12.22.9" 是 Node.js 交互式解释器（REPL）启动时的欢迎横幅。这说明他们可能刚输入 `node` 命令来验证版本，或者安装过程中出现了该提示。
+
+可通过 `which node` 和 `apt-cache policy nodejs` 确认当前版本来自 Ubuntu 仓库。修复时应先卸载旧包，再按 NodeSource 步骤重新安装，并执行 `hash -r && node -v` 刷新环境变量。
+
+计划把 Git 和 Python 的安装命令单独拆分，避免误把 `nodejs` 混入同一行 apt 命令。README 的 Ubuntu 安装章节将改为防错设计：先确认系统是否残留旧版 nodejs，再按 NodeSource 步骤安装，最后用 `apt-cache policy nodejs` 验证版本来源。同时补充 v12.22.9 的排查和修复指引。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+`v12.22.9` 是 Ubuntu 22.04 官方仓库自带的 `nodejs`，不是 Node 22。正在把 README 改成先卸掉旧包、再加 NodeSource，避免再装上这个版本。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\scripts\check-node.cjs</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备用中文解释该问题。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+**因为装上的是 Ubuntu 自带的 Node，不是 Node 22。** `Welcome to Node.js v12.22.9.` 就是 Ubuntu 22.04 官方仓库里那个 `nodejs` 包启动时的欢迎语。
+
+本仓库不会安装 Node。若执行了 `sudo apt install nodejs`（或 NodeSource 脚本失败后仍跑了这句），apt 就会从 Ubuntu 源装 **12.22.9**。README 里那句「不要用 apt 里的 nodejs」指的就是这个包。
+
+按下面做，先卸旧的再装 22：
+
+```bash
+node -v
+which node
+apt-cache policy nodejs
+
+sudo apt-get remove -y nodejs npm libnode72
+sudo apt-get purge -y nodejs npm
+
+curl -fsSL https://deb.nodesource.com/setup_22.x -o /tmp/nodesource_setup.sh
+sudo -E bash /tmp/nodesource_setup.sh
+sudo apt-get install -y nodejs
+
+hash -r
+node -v
+```
+
+`node -v` 必须是 **v22.x**。若还是 `v12.22.9`，看 `apt-cache policy nodejs`：Candidate 应来自 `deb.nodesource.com`。若仍指向 Ubuntu 的 12.22.9，说明 setup 脚本没成功（网络、sudo、GPG），把脚本输出贴出来即可。
+
+---
+
+_**User**_
+
+ubuntu@10-60-56-22:~/visualforge$ apt-cache policy nodejs
+nodejs:
+  Installed: 12.22.9~dfsg-1ubuntu3.6
+  Candidate: 12.22.9~dfsg-1ubuntu3.6
+  Version table:
+ *** 12.22.9~dfsg-1ubuntu3.6 500
+        500 http://mirrors.ucloud.cn/ubuntu jammy-security/universe amd64 Packages
+        500 http://mirrors.ucloud.cn/ubuntu jammy-updates/universe amd64 Packages
+        100 /var/lib/dpkg/status
+     12.22.9~dfsg-1ubuntu3 500
+        500 http://mirrors.ucloud.cn/ubuntu jammy/universe amd64 Packages
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Node.js 12.22.9 is installed via apt on Ubuntu jammy. The package is available from jammy-security and jammy-updates repositories.
+
+No NodeSource repository is configured. The UCloud mirrors may block deb.nodesource.com access. Adding the NodeSource repository and installing Node.js from there is required.
+
+Alternative installation methods are being considered for the UCloud mirror environment. These include nvm with taobao or npmmirror registries, fnm, direct binary downloads from npmmirror, and Ubuntu snap. The NodeSource setup script may fail due to network restrictions.
+
+The exact NodeSource setup command is ready for execution. A China-specific fallback using nvm with npmmirror is being prepared as a backup if the primary method fails.
+
+The old Node.js package must be removed before installing a newer version. The nvm fallback will use the npmmirror registry to fetch Node 22. A direct binary download from npmmirror is another option. The snap channel 22/stable is also available. The README will not be updated unless requested.
+
+The README will be updated to include this exact `apt-cache policy` interpretation and a China-specific fallback for UCloud servers. The current Ubuntu section needs to be reviewed before patching.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这份输出说明 NodeSource 源根本没加上，apt 只能从 UCloud 的 Ubuntu 22.04 仓库选 12.22.9。正在把针对该情况的安装步骤写进 README。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Planning to update the README.
+
+The README will explain the apt-cache policy output. It will include NodeSource installation steps. Fallback methods for China or UCloud mirrors will be noted. The content will stay practical and concise.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备用中文解释 apt-cache policy 的输出结果，并给出下一步的精确命令。
+
+避免提及内部文件，直接给出核心答案。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这份输出已经能定性：**系统里根本没有 Node 22 的软件源。**
+
+- **Installed / Candidate** 都是 `12.22.9~dfsg-1ubuntu3.6`
+- 来源只有 `mirrors.ucloud.cn/ubuntu` 的 **jammy**（Ubuntu 22.04 自带仓库）
+- 没有 `deb.nodesource.com`
+
+所以现在再执行 `apt install nodejs`，apt 只能装这个 12.22.9。NodeSource 的 setup 要么没跑，要么被国内网络拦住了，源从未加上。
+
+不要再走 apt。在这台机器上直接装官方二进制（走 npmmirror）：
+
+```bash
+sudo apt-get remove -y nodejs npm libnode72
+
+cd /tmp
+curl -fsSL https://npmmirror.com/mirrors/node/v22.18.0/node-v22.18.0-linux-x64.tar.xz -o node22.tar.xz
+sudo mkdir -p /usr/local/lib/nodejs
+sudo tar -xJf node22.tar.xz -C /usr/local/lib/nodejs
+sudo ln -sfn /usr/local/lib/nodejs/node-v22.18.0-linux-x64 /usr/local/lib/nodejs/current
+echo 'export PATH="/usr/local/lib/nodejs/current/bin:$PATH"' | sudo tee /etc/profile.d/nodejs.sh
+source /etc/profile.d/nodejs.sh
+hash -r
+
+node -v
+which node
+```
+
+预期：`v22.18.0`，路径是 `/usr/local/lib/nodejs/current/bin/node`。若是 ARM，把 `linux-x64` 改成 `linux-arm64`。
+
+装好后再到 `~/visualforge` 执行 `npm install` 和 `npm run manager`。新开的 SSH 会话会自动读 `/etc/profile.d/nodejs.sh`；当前这个窗口必须先 `source` 一次，否则还会找到旧的 `/usr/bin/node`。
+
+---
+
+_**User**_
+
+回退一下安装方案，上一次其实是$ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+2026-08-19 19:37:03 - Installing pre-requisites
+Hit:1 http://mirrors.ucloud.cn/ubuntu jammy InRelease
+Hit:2 http://mirrors.ucloud.cn/ubuntu jammy-security InRelease
+Hit:3 http://mirrors.ucloud.cn/ubuntu jammy-updates InRelease
+Hit:4 http://mirrors.ucloud.cn/ubuntu jammy-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+210 packages can be upgraded. Run 'apt list --upgradable' to see them.
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+ca-certificates is already the newest version (20260601~22.04.1).
+curl is already the newest version (7.81.0-1ubuntu1.25).
+gnupg is already the newest version (2.2.27-3ubuntu2.5).
+apt-transport-https is already the newest version (2.4.14).
+0 upgraded, 0 newly installed, 0 to remove and 210 not upgraded.
+tee: /etc/apt/sources.list.d/nodesource.sources: No such file or directory
+Hit:1 http://mirrors.ucloud.cn/ubuntu jammy InRelease
+Hit:2 http://mirrors.ucloud.cn/ubuntu jammy-security InRelease
+Hit:3 http://mirrors.ucloud.cn/ubuntu jammy-updates InRelease
+Hit:4 http://mirrors.ucloud.cn/ubuntu jammy-backports InRelease
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+210 packages can be upgraded. Run 'apt list --upgradable' to see them.
+2026-08-19 19:37:09 - Repository configured successfully.
+2026-08-19 19:37:09 - To install Node.js, run: apt install nodejs -y
+2026-08-19 19:37:09 - You can use N|solid Runtime as a node.js alternative
+2026-08-19 19:37:09 - To install N|solid Runtime, run: apt install nsolid -y 
