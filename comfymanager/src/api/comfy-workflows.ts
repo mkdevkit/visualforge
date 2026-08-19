@@ -7,7 +7,7 @@ import { FEATURE_IDS, FEATURE_LABELS } from "./types.ts";
 import type { FeatureId } from "./types.ts";
 import { syncActiveWorkflow, upsertStationWorkflow } from "./features.ts";
 import type { ComfyFeatureConfig, StationWorkflow } from "./features.ts";
-import { injectPlaceholders, uiToApiPrompt, unwrapApiGraph, workflowFormat } from "./workflow-convert.ts";
+import { injectPlaceholders, remapMissingNodeClasses, uiToApiPrompt, unwrapApiGraph, workflowFormat } from "./workflow-convert.ts";
 
 export type WorkflowItem = {
   path: string;
@@ -138,7 +138,7 @@ export function readWorkflowJson(rel: string) {
 
 let objectInfoCache: { at: number; data: Record<string, { input?: { required?: Record<string, unknown>; optional?: Record<string, unknown> } }> } | null = null;
 
-async function fetchObjectInfo() {
+export async function fetchObjectInfo() {
   if (objectInfoCache && Date.now() - objectInfoCache.at < 30000) return objectInfoCache.data;
   const base = loadSettings().comfy.baseUrl.replace(/\/+$/, "");
   if (!base) return {};
@@ -162,16 +162,17 @@ export async function workflowToStationPrompt(rel: string) {
   const { json, format } = readWorkflowJson(rel);
   let graph: Record<string, unknown>;
   const notes: string[] = [];
+  const info = await fetchObjectInfo();
   if (format === "api") {
     graph = unwrapApiGraph(json);
     notes.push("已是 API 格式");
   } else if (format === "ui") {
-    const info = await fetchObjectInfo();
     graph = uiToApiPrompt(json, info);
     notes.push(Object.keys(info).length ? "已从 ComfyUI 画布格式转为 /prompt API" : "ComfyUI 未连通，按画布结构尽力转换；请启动 ComfyUI 后再配一次更稳");
   } else {
     throw new Error("无法识别工作流格式（需要 ComfyUI 画布 JSON 或 API Format）");
   }
+  graph = remapMissingNodeClasses(graph, info);
   const injected = injectPlaceholders(graph);
   notes.push(...injected.notes);
   return { prompt: injected.graph, notes, format };

@@ -46902,6 +46902,3164 @@ _**User**_
 
 _**Agent (grok-4.6)**_
 
+<think><details><summary>Thought Process</summary>
+正在排查视频、音乐、音频、3D 等其他工位是否也存在相同问题。重点关注是否错误使用了 18787 端口而非 ComfyManager 配置地址，以及是否存在空 JSON 响应或连接保持等待等异常。
+
+正在逐项检查各工位的生成流程：前端 API 调用链、长连接等待、空 JSON 错误处理及素材目录获取方式。
+
+发现音乐、TTS、音效和声画设计等工位仍在使用 wait:true 同步等待，存在与图片生成相同的超时和空 JSON 问题。计划统一改为异步提交后轮询机制，并修正相关错误提示。素材目录获取仍通过 18787 调用，与 ComfyManager 的分离是正确架构。
+
+api.ts 中已统一处理空 JSON 响应。接下来将逐页检查各工位的生成函数。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+把各工位的生成调用链对一下，看是否还在长连接等待、空 JSON 或打错地址。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+音乐、TTS、音效和声画设计工位也需从同步等待改为异步轮询。这与图像、视频、3D工位保持一致。
+
+声画设计任务成功后，语音数据的 upsert 需要在轮询阶段完成。
+
+目录接口目前直接请求 18788 端点，生成却走 18787。建议目录也统一通过 VisualForge 的 `/api/models`（18787）代理，让浏览器不再直连 18788。
+
+所有前端调用应统一走 api.ts 的相对 /api 路由。18787 通过 settings.managerUrl 代理 ComfyManager，这样远程浏览器无需直连 18788 即可访问，避免 CORS 问题。
+
+错误提示中不应把 18787 当作配置错误，而应明确指向“视铸生成服务”。
+
+音乐和音频工位也需要类似 StudioImage 的 `useTaskAssets` 可复用 hook 来管理资源。
+
+另外，pollComfyTask 里对 feature 的 fallback 逻辑需要一并修正。
+
+enqueueOrSync 会把 feature 写入 payload，这样 pollComfyTask 就能正确识别 voiceDesign。声画设计任务完成后，upsertVoice 直接从 payload 中提取 voicePrompt 和 preferredName 等字段即可，无需额外等待。
+
+App.ts 中音乐、TTS、音效的处理器目前仍返回 runSync 的资源，需要改为像图像一样返回任务和资源。
+
+目录接口目前由浏览器直接请求 18788，这是跨机器访问时的隐患。应统一改用 api.models()，让目录请求也经过 18787 代理，这样浏览器始终只与 VisualForge 通信，18787 服务器再通过 settings.managerUrl 代理 ComfyManager。
+
+发现 ComfyUI 返回的 `raw` 字段可能过大，导致 JSON 序列化失败并触发空 500 错误。需要在 HTTP 响应中剔除该字段。
+
+其余改动包括：将目录接口改为通过 api.models() 代理；为音乐、音频页面增加共享轮询 hook；修复 pollComfyTask 的 feature 映射；更新 MCP 工具对音乐、TTS、音效的等待逻辑；以及在声画设计任务完成时持久化语音数据。
+
+已确认 `raw` 字段在异步模式下仅含轻量元数据，但为避免体积过大导致 JSON 序列化失败，仍决定从客户端响应中剔除该字段。
+
+同时开始设计 `useGenerateTask` hook，用于统一管理任务状态与资源轮询。
+
+决定把轮询逻辑收进 `frontend/src/lib/useGenerateTask.ts`，避免重复代码。该 hook 接收任务对象和资产回调，供各工位统一调用。
+
+确定将轮询 hook 命名为 `useTaskPoll.ts`。
+
+声画设计 API 的返回结构已明确：成功后会携带 `voice`、`preview` 和 `voices` 字段。
+
+具体实现上，`designVoiceComfy` 入参会透传到 payload，`pollComfyTask` 在识别到 `voiceDesign` 特征且存在资源时，会从 payload 提取语音参数并执行 upsert，同时把首个资源 ID 设为 `previewAssetId`。
+
+前端声画设计页面会在任务轮询成功后刷新语音列表。音乐、TTS、音效接口将统一返回 `{ task, assets? }` 结构，与图像工位保持一致。服务端新增 `withAssets` 辅助函数，自动从任务记录提取资源 ID 并补全资产列表，同时剔除过大的 `raw` 字段，避免 JSON 序列化异常。
+
+确认了目录接口的具体改造方案：`fetchStudioCatalog` 将直接调用 `api.models()`，从而绕过浏览器直连 18788。`catalog.ts` 与 `api.ts` 之间的依赖关系没有循环问题，因为
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将在 app.ts 中实现 `publicGenerateResult` 辅助函数，用于剥离 raw 数据并附加资源。
+
+所有生成端点将统一使用该辅助函数。comfy-generate 的音乐、TTS、音效和声画设计任务均通过队列或同步执行，轮询逻辑负责语音数据更新。计划移除未使用的 runSync，提取共享的 useTaskPoll 钩子供 StudioMusic、StudioAudio 和 StudioImage 复用。catalog 将改用 api.models() 获取。错误提示会避免暗示 18787 是错误值。MCP 同步工具将统一使用等待辅助函数。designVoice 前端改为异步任务模式：调用后若返回 task 则设置任务状态，成功后再刷新语音列表并加载资源。
+
+正在编写 useTaskPoll 钩子。它每 2 秒轮询一次任务状态，自动停止轮询并在任务成功或失败时清理定时器。
+
+useTaskPoll 钩子已补全。它在任务成功后自动拉取 assetIds 对应的资源数据。父组件负责管理 task 状态，钩子仅返回 assets。计划为钩子增加 onSucceeded 回调，以便任务完成后通知父组件刷新语音列表等。
+
+已确定 useTaskPoll 的回调接口，支持 onSucceeded 回调。StudioAudio 任务成功后将调用 api.voices() 刷新语音列表。generateResultJson 辅助函数会从结果中剥离 raw 字段，确保 HTTP 响应不包含原始数据。
+
+视频与 3D 工位无需在 POST 响应中携带资源，它们依赖轮询获取。generateResultJson 会在结果中自动附加资源列表。MCP 的 settleGenerate 函数将轮询任务状态，最多等待 5 分钟，每 2 秒检查一次任务进度。
+
+MCP 的 settleGenerate 将在任务失败时抛出异常，并返回任务与资源列表。该函数可放入 mcp.ts。
+
+前端 TaskRecord 可接受额外字段，不影响兼容性。
+
+designVoiceComfy 入队后仍通过 GET 返回语音列表，POST 仅返回任务；前端轮询结束后再拉取语音列表。
+
+pollComfyTask 在处理 voiceDesign 任务时，会从任务 payload 中提取信息并完成语音数据的 upsert。
+
+发现 ComfyUI prompt 模式通常没有 `r.voice`，每次轮询都用 nanoid 会产生重复语音记录。因此改为从 payload 提取稳定 ID，优先使用 `voiceId`，否则回退到 `comfy-${task.id}`，确保只创建一条语音。
+
+已确定 voiceDesign 任务的 upsert 字段映射：ID 使用 `comfy-${task.id}`，名称取 payload 中的 preferred 或 prefix，prompt 取 payload 的 voicePrompt 或任务 prompt，目标模型取 payload 的 targetModel，设计模型直接使用 task.model，预览资源 ID 取 assets[0].id。
+
+决定不通过 patch 将语音 ID 写入任务 payload，因为前端仍通过
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+音乐、配音、音效、音色设计仍在长连接里等出图，和生图一样会空 500。模型列表还直接打设置里的 18788。会改成：工位一律提交任务再轮询；浏览器只打视铸 `/api`，由 18787 去用设置里的 ComfyManager 地址。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+Offset 155 is beyond file length (119 lines)
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 StudioImage 文件只有 119 行，比预期更短。
+
+准备完整读取该文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 StudioImage 存在 bug：`useEffect` 的依赖项包含 `task` 对象。每 2 秒调用 `setTask` 传入新对象时，interval 会被重置。
+
+决定改用 `task?.id` 和 `task?.status` 作为依赖，避免每次轮询都重建 interval。准备实现 `useTaskPoll` 并开始编写代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\useTaskPoll.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+catalog.ts 仍调用 uploadFile，但该导入已被移除。
+
+需要从 api 导入重新引入 uploadFile。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 comfy-generate.ts 中是否仍在使用 nanoid 和 runSync。
+
+若 runSync 未被使用则将其移除。nanoid 可能也已不再需要。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\comfy-generate.ts",
+  "pattern": "nanoid|runSync"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\comfy-generate.ts",
+  "pattern": "nanoid|runSync",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+排查发现 HTTP_BODY_TEMPLATES 仅在 runSync 错误中被调用。
+
+正在确认 featureCfg 是否仍被使用。若未引用，将一并移除 runSync、nanoid 和 HTTP_BODY_TEMPLATES，并搜索相关代码验证。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server",
+  "pattern": "HTTP_BODY_TEMPLATES|featureCfg"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server",
+  "pattern": "HTTP_BODY_TEMPLATES|featureCfg",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\lib\\features.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\lib\\comfy.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+首次替换 HTTP_BODY_TEMPLATES 导入时可能失败了，因为 nanoid 的导入已经修改过。
+
+正在查看 comfy-generate 中 runSync 部分的代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+runSync 已移除。接下来检查 app.ts 辅助函数、MCP 和 UI 页面。
+
+同时检查 GenerateMusicBody 的 lyrics 字段。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在 mcp.ts 中查找 generate_music 等函数并准备更新。
+
+同时检查 app.ts 中 generatePayload 的位置。需要确保它在使用它的路由之前定义。第一次替换可能把它放在了路由中间。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+  "pattern": "generatePayload|function generate"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+  "pattern": "generatePayload|function generate",
+  "topFiles": [
+    {
+      "matchCount": 8,
+      "uri": "frontend\\server\\src\\app.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 8
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "generate_music|generate_tts|generate_sfx|design_voice|generate_image|pollRemoteTask"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "generate_music|generate_tts|generate_sfx|design_voice|generate_image|pollRemoteTask",
+  "topFiles": [
+    {
+      "matchCount": 8,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 8
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "runSync|useTaskPoll|setTask"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "runSync|useTaskPoll|setTask",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "frontend\\src\\lib\\useTaskPoll.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\pages\\Studio3D.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 14
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\useTaskPoll.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备查看 StudioImage 的相关代码。
+
+将并行检查 StudioAudio、mcp.ts、StudioVideo/Studio3D、catalog.ts 和 api.ts，排查音乐、音频、视频和 3D 等工位的轮询逻辑是否正常。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\lib\\api.ts",
+  "pattern": "generateMusic|generateTts|generateSfx|designVoice|task\\?:"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\lib\\api.ts",
+  "pattern": "generateMusic|generateTts|generateSfx|designVoice|task\\?:",
+  "topFiles": [
+    {
+      "matchCount": 7,
+      "uri": "frontend\\src\\lib\\api.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 `enqueueOrSync` 的返回结构，确认是否包含空的 `assets` 和 `task` 字段。
+
+正在排查语音设计 upsert、音乐生成结果类型、anim3d 等其他页面的问题。发现视频轮询未捕获错误，且视频与图片的超时时间不一致，计划统一使用 useTaskPoll。还考虑将等待任务的逻辑提取为公共 helper 以避免重复。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "result\\.assets|wait:\\s*true|runManagerGenerate"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "result\\.assets|wait:\\s*true|runManagerGenerate",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\lib\\manager-client.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 8
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **5** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge\frontend`** (5 files)
+
+| File |
+|------|
+| `../frontend\src\pages\StudioImage.tsx` |
+| `../frontend\src\pages\StudioMusic.tsx` |
+| `../frontend\src\pages\StudioAudio.tsx` |
+| `../frontend\src\pages\Studio3D.tsx` |
+| `../frontend\src\pages\StudioVideo.tsx` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server",
+  "pattern": "export async function generateMusic|export async function generateTts|export async function designVoice|function generateMusic"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server",
+  "pattern": "export async function generateMusic|export async function generateTts|export async function designVoice|function generateMusic",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 pollComfyTask 中存在一个 bug：当任务类型为 "audio" 时，feature 默认被设为 "tts"。
+
+确认 payload 中已包含正确的 feature 字段。pollComfyTask 的 audio 类型回退逻辑需要改用 payload.feature，避免错误地默认为 tts。
+
+正在梳理各工位的 UI 改造方案：Music、Audio、Image 将统一使用 hook；Video 和 3D 采用可选 hook 与 assets 方案。
+
+MCP 端需要改为类似 generate_image 的轮询逻辑。
+
+generatePayload 的处理方式已确认可行，但 TypeScript 索引签名可能带来一些混乱。
+
+StudioAudio 的设计语音场景存在时序问题：提交时 voices 已经加载完毕，但 poll 成功后才生成新语音，因此初始响应不会包含该语音。UI 必须在设置任务后持续轮询，直到任务成功完成。
+
+useTaskPoll 的 onSucceeded 存在闭包过期风险，需谨慎处理依赖项或改用 ref。Music 不需要该回调，但 Audio 设计需要。
+
+计划在提交时记录 pendingKind，防止任务完成后因标签页切换而无法正确刷新语音列表。
+
+Video 轮询目前缺少错误捕获，且无 ResultStrip，用户需前往素材库查看结果。统一使用 2 秒轮询间隔即可覆盖所有工位。
+
+generatePayload 中剥离 raw 后，其余字段不会残留大量嵌套对象，无需额外处理。
+
+MCP 端准备提取 waitForGenerate 辅助函数，将各工位的轮询逻辑统一收拢。
+
+waitForGenerate 辅助函数的具体实现已确定：轮询间隔设为 2 秒，超时时间 5 分钟，任务失败时抛出异常。assets 优先取 result.assets，否则通过 task.assetIds 反查获取。MCP 端需要补充 TaskRecord 类型定义。
+
+视频和三维工位保持异步返回，因为耗时较长。音乐、语音、音效和设计工位则改为同步等待并立即返回素材，与图片生成逻辑保持一致。
+
+服务端已修复 HTTP wait:true 导致空 JSON 的问题，改为 wait:false。
+
+音乐和音频的 UI 目前仍期望即时返回素材，需要调整为轮询模式。
+
+确认 pollComfyTask 中 sfx 完成后的 feature 回退逻辑正确。
+
+useTaskPoll 的 onSucceeded 会通过 ref 持久化，避免闭包过期。回调内将使用轮询后最新获取的 assets 数据，而非过时的任务状态。
+
+useTaskPoll 的具体实现已确定：通过 useRef 持久化 onSucceeded 和 task 引用，避免闭包过期。轮询逻辑每 2 秒调用一次 api.task 获取最新状态，并在任务成功或失败后自动停止定时器。
+
+useTaskPoll 的 effect 会在任务状态变为 succeeded 时执行：若 assetKey 为空则直接清空 assets 并触发 onSucceeded；否则通过 Promise.all 批量拉取 assetIds 对应的素材数据，成功后更新 assets 并再次触发 onSucceeded，失败时将错误信息传给 setError。
+
+useTaskPoll 返回 assets 与 setAssets，供各工位直接消费。
+
+提交新任务时必须先清空旧素材，避免残留数据干扰。StudioMusic 将彻底移除本地 assets 状态，完全由 hook 驱动。
+
+提交流程改为：先置空 task 与 assets，再发起请求；若接口直接返回 assets 则立即写入 hook，否则进入轮询等待。
+
+提交后若任务已即时成功，useTaskPoll 会重复拉取素材，但无副作用。错误提示将直接展示 task.error。StudioAudio 的三个生成路径共用同一任务状态，切换标签页时仍能保留结果。设计工位在 onSucceeded 中会根据 pendingKind 调用 api.voices() 刷新语音列表。
+
+设计语音的 ID 采用 `preferredName || prefix` 规则。设计工位会在提交时把当前参数存入 ref，等任务成功后通过 `api.voices()`
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server",
+  "pattern": "pollRemoteTask|pollComfyTask"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server",
+  "pattern": "pollRemoteTask|pollComfyTask",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "frontend\\server\\src\\app.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\lib\\comfy-generate.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\lib\\generate.ts"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 9
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "managerBase|18788|catalogFile"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "managerBase|18788|catalogFile",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\lib\\catalog.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "frontend\\src\\lib\\manager.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\lib\\types.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\ApiDocs.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\pages\\Settings.tsx"
+    }
+  ],
+  "totalFiles": 6,
+  "totalMatches": 13
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 frontend/src/lib/manager.ts 是否仍被 catalog 调用，还是仅 Settings 使用。
+
+Settings 页通过浏览器调用 manager 的 ping 和设置逻辑没有问题。接下来将统一实现剩余改动：StudioVideo 的 ResultStrip 需要导入 AssetRecord 并引入 ResultStrip 组件；Image 提交时的轮询逻辑将替换为 useTaskPoll hook；视频轮询间隔保持 2 秒即可；generatePayload 的位置在 JS 中没有问题。同时会检查 generate.ts 包装器和 designVoice 返回的额外字段。
+
+正在检查 MCP generate_music 的 result.assets 是否会导致 failScript，并核对 generate.ts 中 generateMusic 的返回类型。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\manager.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "from \\\"../lib/manager\\\"|from \\\"./manager\\\""
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "from \\\"../lib/manager\\\"|from \\\"./manager\\\"",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\Settings.tsx"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 Settings.tsx 直接在浏览器中调用了 manager.health()。
+
+Settings.tsx 的 ping 请求若在远程浏览器上会失败。catalog 才是主要问题。Settings 应改用 api.pingComfy 而非直接调用 manager。我将查看该文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "manager\\.|api\\.pingComfy|/api/settings"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "manager\\.|api\\.pingComfy|/api/settings",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\ApiDocs.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\Settings.tsx"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+设置页的 manager.health() 在浏览器中返回了 18788。
+
+远程访问时浏览器直连 manager 会失败。应改用 `api.health()`，它通过服务端获取 manager 状态。这与工位类问题相同，属于同一类 bug。
+
+保留 managerBase localStorage 作为打开 ComfyManager 的快捷入口。开始实施全部文件修改。正在为 MCP 等待辅助函数添加 Task 类型定义。
+
+MCP 等待逻辑已确定：轮询间隔 2 秒，超时 5 分钟，失败则抛错。图片、音乐和 TTS 统一采用同步等待；视频和 3D 保持异步。
+
+设计语音等待完成后需加载声库并回显声 ID。服务端 TaskRecord 的 payload 结构需要确认。视频页面将加入 ResultStrip 展示结果。3D 预览沿用资产方式。音频轮询回退逻辑已修复，缺少 feature 字段时不会误判为 voiceDesign。无需调整 useTaskPoll 的轮询间隔。
+
+StudioImage 将接入 useTaskPoll 并移除重复的副作用逻辑。StudioVideo 同样接入该 hook，补充 ResultStrip，并由 hook 统一捕获错误。Studio3D 也接入 useTaskPoll，预览直接从 assets[0] 获取。3D 现有预览效果保留不变，仅用 hook 处理轮询与错误。
+
+generatePayload 的 TypeScript 类型已确认安全。Settings 页面将调用 `api.health()` 获取 engine 与 manager 状态，并按在线或离线分别展示提示文案。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "contextAfter": 25,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\manager-client.ts",
+  "pattern": "fetchManagerRuntime"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\manager-client.ts",
+  "pattern": "fetchManagerRuntime",
+  "topFiles": [
+    {
+      "matchCount": 33,
+      "uri": "frontend\\server\\src\\lib\\manager-client.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\AssetCard.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已理清整体情况。将并行处理剩余修改。
+
+检查了 generatePayload 的返回结构，确认仅包含 task 和 raw，不包含 assets。设计声纹提交时的 voices 数据为预期行为，UI 会轮询获取最新值。接下来将编写 StudioAudio 组件，这是最复杂的部分。
+
+正在实现 StudioAudio 组件的状态逻辑。通过 useTaskPoll 轮询任务，仅在 design 标签页时拉取声纹列表并匹配预设的 preferredName。
+
+补全了 StudioAudio 中 applyDesignedVoice 的调用逻辑。该函数在组件内定义，通过 effect 确保在 onSucceeded 时可用。ErrorBox 将优先展示任务失败状态下的错误信息。提交阶段的 Spinner 提示文案定为“正在提交”。
+
+任务运行中的 Spinner 提示文案定为“ComfyUI 合成中”。提交按钮仅在 busy 状态禁用，允许用户在轮询期间重新提交。音乐生成按钮在无有效输入时禁用。已修复 pollComfyTask 音频回退逻辑，并更新 MCP get_task 描述。将在 mcp.ts 中添加 waitForTaskAssets 辅助函数。generate_image 将改用辅助函数替代内联循环。视频与 3D 任务保持异步返回，不等待完成。
+
+Settings 将使用 api.health manager 字段，同时保留 managerBase/setManagerBase 以缓存 localStorage 中的 URL，避免与服务端设置冲突。useTaskPoll 将改用 useRef 实现。还需验证 generatePayload 在 TypeScript 中是否兼容 Hono 的 c.json，并排查其他文件中残留的 runSync 调用。
+
+确认 MCP 返回类型中 result.assets 可能导致 TypeScript 错误，但修改后代码不再依赖该字段，仅使用 result.task。准备开始编写所有文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+其它工位也有同类问题：音乐/配音仍当同步结果用。接下来会统一成提交任务再轮询，并让浏览器只打视铸 `/api`。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\useTaskPoll.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+继续检查 StudioAudio、StudioVideo、Studio3D、mcp.ts 和 Settings 等其他工位。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 StudioVideo 的 generateVideo 返回类型缺少 assets 字段。
+
+将为 generateVideo API 类型补充可选 assets 字段。Studio3D 将改用 useTaskPoll 替换 poll，并同步更新 mcp、settings 和 api 类型。同时会移除 video 中未使用的 setAssets 导入以避免 lint 警告。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 generateVideo API 的返回类型是否包含可选的 assets。
+
+还需为视频任务添加 ErrorBox 错误提示。发现 StudioVideo 中 generateVideo 返回了 task 字段，但 API 类型将其设为必填。准备更新 MCP 和设置模块，并修复 pollComfyTask 在音频类型时默认使用 tts 的逻辑。另外注意到 React hooks 调用顺序可能存在不一致，需要排查。
+
+已确认 useTaskPoll 在 useEffect 之后调用是安全的。接下来将修改 mcp.ts 辅助函数和生成音乐等接口。同时会把 3D 接口的 assets 类型也改为可选。视频和 3D 的 ErrorBox 都要展示 task.error。另外注意到音乐生成的 5 分钟超时可能对部分模型偏短，但与图片生成保持一致。
+
+设计语音 MCP 的等待结果将包含匹配到的 voices 和 voice id。pollComfyTask 中 sfx 与 voiceDesign 的 feature 回退逻辑已存在。Settings.tsx 也需要同步调整。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Settings 的 refresh() 需要改用 API。
+
+还需修复 manager.status() 与 "打开 ComfyManager" 链接。Studio3D 的 setTask(r.task) 需处理 task 可能为 undefined 的情况。Settings.tsx 中仍有 manager.url() 待修正。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "result\\.assets|runSync|wait:\\s*true|managerBase\\("
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "result\\.assets|runSync|wait:\\s*true|managerBase\\(",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": ".\\frontend\\src\\pages\\Settings.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\frontend\\src\\lib\\manager.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Settings.tsx 中 health 的替换未生效，文件仍显示 manager。
+
+href 替换可能也未生效。怀疑是读写竞争导致替换失败。准备重写整个 Settings.tsx 文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.ts",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\types.ts",
+  "pattern": "payload"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\types.ts",
+  "pattern": "payload",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\types.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 MCP generate_video/3d 的分布情况。同时排查其他工位是否存在类似问题。
+
+发现 video/3d 接口返回的 result 中也包含 raw 字段，需要像生图一样剔除该字段以避免 MCP 返回过大的 JSON。准备同步修改这两个接口的返回逻辑。
+
+确认了 fetchManagerRuntime 的健康状态判断逻辑：若运行时对象缺少 `ok` 字段，前端会正确显示为“在线”，无需额外处理。
+
+前端 TaskRecord 没有 payload 字段，无需调整。
+
+pollComfyTask 的音频回退逻辑在 voiceDesign 场景下正常工作。
+
+generate_video 接口确实存在将 raw 字段直接展开到 MCP 返回体中的 bug，需要一并修复。
+
+音频缺失时默认回退到 tts，persist 场景仅不执行 upsert，payload 已包含 feature 字段，逻辑正常。
+
+generatePayload 中未使用的 raw 参数存在 lint 警告，需要清理。
+
+fetchManagerRuntime 的健康状态可能始终返回 `ok: true`，需进一步确认。
+
+generatePayload 的 TypeScript 类型定义（`[key: string]: unknown` 且 task 可选）可能存在隐患，需要排查。
+
+确认了 waitForTaskAssets 的轮询逻辑正常。
+
+发现一个关键遗漏：当任务立即完成（无 promptId）时，enqueueOrSync 直接返回成功任务，但没有调用 upsertVoice 来持久化 voiceDesign 文件。这意味着即时完成路径下 voiceDesign 数据可能丢失。
+
+确认了即时完成路径下 voiceDesign 数据丢失的问题。计划将持久化与 voice upsert 提取为公共辅助函数，统一修复该路径。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在修复 generate_3d MCP，避免其直接暴露原始数据。
+
+检查了 fetchManagerRuntime 的返回值。Settings 可能显示"未连通"，但决定保留现状。
+
+确认了 pollComfyTask 中 sfx 功能推断和 assetMeta 的工作正常。
+
+generatePayload 剥离 raw 后仍会展开剩余字段，但体积不会过大。
+
+StudioAudio 中 useTaskPoll 在 useEffect 之后调用是合法的。
+
+已清理 generate_3d 和 generatePayload 的 raw 字段。
+
+接下来会检查前端健康类型是否包含 manager，并尝试运行 tsc。
+
+发现 generateImage 返回类型可能缺少 assets，waitForTaskAssets 虽然兼容可选参数，但仍需确认 TypeScript 是否会因多出的 raw 字段报错。
+
+确认额外字段不会引发 TypeScript 报错。
+
+generatePayload 展开剩余字段时仅包含 task 与 raw，不会携带其他大体积数据。
+
+即时完成的任务会同时通过 setTask 和 setAssets 直接返回结果，useTaskPoll 也会继续拉取；重复设置 assets 不影响功能。
+
+generateMusic 返回的 raw 字段同样安全。
+
+发现切换任务时旧 assets 可能残留。将在 image、music、audio 提交时清空 assets，保持界面整洁。
+
+重新评估后决定保留旧 assets 残留：生成新任务时保留上次结果更符合用户体验。image 工位原本也没有清空 assets，保持现状即可。接下来继续修复 3d MCP 并运行类型检查。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "manager\\.health|result\\.assets"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "manager\\.health|result\\.assets",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 generate.ts 中 waitForTaskAssets 与 generateImage 返回类型（含 raw）的兼容性。
+
+TypeScript 结构类型兼容性已确认。接下来将运行前端服务端和 Vite 客户端的 tsc 检查，并核对前端 tsconfig。
+
+发现两个潜在问题：
+- generateImage 返回的 raw 字段体积很大但未被使用
+- 即时完成时 payload 可能缺少 feature 字段，因为 body 来自 VoiceDesignBody 类型
+
+即时完成路径无需担心 feature 字段缺失，因为该路径已执行 upsert，且不会触发轮询（无 remoteTaskId）。接下来将运行类型检查，并查看前端 tsconfig。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **2** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge\frontend`** (2 files)
+
+| File |
+|------|
+| `../frontend\server\tsconfig.json` |
+| `../frontend\tsconfig.json` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+运行 tsc 检查类型错误。同时检查 generatePayload 中未使用的 _raw。
+
+StudioAudio 的 hooks 规则没有问题。useTaskPoll 位于两个 useEffect 之后，且无条件返回，符合 React exhaustive 规则。接下来将运行 tsconfigs.Task 的类型检查。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\tsconfig.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\tsconfig.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查前端源码中未使用的变量。
+
+已逐一核对各工位代码中的变量使用情况。StudioVideo、Studio3D、Settings、useTaskPoll、StudioAudio 及 tsc 相关模块均确认变量被正常引用，未发现未使用变量。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc -p tsconfig.json --noEmit; npx tsc -p server/tsconfig.json --noEmit</summary>
+```bash
+npx tsc -p tsconfig.json --noEmit; npx tsc -p server/tsconfig.json --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+src/lib/catalog.ts(38,16): error TS2352: Conversion of type 'Catalog & { ok: boolean; openModels?: OpenModel[] | undefined; }' to type 'Catalog & Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Catalog & { ok: boolean; openModels?: OpenModel[] | undefined; }' is not comparable to type 'Record<string, unknown>'.
+    Index signature for type 'string' is missing in type 'Catalog & { ok: boolean; openModels?: OpenModel[] | undefined; }'.
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+catalog.ts 中存在一个由 API 相关改动引发的 TypeScript 错误。
+
+catalog.ts 的类型断言需要修正。tsc 报错但 PowerShell 退出码为 0，因为命令行中分号导致前一条失败、后一条成功。准备单独运行服务端 tsc 检查是否通过。
+
+决定调整 `looksLikeLegacyCloudCatalog` 的入参类型为 `Catalog & { priceDisclaimer?: unknown }`，这样调用处无需额外类型断言，代码更简洁。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc -p tsconfig.json --noEmit</summary>
+```bash
+npx tsc -p tsconfig.json --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+src/lib/catalog.ts(38,16): error TS2352: Conversion of type 'Catalog & { ok: boolean; openModels?: OpenModel[] | undefined; }' to type 'Catalog & Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Catalog & { ok: boolean; openModels?: OpenModel[] | undefined; }' is not comparable to type 'Record<string, unknown>'.
+    Index signature for type 'string' is missing in type 'Catalog & { ok: boolean; openModels?: OpenModel[] | undefined; }'.
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc -p server/tsconfig.json --noEmit</summary>
+```bash
+npx tsc -p server/tsconfig.json --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+StrReplace 因遗漏路径参数而失败。
+
+正在重试。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在修复 catalog.ts。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 Catalog 类型是否包含 catalogFile。
+
+fetchStudioCatalog 返回仍使用 `as Catalog` 和 `String(json.catalogFile)`。准备再次运行 tsc 检查。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc -p tsconfig.json --noEmit</summary>
+```bash
+npx tsc -p tsconfig.json --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+类型检查已通过。正在排查 Settings 工位是否因 fetchManagerRuntime 缺少 `ok: true` 而被误判为未连通。
+
+正在确认 ManagerRuntime 类型是否包含 `ok` 字段。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/runtime*",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "ok:"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "ok:",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "**/*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "/api/runtime|ok:\\s*true"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "/api/runtime|ok:\\s*true",
+  "topFiles": [
+    {
+      "matchCount": 28,
+      "uri": "comfymanager\\src\\api\\app.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 43
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查其他工位是否正常。ManagerRuntime 已确认通过，但 Settings 中的 m.comfy 检查仍需验证。
+
+发现 Settings 的 ComfyUI 连通状态判断有误：旧代码读取 `api?.ok`，但新接口返回的是 `connected` 和 `processRunning`。需要修正为使用这两个字段。
+
+确认这是我引入的 UX bug。修复时会同时兼容 `connected` 和 `api?.ok` 两个字段，确保连通状态显示正确。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问除生图外，其它工位是否存在问题。
+
+其他工位也存在同类问题。音乐、配音、音效、音色设计等工位在单次请求中等待 ComfyUI，导致空 500 错误；UI 却期望立即返回素材。视频和 3D 工位虽已异步，但轮询未捕获错误，现已统一 hook 并修复结果展示。目录服务已切换至 18787 端口，设置页此前从浏览器 ping 了 18788 端口。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+有。音乐、配音、音效、音色设计和生图是同一类问题；视频 / 3D 已经是异步，但轮询和成品展示不完整。已经按生图同一套方式改完。
+
+**会空响应 / 超时的工位**
+
+音乐、配音、音效、音色设计之前都在一次 HTTP 里等 ComfyUI 跑完。代理或超时一掐，页面就拿到空 JSON。它们现在也是：提交立刻返回任务，前端再轮询成品。
+
+**已经异步、但还不完整的工位**
+
+视频、3D 本来就是交任务再查，但轮询出错会吞掉，视频页做完也看不到片子。现在五个工位共用同一套轮询，视频会直接出成品预览。
+
+**顺带修了两处同类路径问题**
+
+- 工位模型目录已改为走视铸 `/api`（18787），不再由浏览器直打 ComfyManager（18788）。
+- 设置页的在线检测也改走视铸健康检查，远程打开时不会误打本机 18788。
+
+刷新页面后再试音乐或配音：按钮会先变成「提交中」，随后是「合成中，将自动刷新」，完成后出现成品。
+
+---
+
+_**User**_
+
+视铸生成接口 /api/models 返回空响应（HTTP 500）。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户报告了视铸生成接口 `/api/models` 返回空响应且状态码为 HTTP 500 的问题。
+
+正在排查该问题。将检查前端服务端点、终端日志以及 ComfyManager 的调用逻辑。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+`/api/models` 空 500 多半是生成服务转 ComfyManager 时崩了。我先看接口实现和当前终端报错。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\9.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **6** results in **1** directory</summary>
+
+Directory: **`c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals`** (6 files)
+
+| File |
+|------|
+| `../c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\9.txt` |
+| `../c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\10.txt` |
+| `../c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\8.txt` |
+| `../c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\882349.txt` |
+| `../c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\882348.txt` |
+| `../c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\882347.txt` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+终端显示 Vite 运行正常，但 18787 端口的 API 服务器未启动。这导致 /api/models 接口返回空响应并触发 HTTP 500 错误。
+
+重启后 API 进程以退出码 0 正常退出，而非崩溃。这说明服务启动后立即终止，需要检查前端 server/index.ts 的启动逻辑。
+
+Vite 代理因连接被拒绝而返回空 500。这是生成服务器未能持续运行的 bug。我将直接启动 API 并检查其退出原因。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+Vite 在跑，但 18787 上的生成服务没起来，代理因此返回空 500。接着查 API 进程为什么立刻退出。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\10.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\index.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "listen|18787|process\\.exit"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "listen|18787|process\\.exit",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\index.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\config.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+API 进程在重启前已退出，退出码为 0。
+
+重启后仅 Vite 启动，未见 `[api]` 日志。怀疑 tsx 编译中、并发启动异常或端口冲突导致静默失败。准备手动运行 API 服务器定位错误，并检查 prepare()、startTaskPump 和 app.ts 的语法与导入问题。
+
+确认 500 空响应是 Vite 代理返回的 ECONNREFUSED，说明生成服务未监听。准备手动启动服务并排查导入问题。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "startTaskPump|export function prepare"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "startTaskPump|export function prepare",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\app.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\index.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 4
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\9.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+API 服务器未启动，导致接口返回 HTTP 500 空响应。
+
+准备从前端目录手动运行 `tsx watch server/srcindex.ts` 以定位错误。怀疑原因包括：app.ts 导入异常、tsx watch 在导入时崩溃退出，或并发前缀导致日志未显示。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+Cancelled
+</details></tool-use>
+
+---
+
+_**User**_
+
+为什么要找18787 ？不是不是找配置的ComfyManager吗？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户在问：为什么前端没有使用配置里的 ComfyManager 地址，而是去查找 18787 端口。
+
+generate 服务运行在 18787，ComfyManager 在 18788。浏览器通过 Vite 代理到 18787，再由该服务转发请求。当前 18787 无响应，导致 Vite 代理报错。需要向用户解释这一架构设计，并说明为何不能直接访问 ComfyManager。
+
+用户质疑这种架构设计。他们希望 `/api/models` 直接访问配置中的 ComfyManager（18788），而不是先经过 18787 的 generate 服务。当前 18787 未运行导致 Vite 代理连接被拒绝。用户想知道为何前端要先去查找 18787 这个中间节点。
+
+用户正在质疑这一架构设计本身。既然已明确 VisualForge 只需 ComfyManager 地址，生成也应由该服务直接调用，为何浏览器仍要先经过 18787 这个中间节点。当前 18787 未运行导致 Vite 代理连接被拒绝，这进一步暴露了绕路设计的缺陷。
+
+用户看到此前错误提示中提到“由视铸生成服务去调用”，因此质疑为何不直接访问配置中的 ComfyManager。这说明用户可能希望前端直接请求 ComfyManager，而非通过 generate 服务中转。generate 服务本身应已按配置地址调用 ComfyManager。
+
+generate 服务负责本地持久化、任务管理、MCP、上传和库功能，ComfyManager 仅负责 GPU 工作流与模型。/api/models 是 generate 服务的转发端点，它会从 ComfyManager 拉取模型目录。用户对 18787 的困惑是合理的，因为错误提示把 generate 服务当成了 ComfyManager 的直接入口。
+
+之前将 catalog 请求改为经 18787 转发，是为了避免远程浏览器直接访问 localhost:18788。现在 generate 服务未运行，导致该中转路径失效并返回空 500。用户质疑为何不直接访问配置中的 ComfyManager，因为 generate 服务本身已按配置地址调用 ComfyManager。这暴露了当前架构的脆弱性：只要 generate 服务宕机，即使 ComfyManager 正常也无法获取模型目录。
+
+我意识到用户是在询问架构原因，而非要求修改代码。我将先解释 `/api/models` 是视铸生成服务的接口，浏览器必须先经过 18787，而设置中的 ComfyManager 地址是 generate 服务用来连接下游的。随后我会说明当前 500 错误是因为 generate 服务未运行导致 Vite 代理连接被拒绝。如果用户确实希望前端直接访问 ComfyManager，我可以重新评估是否调整架构，但目前用户只是在质疑为何绕路。
+
+Vite 代理到 18787 与 ComfyManager 配置地址相互独立。generate 服务通过 loadSettings().managerUrl 读取设置中的 ComfyManager 地址。此前任务已明确浏览器只打视铸 `/api`，18787 负责调用下游 ComfyManager。因此不应将 catalog 请求改为直接访问 ComfyManager，而应先恢复 generate 服务运行以解决当前 500 错误。
+
+18787 不可用是操作问题，与架构设计无关。当前错误提示容易误导用户，应当优化。/api/models 必须由 generate 服务转发，因为它会包装 ComfyManager 的原始目录数据。我将用简洁流程图向用户解释这一设计。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先把调用链说清楚：浏览器打的是视铸生成服务，设置里的 ComfyManager 是它再去连的。我核对一下代理和当前 18787 是否在跑。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: c:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\9.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,mjs,js,json}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "proxy|18787|managerUrl"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "proxy|18787|managerUrl",
+  "topFiles": [
+    {
+      "matchCount": 6,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend\\server\\src\\app.ts"
+    },
+    {
+      "matchCount": 7,
+      "uri": "frontend\\server\\src\\lib\\manager-client.ts"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend\\vite.config.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\lib\\manager.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\lib\\types.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\types.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\config.ts"
+    }
+  ],
+  "totalFiles": 9,
+  "totalMatches": 34
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望得到一个清晰的解释。
+
+错误信息造成了误解。Settings 中的 ComfyManager URL 实际上由 generate server 使用，而非浏览器直接调用。浏览器请求会经过 Vite 代理到 18787 的 VisualForge API，再由该服务去访问 ComfyManager。当前 500 错误是因为 18787 服务未运行导致连接被拒绝。用户可能希望浏览器直接与 ComfyManager 通信。
+
+不建议让浏览器直接访问 ComfyManager。本地库、任务上传和 MCP 等功能都依赖 18787 服务才能正常工作。远程环境同样会指向 127.0.0.1:18788。我会把报错信息改得更清楚：明确说明是视铸生成服务没起来，并提示开发时用 npm run dev 同时启动 18787。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+浏览器不会去打设置里的 ComfyManager。设置里的地址是给 **视铸生成服务** 用的。
+
+开发时实际是两跳：
+
+1. 页面在 `5173`，`/api/models` 被 Vite 转到本机 **18787**（视铸生成服务）
+2. 18787 再用设置里的 ComfyManager 地址（默认 **18788**）去拉模型目录、提交生成
+
+所以「找 18787」是对的：那是视铸自己的接口。工位、资源库、任务轮询都挂在这里；ComfyManager 管 ComfyUI、工作流和权重。
+
+你看到的空 500 不是 ComfyManager 配错了。当前 `npm run dev` 里 **Vite 起来了，18787 没起来**，代理连不上就返回空响应。终端里是 `connect ECONNREFUSED 127.0.0.1:18787`。
+
+正常启动后日志里应同时有：
+
+- `[web] VITE ... localhost:5173`
+- `[api] VisualForge API  http://127.0.0.1:18787`
+
+如果只有 Vite、没有 API 那行，把 `npm run dev` 停掉重开。ComfyManager 仍要另开 `npm run manager`。
+
+---
+
+_**User**_
+
+[32m[INFO][0m got prompt
+[1m[33m[WARNING][0m invalid prompt: {'type': 'missing_node_type', 'message': "Node 'LoadDiffusionModel' not found. The custom node may not be installed.", 'details': "Node ID '#1'", 'extra_info': {'node_id': '1', 'class_type': 'LoadDiffusionModel', 'node_title': 'LoadDiffusionModel'}}
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+ComfyUI reports a missing `LoadDiffusionModel` node. This custom node likely isn't installed.
+
+`LoadDiffusionModel` appears to be a native ComfyUI core node rather than a separate custom package. I am checking whether this indicates a version mismatch or a missing dependency. I will also review how VisualForge handles custom node installation.
+
+`LoadDiffusionModel` is a built-in node in newer ComfyUI versions, introduced during the GGUF model loader refactor. It is absent in older installations. `UNETLoader` and `ComfyUI-GGUF` provide alternative loading paths.
+
+I will search the codebase for workflow JSON and custom node installation patterns. I will also check the README for node dependency documentation.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这是 ComfyUI 里缺节点：工作流用了 `LoadDiffusionModel`，当前安装里没有。我先查视铸侧工作流和自定义节点安装是否覆盖这个节点。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "LoadDiffusionModel"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "LoadDiffusionModel",
+  "topFiles": [
+    {
+      "matchCount": 15,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    },
+    {
+      "matchCount": 4,
+      "uri": ".\\README.md"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 19
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,md,json,py}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "custom.?node|custom_nodes|missing_node"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "custom.?node|custom_nodes|missing_node",
+  "topFiles": [
+    {
+      "matchCount": 7,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The user encountered a ComfyUI error. The LoadDiffusionModel node is missing. The custom node likely isn't installed.
+
+LoadDiffusionModel is actually a built-in node from newer ComfyUI versions. Older installations still use UNETLoader. The workflow was likely exported from a newer version.
+
+Three fixes are being considered. Update ComfyUI. Remap LoadDiffusionModel to UNETLoader via a compatibility layer. Or check ComfyManager's installation method. Auto-aliasing is practical because both nodes accept the same unet_name input.
+
+The error shows class_type 'LoadDiffusionModel'. This suggests the node was renamed in ComfyUI. The class type likely remained 'UNETLoader'.
+
+The workflow JSON explicitly uses class_type LoadDiffusionModel. This confirms the node was introduced in a newer ComfyUI release. The exact implementation details are being checked against the repository.
+
+The two nodes are functionally identical. Newer ComfyUI simply renamed UNETLoader to LoadDiffusionModel. The recommended fix is updating ComfyUI to a version that includes this node.
+
+Checking deploy.ts to see if ComfyManager installs an outdated ComfyUI version. The workflow converter could also remap LoadDiffusionModel to UNETLoader during upload.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "UNETLoader|LoadDiffusionModel|comfyui.*clone|github.com/comfyanonymous"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "UNETLoader|LoadDiffusionModel|comfyui.*clone|github.com/comfyanonymous",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge\comfymanager`** (1 file)
+
+| File |
+|------|
+| `../comfymanager\src\api\workflow-convert.ts` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\config\models.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Checking workflow-convert.ts and when LoadDiffusionModel was added to ComfyUI.
+
+The user's ComfyUI likely predates the latest release. A git pull should update it. I'll also check if UNETLoader was renamed to LoadDiffusionModel in a specific commit. Adding an alias remap in generate.ts would be user-friendly.
+
+Reading workflow-convert.ts and generate.ts to check for existing node aliasing.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "class_type|object_info|alias|UNETLoader"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "class_type|object_info|alias|UNETLoader",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "comfymanager\\src\\api\\workflow-convert.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "ComfyUI LoadDiffusionModel UNETLoader renamed node not found"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [UNET Loader Guide | Load Diffusion Model - Documentation \u0026 Example | ComfyUI Wiki](https://comfyui-wiki.com/en/comfyui-nodes/advanced/loaders/unet-loader)\n2. [Install Flux in ComfyUI 2026: Schnell, Dev \u0026 Flux 2](https://www.earngenix.com/tutorials/install-flux-comfyui)\n3. [ComfyUI FLUX Workflow (2026): JSON Nodes Explained | Local AI Master](https://localaimaster.com/blog/comfyui-flux-workflow-guide)\n4. [Load Checkpoint vs Load Diffusion Model in ComfyUI (2026)](https://www.earngenix.com/tutorials/comfyui-load-checkpoint-vs-diffusion-model)\n\nSynthesis:\nThe UNETLoader node was renamed to Load Diffusion Model in the ComfyUI interface [1][2][3]. If you cannot find the node or your files, check the following:\n\nEnsure your model files are located in ComfyUI/models/diffusion_models/ [4][5]. Older installations may use the folder named unet, which ComfyUI typically still scans [4][3]. If files do not appear, refresh your browser [5].\n\nIf the node appears in red or shows an error, verify if custom node packs (such as ComfyUI-GGUF or Flow-Control) are overriding the node's behavior [6][7]. Uninstalling or updating conflicting custom nodes often resolves these issues [6][7][3].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eUNET Loader Guide | Load Diffusion Model - Documentation \u0026 Example | ComfyUI Wiki\u003c/title\u003e\n\u003curl\u003ehttps://comfyui-wiki.com/en/comfyui-nodes/advanced/loaders/unet-loader\u003c/url\u003e\n\u003ccontent\u003eThis node has been renamed as`Load Diffusion Model`.\n...\n- Class name:`UNETLoader`\n- Category:`advanced/loaders`\n- Output node:`False`\n...\nThe UNETLoader node is designed for loading U-Net models by name, facilitating the use of pre-trained U-Net architectures within the system.\n...\n| Parameter | Comfy dtype | Description |\n| --- | --- | --- |\n| `unet_name` | `COMBO[STRING]` | Specifies the name of the U-Net model to
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "git pull|updateComfy|ComfyUI.git"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "git pull|updateComfy|ComfyUI.git",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The UI label "Load Diffusion Model" differs from the internal node ID "#1", which likely caused the lookup failure.
+
+The node's historical internal class was `UNETLoader`. Recent ComfyUI versions appear to have renamed it to `LoadDiffusionModel`. This suggests the workflow file was exported by a newer frontend version, while the current runtime still expects the older class name.
+
+The conversion logic copies `node.type` directly into `class_type`, so a frontend exporting `LoadDiffusionModel` sends that exact string. VisualForge can fix this by rewriting `class_type` to `UNETLoader` when the runtime reports the latter as the registered node.
+
+Checking generate.ts to see how it converts and posts the workflow.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "object_info|uiToApiPrompt|injectPlaceholders"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src",
+  "pattern": "object_info|uiToApiPrompt|injectPlaceholders",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "comfymanager\\src\\api\\comfy-workflows.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\workflow-convert.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Checking how generate.ts converts the workflow and posts it to /prompt.
+
+Will fetch object_info to validate node types. Adding alias remapping for mismatched class_types. Reading the rest of generate.ts and the convertWorkflow function.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+<summary>Tool use: **web_fetch**</summary>
+
+Parameters:
+
+```json
+{
+  "url": "https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/nodes.py"
+}
+```
+Result:
+
+```json
+{
+  "markdown": "import torch\n\nimport os\nimport sys\nimport json\nimport glob\nimport hashlib\nimport inspect\n\nimport traceback\nimport math\nimport time\nimport random\nimport logging\n\nfrom PIL import Image, ImageOps, ImageSequence\nfrom PIL.PngImagePlugin import PngInfo\n\nimport numpy as np\nimport safetensors.torch\n\nimport comfy.diffusers_load\nimport comfy.samplers\nimport comfy.sample\nimport comfy.sd\nimport comfy.utils\nimport comfy.controlnet\nfrom comfy.comfy_types import IO, ComfyNodeABC, InputTypeDict, FileLocator\nfrom comfy_api.internal import register_versions, ComfyAPIWithVersion\nfrom comfy_api.version_list import supported_versions\nfrom comfy_api.latest import io, ComfyExtension, InputImpl\n\nimport comfy.clip_vision\n\nimport comfy.model_management\nfrom comfy.cli_args import args\n\nimport importlib\n\nimport folder_paths\nimport latent_preview\nimport node_helpers\n\nif args.enable_manager:\n import comfyui_manager\n\ndef before_node_execution():\n comfy.model_management.throw_exception_if_processing_interrupted()\n\ndef interrupt_processing(value=True):\n comfy.model_management.interrupt_current_processing(value)\n\nMAX_RESOLUTION=16384\n\nclass CLIPTextEncode(ComfyNodeABC):\n @classmethod\n def INPUT_TYPES(s) -\u003e InputTypeDict:\n return {\n \"required\": {\n \"text\": (IO.STRING, {\"multiline\": True, \"dynamicPrompts\": True, \"tooltip\": \"The text to be encoded.\"}),\n \"clip\": (IO.CLIP, {\"tooltip\": \"The CLIP model used for encoding the text.\"})\n }\n }\n RETURN_TYPES = (IO.CONDITIONING,)\n OUTPUT_TOOLTIPS = (\"A conditioning containing the embedded text used to guide the diffusion model.\",)\n FUNCTION = \"encode\"\n\n CATEGORY = \"model/conditioning\"\n DESCRIPTION = \"Encodes a text prompt using a CLIP model into an embedding that can be used to guide the diffusion model towards generating specific images.\"\n SEARCH_ALIASES = [\"text\", \"prompt\", \"text prompt\", \"positive prompt\", \"negative prompt\", \"encode te
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Searching the downloaded nodes.py for LoadDiffusionModel and UNETLoader.
+
+Also checking comfy_extras.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-tools\\a5482c6e-f261-4f70-b7cb-9687cb6fe2a9.txt",
+  "pattern": "LoadDiffusionModel|UNETLoader|class UNET"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-tools\\a5482c6e-f261-4f70-b7cb-9687cb6fe2a9.txt",
+  "pattern": "LoadDiffusionModel|UNETLoader|class UNET",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-tools\\a5482c6e-f261-4f70-b7cb-9687cb6fe2a9.txt"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "github comfyanonymous ComfyUI LoadDiffusionModel class_type NODE_CLASS_MAPPINGS"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Mark weight_dtype as advanced input in Load Diffusion Model node (#12769) · ed7c2c6 · bezo97/ComfyUI](https://github.com/bezo97/ComfyUI/commit/ed7c2c65790c36871b90fff2bdd3de25a17a5431)\n2. [nodes.py](https://github.com/comfyanonymous/ComfyUI/blob/cffa2f43/nodes.py)\n3. [nodes.py](https://github.com/Comfy-Org/ComfyUI/blob/cd45f42a/nodes.py)\n4. [nodes.py at f48f0872e2310b1650f798d02e94264cc06afd69 · Comfy-Org/ComfyUI](https://github.com/comfyanonymous/ComfyUI/blob/f48f0872e2310b1650f798d02e94264cc06afd69/nodes.py)\n\nSynthesis:\nIn ComfyUI, the node displayed as Load Diffusion Model is implemented by the class UNETLoader [1][2]. It is included in the core NODE_CLASS_MAPPINGS dictionary within nodes.py [3][4].\n\nThe node is defined as follows:\n\nclass UNETLoader:\n @classmethod\n def INPUT_TYPES(s):\n return {\"required\": { \"unet_name\": (folder_paths.get_filename_list(\"diffusion_models\"),),\n \"weight_dtype\": ([\"default\", \"fp8_e4m3fn\", \"fp8_e4m3fn_fast\", \"fp8_e5m2\"], {\"advanced\": True})\n }}\n RETURN_TYPES = (\"MODEL\",)\n FUNCTION = \"load_unet\"\n CATEGORY = \"advanced/loaders\"\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eMark weight_dtype as advanced input in Load Diffusion Model node (#12769) · ed7c2c6 · bezo97/ComfyUI\u003c/title\u003e\n\u003curl\u003ehttps://github.com/bezo97/ComfyUI/commit/ed7c2c65790c36871b90fff2bdd3de25a17a5431\u003c/url\u003e\n\u003ccontent\u003e# Commit: bezo97/ComfyUI@ed7c2c6\n\n- Repository: bezo97/ComfyUI | The most powerful and modular diffusion model GUI, api and backend with a graph/nodes interface. | 1 stars | Python\n\n## Mark weight_dtype as advanced input in Load Diffusion Model node (#12769)\n\n- Author: [@christian-byrne](https://github.com/christian-byrne)\n- Committer: [@web-flow](https://github.com/web-flow)\n- Date: 2026-03-17T14:24:00Z\n- SHA: ed7c2c65790c36871b90fff2bdd3de25a17a5431\n- Changes: +1 -1 (1 files)\n- Ve
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "git pull|updateComfy|pullComfy|syncComfy"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+  "pattern": "git pull|updateComfy|pullComfy|syncComfy",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The official ComfyUI node is `UNETLoader` with the display name "Load Diffusion Model".
+
+The workflow JSON contains the incorrect `class_type: LoadDiffusionModel`. This likely came from a frontend export or template. Our README example used the same wrong type. The correct class type is `UNETLoader`.
+
+The README example itself contains the bug. The user likely copied the incorrect type from that documentation rather than from a raw ComfyUI export.
+
+The error message is generic and does not mean a custom node is missing. The fix is to remap `LoadDiffusionModel` to `UNETLoader` before posting workflows. The README examples should also be corrected to use `UNETLoader` and clarify that the UI label is "Load Diffusion Model".
+
+Bidirectional aliases will be added in `workflow-convert.ts` so `LoadDiffusionModel` maps to `UNETLoader` and vice versa. During conversion, the code will check `object_info` to determine which class type is registered and rewrite the node accordingly.
+
+A single `canonicalizeNodeClasses` helper will handle the remapping across three stages: `uiToApiPrompt`, `generate.ts` before POST, and `workflowToStationPrompt` after conversion. It will fall back to the default `LoadDiffusionModel` → `UNETLoader` alias whenever `object_info` is unavailable.
+
+The canonicalization logic now prefers the original class type when it is present in `object_info`. It only falls back to the alias if the original is absent. This prevents breaking workflows if a future ComfyUI version renames the node.
+
+The remapping logic will preserve the original class type when both variants appear in object_info. Otherwise it falls back to the alias. API-format stored workflows will be remapped during generation by fetching object_info before posting. UI conversion already handles this at station resolution. The fix targets uiToApiPrompt and the generation step.
+
+The remapping logic will live in `workflow-convert.ts` and be called from `workflowToStationPrompt` and `runGenerate`. Updating ComfyUI is unnecessary because the official node has always been `UNETLoader`; the error is purely a malformed workflow JSON type.
+
+I will explain the fix to the user in Chinese and patch the remapping logic and README together. I also need to check whether the frontend writes `LoadDiffusionModel` directly, since `EmptySD3LatentImage` is another real node that could cause a similar mismatch on older ComfyUI versions.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这不是缺自定义节点。画布上叫「Load Diffusion Model」，ComfyUI 真正的类型是 `UNETLoader`。工作流里写成了 `LoadDiffusionModel`，所以会被拒。接下来会在提交前自动改掉，并修正文档里的错误示例。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+I'll export fetchObjectInfo or duplicate a small call in generate.ts.
+
+I'll export `fetchObjectInfo` from comfy-workflows and `remapMissingNodeClasses` from workflow-convert. `runGenerate` will call both to resolve missing node types.
+
+The graph from applyVars may be nested, so I'll clone it before remapping. I'll add a bidirectional alias map to resolve node classes like LoadDiffusionModel.
+
+`resolveNodeClass` checks known node types against aliases. It falls back to mapping `LoadDiffusionModel` to `UNETLoader`.
+
+`remapMissingNodeClasses` iterates over the graph entries. It leaves non-object nodes unchanged. For objects it resolves the class type and only updates the node when the resolved name differs.
+
+The remapping logic handles bidirectional mismatches correctly. `workflowToStationPrompt` will fetch object info and remap classes for both API and UI formats.
+
+The remapping runs after `uiToApiPrompt` converts UI format. `runGenerate` keeps it as a final safeguard.
+
+The resolve cache should be cleared. Existing manager processes may hold stale converted JSON under the old node name. Restarting the manager is required.
+
+Station workflows persisted in settings may still contain the old LoadDiffusionModel node name. Library workflows read from disk and convert dynamically, but stored copies in settings likely retain the legacy JSON.
+
+Manual JSON pasted into a station workflow is handled by the runGenerate remap. Library workflows are converted during resolution and caught by workflowToStationPrompt remap. The README example at line 175 incorrectly uses LoadDiffusionModel and needs updating to UNETLoader.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\workflow-convert.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\comfy-workflows.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Cancelled
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Cancelled
+</details></tool-use>
+
+---
+
+_**User**_
+
+这个是需要我改工作流json吗？
+
+---
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
 <summary>Tool use: **read_file_v2** • Read file: </summary>
 

@@ -4,7 +4,8 @@ import type { FeatureId } from "./types.ts";
 import { applyStationWorkflow } from "./features.ts";
 import type { ComfyFeatureConfig } from "./features.ts";
 import { resolveModelName } from "./catalog.ts";
-import { hydrateFeatures } from "./comfy-workflows.ts";
+import { fetchObjectInfo, hydrateFeatures } from "./comfy-workflows.ts";
+import { remapMissingNodeClasses, unwrapApiGraph } from "./workflow-convert.ts";
 
 export type GenerateFile = { name: string; mime: string; ext: string; data: string };
 
@@ -293,7 +294,11 @@ export async function runGenerate(opts: {
     if (i === 0) vars.image = name;
     vars[`image${i + 1}`] = name;
   }
-  const graph = applyVars(parseGraph(cfg.workflow), vars);
+  const rawGraph = applyVars(parseGraph(cfg.workflow), vars);
+  const graph = remapMissingNodeClasses(
+    unwrapApiGraph(rawGraph),
+    await fetchObjectInfo(),
+  );
   const { json } = await comfyFetch(
     `${base}/prompt`,
     {

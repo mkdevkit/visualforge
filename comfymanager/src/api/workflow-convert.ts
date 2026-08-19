@@ -80,9 +80,9 @@ export function uiToApiPrompt(ui: unknown, objectInfo: Record<string, NodeSpec> 
     const mode = Number(node.mode || 0);
     if (mode === 2 || mode === 4) continue;
     const id = String(node.id);
-    const classType = String(node.type || "");
+    const classType = resolveNodeClass(String(node.type || ""), objectInfo);
     if (!classType || classType === "Note" || classType === "Reroute") continue;
-    const info = objectInfo[classType];
+    const info = objectInfo[classType] || objectInfo[String(node.type || "")];
     const inputs: Record<string, unknown> = {};
     const nodeInputs = Array.isArray(node.inputs) ? (node.inputs as Array<Record<string, unknown>>) : [];
     for (const inp of nodeInputs) {
@@ -115,6 +115,37 @@ export function uiToApiPrompt(ui: unknown, objectInfo: Record<string, NodeSpec> 
     prompt[id] = { class_type: classType, inputs };
   }
   return prompt;
+}
+
+/** 界面显示名 / 旧类名 ↔ ComfyUI 实际 class_type。Load Diffusion Model 的真正类型是 UNETLoader。 */
+const NODE_CLASS_ALIASES: Record<string, string[]> = {
+  LoadDiffusionModel: ["UNETLoader"],
+  UNETLoader: ["LoadDiffusionModel"],
+};
+
+export function resolveNodeClass(classType: string, objectInfo: Record<string, unknown> = {}) {
+  if (!classType) return classType;
+  const known = Object.keys(objectInfo);
+  if (known.includes(classType)) return classType;
+  for (const alt of NODE_CLASS_ALIASES[classType] || []) {
+    if (!known.length || known.includes(alt)) return alt;
+  }
+  if (classType === "LoadDiffusionModel") return "UNETLoader";
+  return classType;
+}
+
+export function remapMissingNodeClasses(graph: Record<string, unknown>, objectInfo: Record<string, unknown> = {}) {
+  const out: Record<string, unknown> = {};
+  for (const [id, node] of Object.entries(graph)) {
+    if (!node || typeof node !== "object" || Array.isArray(node)) {
+      out[id] = node;
+      continue;
+    }
+    const rec = node as { class_type?: string };
+    const next = resolveNodeClass(rec.class_type || "", objectInfo);
+    out[id] = next === rec.class_type ? node : { ...rec, class_type: next };
+  }
+  return out;
 }
 
 export function injectPlaceholders(graph: Record<string, unknown>): { graph: Record<string, unknown>; notes: string[] } {
