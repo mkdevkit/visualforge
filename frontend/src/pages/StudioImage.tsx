@@ -30,7 +30,7 @@ export function StudioImage() {
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
       <PageHead kicker="ComfyUI" title="生图工位" desc="在本页指定工作流和模型。列表来自 ComfyManager，请先下载权重并给工位配上生效工作流。" />
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <Field label="提示词">
             <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} />
@@ -66,6 +66,7 @@ export function StudioImage() {
           {task && task.status !== "succeeded" && task.status !== "failed" ? (
             <Spinner label="ComfyUI 出图中，将自动刷新" />
           ) : null}
+          <ResultStrip assets={assets} />
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           <WorkflowSelect feature="image" value={workflowId} onChange={setWorkflowId} />
@@ -93,7 +94,6 @@ export function StudioImage() {
           <ProviderHint feature="image" />
         </aside>
       </div>
-      <div className="mt-10"><ResultStrip assets={assets} /></div>
     </section>
   );
 }

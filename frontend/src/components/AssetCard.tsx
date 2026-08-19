@@ -91,7 +91,7 @@ export function AssetCard({
 export function ResultStrip({ assets, onChange }: { assets: AssetRecord[]; onChange?: () => void }) {
   if (!assets.length) return null;
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {assets.map((a) => (
         <AssetCard key={a.id} asset={a} onChange={onChange} />
       ))}

@@ -44,7 +44,7 @@ export function Studio3D() {
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
       <PageHead kicker="ComfyUI" title="生 3D 工位" desc="文生 / 图生 3D。成品可绑骨：UniRig、Mixamo 命名骨骼 + 你自己的 Mixamo 动作，或快速几何估骨。" />
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <Field label="描述（文生 3D）">
             <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} />

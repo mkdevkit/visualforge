@@ -34,7 +34,7 @@ export function StudioVideo() {
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
       <PageHead kicker="ComfyUI" title="生视频工位" desc="通过 ComfyUI 工作流生视频。Wan 2.2 做文生/图生视频；Wan Animate 2 做角色动画（参考图 + 驱动视频）。" />
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <Field label="分镜 / 提示词">
             <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} className="min-h-40" />
@@ -75,6 +75,7 @@ export function StudioVideo() {
               {task.status === "succeeded" ? <div className="mt-2 text-brass">已写入成品。</div> : <Spinner label="ComfyUI 渲染中，将自动轮询" />}
             </div>
           ) : null}
+          <ResultStrip assets={assets} />
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           <WorkflowSelect feature="video" value={workflowId} onChange={setWorkflowId} />
@@ -116,7 +117,6 @@ export function StudioVideo() {
           <ProviderHint feature="video" />
         </aside>
       </div>
-      <div className="mt-10"><ResultStrip assets={assets} /></div>
     </section>
   );
 }

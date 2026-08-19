@@ -89,7 +89,7 @@ export function StudioAudio() {
           </button>
         ))}
       </div>
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           {tab === "tts" ? (
             <>
@@ -185,6 +185,7 @@ export function StudioAudio() {
           {task && task.status !== "succeeded" && task.status !== "failed" ? (
             <Spinner label="ComfyUI 音频合成中，将自动刷新" />
           ) : null}
+          <ResultStrip assets={assets} />
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           {tab === "tts" ? (
@@ -267,7 +268,6 @@ export function StudioAudio() {
           ) : null}
         </aside>
       </div>
-      <div className="mt-10"><ResultStrip assets={assets} /></div>
     </section>
   );
 }

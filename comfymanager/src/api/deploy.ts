@@ -674,8 +674,16 @@ function run(cmd: string, args: string[], cwd: string, extraEnv: NodeJS.ProcessE
   });
 }
 
+function stripAnsi(text: string) {
+  return text
+    .replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, "")
+    .replace(/\u001b\][^\u0007\u001b]*(?:\u0007|\u001b\\)/g, "")
+    .replace(/\u001b[@-Z\\-_]/g, "")
+    .replace(/\[[\d;]*m/g, "");
+}
+
 function normalizeLog(text: string) {
-  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  return stripAnsi(text.replace(/\r\n/g, "\n").replace(/\r/g, "\n"));
 }
 
 function appendLog(text: string) {

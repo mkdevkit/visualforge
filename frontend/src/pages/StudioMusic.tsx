@@ -29,7 +29,7 @@ export function StudioMusic() {
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
       <PageHead kicker="ComfyUI" title="生音乐工位" desc="通过 ComfyUI 音乐工作流生成歌曲或纯音乐。成品写入 data/music。" />
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <Field label="风格提示词">
             <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} />
@@ -72,6 +72,7 @@ export function StudioMusic() {
           {task && task.status !== "succeeded" && task.status !== "failed" ? (
             <Spinner label="ComfyUI 谱曲中，将自动刷新" />
           ) : null}
+          <ResultStrip assets={assets} />
         </div>
         <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
           <WorkflowSelect feature="music" value={workflowId} onChange={setWorkflowId} />
@@ -92,7 +93,6 @@ export function StudioMusic() {
           <ProviderHint feature="music" />
         </aside>
       </div>
-      <div className="mt-10"><ResultStrip assets={assets} /></div>
     </section>
   );
 }

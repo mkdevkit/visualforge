@@ -3,6 +3,13 @@ import { api } from "../lib/api";
 import { Button, ErrorBox } from "../components/ui";
 import { PageHead } from "../components/PageHead";
 
+function logLineClass(line: string) {
+  if (/\bERROR\b|Exception|Traceback|Error:/.test(line)) return "text-red-300";
+  if (/\bWARNING\b/.test(line)) return "text-amber-200";
+  if (/\bINFO\b/.test(line)) return "text-mute";
+  return "text-foam/90";
+}
+
 function LogPane({
   title,
   path,
@@ -35,7 +42,7 @@ function LogPane({
         style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
       >
         {(text.trim() ? text : empty).split("\n").map((line, i) => (
-          <div key={i}>{line || "\u00a0"}</div>
+          <div key={i} className={text.trim() ? logLineClass(line) : undefined}>{line || "\u00a0"}</div>
         ))}
       </div>
     </div>
