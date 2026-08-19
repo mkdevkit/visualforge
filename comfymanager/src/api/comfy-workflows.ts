@@ -7,7 +7,7 @@ import { FEATURE_IDS, FEATURE_LABELS } from "./types.ts";
 import type { FeatureId } from "./types.ts";
 import { syncActiveWorkflow, upsertStationWorkflow } from "./features.ts";
 import type { ComfyFeatureConfig, StationWorkflow } from "./features.ts";
-import { injectPlaceholders, remapMissingNodeClasses, uiToApiPrompt, unwrapApiGraph, workflowFormat } from "./workflow-convert.ts";
+import { injectPlaceholders, normalizePromptGraph, uiToApiPrompt, unwrapApiGraph, workflowFormat } from "./workflow-convert.ts";
 
 export type WorkflowItem = {
   path: string;
@@ -172,7 +172,7 @@ export async function workflowToStationPrompt(rel: string) {
   } else {
     throw new Error("无法识别工作流格式（需要 ComfyUI 画布 JSON 或 API Format）");
   }
-  graph = remapMissingNodeClasses(graph, info);
+  graph = normalizePromptGraph(graph, info);
   const injected = injectPlaceholders(graph);
   notes.push(...injected.notes);
   return { prompt: injected.graph, notes, format };

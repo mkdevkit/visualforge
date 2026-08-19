@@ -148,6 +148,55 @@ export function remapMissingNodeClasses(graph: Record<string, unknown>, objectIn
   return out;
 }
 
+const HARD_WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
+  UNETLoader: { weight_dtype: "default" },
+  LoadDiffusionModel: { weight_dtype: "default" },
+};
+
+function widgetDefault(spec: unknown): unknown {
+  const extra = Array.isArray(spec) ? spec[1] : undefined;
+  if (extra && typeof extra === "object" && extra !== null && "default" in extra) {
+    return (extra as { default: unknown }).default;
+  }
+  const t = Array.isArray(spec) ? spec[0] : spec;
+  if (Array.isArray(t) && t.length) return t[0];
+  if (t === "INT") return 0;
+  if (t === "FLOAT") return 0;
+  if (t === "BOOLEAN") return false;
+  if (t === "STRING") return "";
+  return undefined;
+}
+
+export function fillMissingRequiredInputs(graph: Record<string, unknown>, objectInfo: Record<string, NodeSpec> = {}) {
+  const out: Record<string, unknown> = {};
+  for (const [id, node] of Object.entries(graph)) {
+    if (!node || typeof node !== "object" || Array.isArray(node)) {
+      out[id] = node;
+      continue;
+    }
+    const rec = node as { class_type?: string; inputs?: Record<string, unknown> };
+    const cls = rec.class_type || "";
+    const inputs = { ...(rec.inputs || {}) };
+    const required = objectInfo[cls]?.input?.required || {};
+    for (const [name, spec] of Object.entries(required)) {
+      if (name in inputs && inputs[name] !== undefined && inputs[name] !== "") continue;
+      if (!isWidgetSpec(spec)) continue;
+      if (/(_name|filename)$/i.test(name) && name !== "weight_dtype") continue;
+      const d = widgetDefault(spec);
+      if (d !== undefined) inputs[name] = d;
+    }
+    for (const [name, d] of Object.entries(HARD_WIDGET_DEFAULTS[cls] || {})) {
+      if (!(name in inputs) || inputs[name] === undefined) inputs[name] = d;
+    }
+    out[id] = { ...rec, inputs };
+  }
+  return out;
+}
+
+export function normalizePromptGraph(graph: Record<string, unknown>, objectInfo: Record<string, NodeSpec> = {}) {
+  return fillMissingRequiredInputs(remapMissingNodeClasses(graph, objectInfo), objectInfo);
+}
+
 export function injectPlaceholders(graph: Record<string, unknown>): { graph: Record<string, unknown>; notes: string[] } {
   const notes: string[] = [];
   let promptSet = false;
