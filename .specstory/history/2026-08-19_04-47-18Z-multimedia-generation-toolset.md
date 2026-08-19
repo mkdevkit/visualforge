@@ -38345,19 +38345,29 @@ _**Agent (grok-4.6)**_
 错误提示中的包名与实际版本不匹配，应改为 `python3.10-venv`。需要更新错误提示和 README 文档，并优化对该依赖缺失的检测。
 
 用户要求自行安装依赖，因此不应自动执行 apt 命令。我会直接提供 `sudo apt install python3.10-venv` 的具体指令，并在 deploy.ts 中根据检测到的 Python 版本动态提示正确的包名。
+
+Python 报错本身已明确提示需安装 `python3.10-venv`。即使系统中存在 `python3-venv`，它也可能因默认 Python 版本差异而无法满足需求。
+
+另外，若虚拟环境目录已部分创建，需要在重试前清理该目录，否则会因残留文件导致再次安装失败。
+
+部分创建的 `.venv` 目录可能被误判为有效，因为 `existsSync` 只检查 `.venv/bin/python` 是否存在，而失败时该路径可能已存在但损坏。需要确保在重试前彻底清理 `.venv` 目录，避免残留导致重复安装失败。
 </details></think>
 
 _**Agent (grok-4.6)**_
 
+Ubuntu 上要装的是对应版本的 `python3.10-venv`，不是笼统的 `python3-venv`。正在改提示，并在创建失败时清掉半成品 `.venv`，方便重试。
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
 
 </details></tool-use>
 
 _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
 
 </details></tool-use>
 
@@ -38365,6 +38375,171 @@ _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-Status: **loading**
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,md,cjs}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "python3-venv"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "python3-venv",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": ".\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 11,
+      "uri": ".\\.specstory\\history\\2026-08-19_04-47-18Z-multimedia-generation-toolset.md"
+    },
+    {
+      "matchCount": 2,
+      "uri": ".\\README.md"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 16
+}
+```
+Status: **completed**
 
 </details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要先导入 rmSync。
+
+发现一个关键 bug：即使虚拟环境创建失败，`existsSync` 仍可能返回 true，因为 venv 通常会保留 `bin/python` 链接。这会导致下次重试时跳过重建，而实际环境已经损坏。
+
+需要在创建失败后删除损坏的 `.venv` 目录，并根据系统版本提示正确的安装命令（如 `python3.10-venv`）。
+
+新增 `venvLooksReady` 函数检测虚拟环境是否真正可用。若 `.venv` 存在但 pip 无法运行，则强制删除并重新创建。
+
+新增 `venvHint` 函数，根据系统版本和 Python 版本生成对应的安装命令。README 中建议同时安装 `python3-venv` 和 `python3.10-venv`，以兼容 Ubuntu 22.04 等系统。
+
+还需更新 Ubuntu 下的 pythonHint 提示。明确不自动执行 apt 安装，由用户自行处理依赖。准备检查 deploy.ts 中的 fs 导入情况。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将更新 pythonHint，添加 venvHint，并清理损坏的虚拟环境。随后检查现有虚拟环境中的 pip。
+
+README 也会同步更新。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要提供安装 python3-venv 的具体命令。
+
+不应直接安装，而应解释为何需要安装 python3-venv（而非 python3.10-venv）。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+这是 Ubuntu 上缺 **ensurepip**，不是 ComfyUI 本身的问题。系统里的解释器是 3.10，要装的是 `python3.10-venv`，只装 `python3-venv` 经常不够。
+
+在那台机器上执行（本工具不代装）：
+
+```bash
+sudo apt install python3.10-venv
+```
+
+装好后回到 ComfyManager 再点一次安装。半成品 `.venv` 会自动删掉再建。
+
+---
+
+_**User**_
+
+node:internal/fs/watchers:254
+    const error = new UVException({
+                  ^
+
+Error: ENOSPC: System limit for number of file watchers reached, watch '/home/ubuntu/visualforge/comfym
+anager/comfy/.venv/lib/python3.10/site-packages/OpenGL/raw/GL/ARB/invalidate_subdata.py'
+    at FSWatcher.<computed> (node:internal/fs/watchers:254:19)
+    at Object.watch (node:fs:2554:36)
+    at createFsWatchInstance (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/chunks/config
+.js:12958:16)
+    at setFsWatchListener (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/chunks/config.js
+:13000:14)
+    at NodeFsHandler$1._watchWithNodeFs (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/ch
+unks/config.js:13114:20)
+    at NodeFsHandler$1._handleFile (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/chunks/
+config.js:13158:24)
+    at NodeFsHandler$1._addToNodeFs (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/chunks
+/config.js:13332:26)
+Emitted 'error' event on FSWatcher instance at:
+    at FSWatcher._handleError (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/chunks/confi
+g.js:14133:148)
+    at NodeFsHandler$1._addToNodeFs (file:///home/ubuntu/visualforge/node_modules/vite/dist/node/chunks
+/config.js:13337:18) {
+  errno: -28,
+  syscall: 'watch',
+  code: 'ENOSPC',
+  path: '/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/OpenGL/raw/GL/A
+RB/invalidate_subdata.py',
+  filename: '/home/ubuntu/visualforge/comfymanager/comfy/.venv/lib/python3.10/site-packages/OpenGL/raw/
+GL/ARB/invalidate_subdata.py'

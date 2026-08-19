@@ -31,6 +31,17 @@ function apiPlugin(): Plugin {
 
 const listen = loadSettings();
 
+const watchIgnored = [
+  "**/node_modules/**",
+  "**/.git/**",
+  "**/comfy/**",
+  "**/models/**",
+  "**/data/**",
+  "**/tools/**",
+  "**/.venv/**",
+  "**/site-packages/**",
+];
+
 export default defineConfig({
   plugins: [react(), tailwindcss(), apiPlugin()],
   server: {
@@ -38,6 +49,9 @@ export default defineConfig({
     host: listen.host,
     allowedHosts: true,
     strictPort: true,
+    watch: {
+      ignored: watchIgnored,
+    },
   },
   preview: {
     port: listen.port,
