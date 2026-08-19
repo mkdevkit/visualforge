@@ -7,7 +7,6 @@ const items = [
   { to: "/audio", label: "音频", kicker: "Voice / SFX" },
   { to: "/3d", label: "生 3D", kicker: "3D" },
   { to: "/library", label: "资源库", kicker: "Library" },
-  { to: "/models", label: "模型库", kicker: "ComfyUI" },
   { to: "/api", label: "本地 API", kicker: "Open API" },
   { to: "/settings", label: "设置", kicker: "Settings" },
 ];

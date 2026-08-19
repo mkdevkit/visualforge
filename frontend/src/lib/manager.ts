@@ -39,14 +39,4 @@ async function mreq<T>(path: string, init?: RequestInit): Promise<T> {
 export const manager = {
   url: managerBase,
   health: () => mreq<{ ok: boolean; comfy: Record<string, unknown> }>("/api/health"),
-  status: () => mreq<Record<string, unknown>>("/api/comfy/status"),
-  models: () => mreq<{ openModels: unknown[]; catalogFile?: string; activeModels: Record<string, string> }>("/api/models"),
-  downloads: () => mreq<{ jobs: Array<{ modelId: string; status: string; progress: number; error?: string }> }>("/api/models/downloads"),
-  download: (id: string) => mreq(`/api/models/${encodeURIComponent(id)}/download`, { method: "POST" }),
-  remove: (id: string) => mreq(`/api/models/${encodeURIComponent(id)}`, { method: "DELETE" }),
-  install: () => mreq("/api/comfy/install", { method: "POST" }),
-  start: () => mreq("/api/comfy/start", { method: "POST" }),
-  stop: () => mreq("/api/comfy/stop", { method: "POST" }),
-  saveActive: (activeModels: Record<string, string>) =>
-    mreq("/api/active-models", { method: "PUT", body: JSON.stringify({ activeModels }) }),
 };

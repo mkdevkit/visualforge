@@ -81,7 +81,7 @@ export function StudioMusic() {
               <option value="male">男声</option>
             </Select>
           </Field>
-          <p className="text-xs leading-relaxed text-mute">使用 ComfyUI 音乐工作流。未下载的模型请先到模型库获取。</p>
+          <p className="text-xs leading-relaxed text-mute">使用 ComfyUI 音乐工作流。未下载的模型请到 ComfyManager「模型」页获取。</p>
           <ProviderHint feature="music" />
         </aside>
       </div>
