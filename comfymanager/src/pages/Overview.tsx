@@ -18,10 +18,15 @@ export function Overview() {
 
   const apiInfo = (status?.api as { ok?: boolean; error?: string; baseUrl?: string }) || {};
   const unirig = (status?.unirig as { installed?: boolean; dir?: string }) || {};
+  const prereqs = (status?.prereqs || {}) as {
+    os?: { label?: string };
+    git?: { ok?: boolean; version?: string; hint?: string };
+    python?: { ok?: boolean; version?: string; executable?: string; hint?: string };
+  };
 
   return (
     <section className="mx-auto max-w-3xl px-8 py-10">
-      <PageHead kicker="ComfyUI" title="部署与接口" desc="若本机已有 ComfyUI，会直接使用，不必再克隆。模型仍下载到配置的模型目录。" />
+      <PageHead kicker="ComfyUI" title="部署与接口" desc="支持 Windows 与 Ubuntu。Git、Python 3.10+ 请自行安装并加入 PATH。本工具会建虚拟环境并安装 CUDA 版 PyTorch。" />
       <div className="space-y-3 rounded-2xl border border-line bg-panel p-6 text-sm">
         <div>
           安装：{status?.installed
@@ -39,7 +44,14 @@ export function Overview() {
             已发现：{(status.existingInstalls as string[]).join("；")}
           </div>
         ) : null}
-        <div>Python：{String(status?.python || "")}</div>
+        <div>系统：{prereqs.os?.label || ""}</div>
+        <div>Git：{prereqs.git?.ok ? prereqs.git.version || "已就绪" : prereqs.git?.hint || "未检测到（请自行安装）"}</div>
+        <div className="break-all">
+          Python：{prereqs.python?.ok
+            ? `${prereqs.python.version} · ${prereqs.python.executable}`
+            : prereqs.python?.hint || "未检测到（请自行安装 3.10+）"}
+        </div>
+        <div>加速：{String((status?.accel as { label?: string } | undefined)?.label || "检测中")}</div>
         <div>进程：{status?.processRunning ? `运行中 PID ${status.pid}` : "未启动"}</div>
         <div>接口：{String(status?.baseUrl || "")} · {apiInfo.ok ? "已连通" : apiInfo.error || "未连通"}</div>
       </div>
@@ -61,12 +73,12 @@ export function Overview() {
           }}
         >
           {busy === "install"
-            ? "处理中…"
+            ? "安装依赖中（含 CUDA PyTorch，可能要几分钟）…"
             : status?.installed
-              ? "同步模型路径"
+              ? "同步模型路径 / CUDA 依赖"
               : Array.isArray(status?.existingInstalls) && (status.existingInstalls as string[]).length
                 ? "使用已有安装"
-                : "安装 ComfyUI"}
+                : "安装 ComfyUI（含 CUDA）"}
         </Button>
         <Button
           tone="ghost"

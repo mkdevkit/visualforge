@@ -37,7 +37,10 @@ comfymanager/tools/       可选工具：UniRig 官方仓库（gitignore）
 ## 环境要求
 
 - Node.js 20+
-- 本机 **Git** 与 **Python 3.10+**（ComfyManager 安装/启动 ComfyUI 需要）
+- **自行安装** Git 与 Python 3.10+，并加入 PATH（ComfyManager 不代装）
+  - Windows： [Git](https://git-scm.com)（勾选 PATH）、[Python](https://www.python.org)（勾选 Add python.exe to PATH）
+  - Ubuntu：`sudo apt install git python3 python3-venv python3-pip`
+- NVIDIA 驱动（安装 ComfyUI 时会按 `nvidia-smi` 选择 CUDA 版 PyTorch：20 系及以上默认 cu130，10 系用 cu126）
 - 显卡与显存按所选模型而定（例如 Wan 2.2 TI2V 5B 大约 8GB 显存可跑）
 
 复制环境变量示例：
@@ -52,7 +55,8 @@ copy .env.example .env
 |---|---|---|
 | `COMFYMANAGER_PORT` | `18788` | 管理端端口 |
 | `COMFYMANAGER_DATA_DIR` | `./comfymanager/data` | 管理端数据 |
-| `COMFYUI_INSTALL_DIR` | `./comfymanager/comfy` | ComfyUI 安装目录 |
+| `COMFYUI_INSTALL_DIR` | `./comfymanager/comfy` | ComfyUI 安装目录（本机已有则可复用） |
+| `COMFYUI_CUDA` | 自动 | PyTorch CUDA 轮子：`cu130` / `cu126` / `cpu`。空则按 nvidia-smi 选择 |
 | `COMFYUI_MODELS_DIR` | `./comfymanager/models` | 权重目录 |
 | `COMFYUI_BASE_URL` | `http://127.0.0.1:8188` | ComfyUI 接口 |
 | `HF_TOKEN` | 空 | Hugging Face Token（门禁模型） |
@@ -82,7 +86,7 @@ npm run dev:all
 
 推荐流程：
 
-1. 打开 ComfyManager。若本机已有 ComfyUI，点「使用已有安装」（或「同步模型路径」）；没有才会克隆。然后启动（带 `--enable-cors-header`）。模型仍下载到配置的模型目录。
+1. 自行装好 Git、Python 3.10+。打开 ComfyManager。若本机已有 ComfyUI，点「使用已有安装」；没有则「安装 ComfyUI（含 CUDA）」（Windows / Ubuntu 都会在安装目录建 `.venv`，再装 CUDA 版 PyTorch）。然后启动。模型仍下载到配置的模型目录。
 2. 在「模型」页下载权重，指定各工位「当前生效模型」。
 3. 在「工作流」页把一份或多份图加入工位并勾选「生效」（也可粘贴 API JSON）。该页支持 zip / json 批量导入导出。
 4. 打开视铸，设置里只填写 ComfyManager 地址（可选改成品目录）。
@@ -252,7 +256,7 @@ POST /api/3d/rig
 | GET | `/api/health` | 健康检查（含 UniRig 状态） |
 | GET/PUT | `/api/settings` | 安装路径、监听、HF Token 等 |
 | GET | `/api/comfy/status` | 安装与进程状态 |
-| POST | `/api/comfy/install` | 发现已有 ComfyUI 则复用并写入模型路径；否则克隆安装 |
+| POST | `/api/comfy/install` | 复用或克隆 ComfyUI，并安装 CUDA 版 PyTorch + requirements |
 | POST | `/api/comfy/start` | 启动 ComfyUI |
 | POST | `/api/comfy/stop` | 停止 ComfyUI |
 | GET | `/api/comfy/workflows` | 列出本机 ComfyUI 工作流 |

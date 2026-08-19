@@ -34358,13 +34358,47 @@ _**Agent (grok-4.6)**_
 
 若未找到已安装的 ComfyUI，则回退到默认目录克隆并执行 pip 安装。状态接口将新增 installed 字段，用于标识当前是否已复用现有实例。
 
-正在设计 Overview 界面的展示逻辑：区分“已就绪（使用本机已有 ComfyUI）”与“未安装”，并以操作系统原生格式显示路径。按钮文案将改为“采用已有安装并写入模型路径”或“安装
+正在设计 Overview 界面的展示逻辑：区分“已就绪（使用本机已有 ComfyUI）”与“未安装”，并以操作系统原生格式显示路径。按钮文案将改为“采用已有安装并写入模型路径”或“安装 / 更新依赖”。
+
+同时考虑在启动阶段自动检测：若默认目录为空且检测到系统中已有 ComfyUI 实例，则自动将其设为当前安装目录，无需用户手动操作。
+
+放弃启动时自动检测的方案，避免意外覆盖用户预期的全新安装。改为在点击安装按钮时才扫描系统中的已有 ComfyUI 实例。
+
+设计了 `looksLikeComfy` 判定函数：通过检测目录下是否存在 `main.py` 和 `comfy` 文件夹来识别 ComfyUI 根目录。若默认目录中已包含 `main.py`，则沿用现有行为。
+
+Overview 界面将提示用户“发现已有安装：xxx，点安装将直接使用”。这样既保留了自动复用能力，又不会干扰用户主动选择全新安装的意图。
+
+正在完善 `isComfyRoot` 的判定条件：除了 `main.py` 外，还会检查 `folder_paths.py` 或 `comfy/__init__.py` 来确认目录是否为 ComfyUI 根目录。
+
+候选路径将从环境变量、配置设置及常见安装位置收集。主目录下会搜索名称匹配 `/comfyui/i` 的子目录作为额外候选。
+
+Windows 特定路径补充了 `LOCALAPPDATA/Programs/ComfyUI`、`USERPROFILE` 下的多处可能位置，以及 `Stability Matrix` 的安装包目录。
+
+同时考虑通过 `COMFYUI_PATH` 环境变量来定位现有实例。
+
+接下来准备处理采用已有安装时的 Python 解释器检测逻辑。
+
+正在实现 `detectComfyPython` 函数，按操作系统平台分别列出候选 Python 路径。Windows 下优先检查 `python_embeded`、`.venv` 和 `venv` 子目录；Linux/macOS 下则检查 `.venv` 与 `venv` 的 `bin` 目录。通过逐个遍历这些路径来定位现有 ComfyUI 实例对应的 Python 解释器。
+
+确定了 Python 解释器检测的具体实现：遍历候选路径并返回首个存在的文件，若未找到则返回空字符串。若检测到现有 Python 而配置中尚无记录，则自动保存该路径。
+
+采用已有 ComfyUI 实例时，不再克隆代码到父目录，也无需创建 installDir。
+
+关于路径处理：后端应始终存储原生绝对路径，由前端统一调用 displayPath 进行格式化渲染，避免在后端硬编码跨平台转换逻辑。
+
+正在实现 `formatOsPath` 工具函数，用于按操作系统原生格式规范化路径。Windows 下将路径归一化并确保反斜杠，Unix 下则保持正斜杠。该函数将统一处理 API 返回的路径展示，避免 YAML 文件中混杂不同格式的路径分隔符。
+
+正在编写 `formatOsPath` 函数，利用 Node.js 的 `normalize`
 </details></think>
 
 _**Agent (grok-4.6)**_
 
+安装时会先扫本机已有 ComfyUI，找到就复用，模型仍写到配置的模型目录；界面路径按当前操作系统显示。
+
+_**Agent (grok-4.6)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\app.ts</summary>
 
 </details></tool-use>
 
@@ -34372,13 +34406,1189 @@ _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
 <summary>Tool use: **ripgrep_raw_search**</summary>
-Status: **loading**
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "安装|installDir|comfy/"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "安装|installDir|comfy/",
+  "topFiles": [
+    {
+      "matchCount": 22,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 22
+}
+```
+Status: **completed**
 
 </details></tool-use>
 
 _**Agent (grok-4.6)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将在 deploy.ts 中创建路径工具和检测逻辑，用于识别系统中已有的 ComfyUI 安装。
+
+同时会更新 writeExtraModelPaths 以合并 YAML 配置。搜索候选目录时，将检查 COMFYUI_INSTALL_DIR 环境变量，并扫描便携版 ComfyUI 的常见存放位置（如桌面、文档、下载、C 盘或 D 盘根目录等）。
+
+还会扫描用户主目录、桌面、文档和下载文件夹中的 *comfy* 目录。Windows 下将检查 D、C、E 盘根目录及 LOCALAPPDATA\Programs\ComfyUI 路径。同时会查找便携版 ComfyUI 的 python_embeded 子目录。
+
+若候选目录名为类似 ComfyUI_windows_portable 的便携版文件夹，会进一步检查其内部的 ComfyUI 子目录是否为有效根目录。detectComfyPython 将补充检测父目录下的 python_embeded 子目录。同时会把 formatOsPath 提取为 deploy.ts 中的独立函数。
+
+YAML 配置值将保留正斜杠以兼容 ComfyUI 文档格式，界面显示则使用操作系统路径。若复用已有安装，无需递归创建空目录树。extra_model_paths.yaml 可直接写入，即使该文件被仓库忽略。正在仔细设计合并函数，确保正确处理现有 YAML 文件中的注释与结构。
+
+正在实现 `upsertYamlSection` 函数，用于向 YAML 文件中插入或替换指定的配置块。该函数会先定位目标键名，若未找到则追加新块；若已存在，则删除原有块并重新插入，从而避免重复添加。
+
+已完善 `upsertYamlSection` 的边界处理：当遇到非缩进的顶层注释或新键时停止截断，确保后续内容不受影响。同时保留了原始文件末尾的换行符。
+
+确定了 Overview 按钮的三态文案：复用已有 ComfyUI 时显示“同步模型路径”，发现其他可用实例但未安装时显示“使用已有 ComfyUI”，否则显示“安装 / 更新依赖”。状态对象将区分 installed、installDir、modelsDir、python 和 discovered 等字段。
+
+状态对象将简化为 `willReuse`、`discovered` 和 `existingInstalls` 等字段。界面文案也相应调整：若配置目录已有安装则显示“已就绪（本机已有安装）”；若未安装但发现其他可用实例则显示“未安装到配置目录，发现已有：xxx”。Overview 区域的安装状态提示将基于这些状态动态生成。
+
+正在细化 Overview 区域的界面展示：安装状态提示将按三种情况分别显示“已就绪（本机已有安装）”“未安装到配置目录，发现已有：xxx”或“未安装”。按钮文案也将对应三种状态切换为“同步模型路径”“使用已有安装”或“安装 ComfyUI”。
+
+同时考虑点击行为：已安装时仍会写入 extra_model_paths 并跳过 pip；未安装但发现已有实例则直接采用；无任何安装时才执行克隆。
+
+为了区分默认克隆副本与外部已有安装，计划新增 `isBundledInstall` 
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+The string to replace was not found in the file.
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+formatOsPath 的首次替换可能插入到了 publicSettings 之前，导致该函数仍保留旧实现。
+
+正在查看 config.ts 文件末尾。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+误将 `publicSettings` 函数替换为 `formatOsPath`，导致函数体被孤立。
+
+需要修复该问题。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 formatOsPath 依赖 resolve() 处理路径，因此需要确保路径有效。
+
+准备重写 deploy.ts，加入检测逻辑、YAML 合并和安装复用。将替换 writeExtraModelPaths 等函数，并把 pythonBin 改为保存 pythonPath。改动会尽量精简。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在更新 comfyStatus 和 installComfy 的相关逻辑。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现了一个bug：`listExistingComfyInstalls` 函数会把配置中的 installDir 也包含进去。
+
+确认了现有安装列表的优先级逻辑：配置路径若有效则优先，否则取首个真实找到的 Comfy 实例。保存设置后加载新路径，且 Python 路径解析正常。
+
+又发现一处路径解析错误：当 python 配置为 "python" 这类命令而非完整路径时，resolve 会将其相对当前工作目录解析，导致路径错误。计划添加一个辅助函数，仅对看起来像路径的字符串执行 formatOsPath，避免将纯命令名误处理。
+
+确定了 `displayMaybePath` 辅助函数的具体实现：仅对包含斜杠、反斜杠或实际存在的路径调用 `formatOsPath`，纯命令名直接返回原样。该函数将用于状态显示和安装返回的 Python 路径展示。同时计划更新 Overview 界面、设置提示（带操作系统示例）、README，并修复安装返回的 Python 路径格式化。
+
+还注意到一个边界情况：即使系统中已存在 ComfyUI 实例，只要用户未点击安装来采纳它，启动时仍会报错“尚未安装 ComfyUI”。另外，写入 extra_model_paths 的 YAML 里模型文件夹路径已通过 formatOsPath 处理，Windows 下可直接被 ComfyUI 识别。
+
+考虑在启动 ComfyUI 时自动采纳已发现的现有实例。如果当前未配置安装路径，但系统中已有 ComfyUI 实例，将自动保存该路径作为当前配置，避免用户手动点击安装按钮。计划添加 `adoptExistingIfNeeded` 函数来实现这一逻辑。
+
+决定将自动采纳现有 Comfy 实例的逻辑统一提取到 `adoptExistingIfNeeded` 中，供启动和安装流程复用以避免重复代码。同时计划修复 `comfyStatus` 和启动时的 Python 路径格式化问题，并在设置界面补充相关提示说明。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要更新安装按钮的文本和设置提示。
+
+安装按钮将按状态显示不同文案：正在处理、已有安装则显示“同步模型路径”，否则显示“安装 ComfyUI”。设置页的安装目录和模型目录提示也会同步更新。README 中相关行号已定位。另外需要处理 pythonPath 的空值格式化问题。
+
+formatOsPath 将增加安全判断：若字符串不含路径分隔符且不存在于文件系统，则直接返回原值，避免将 "python" 等短名称误解析为路径。
+
+确认 startComfy 在修改后仍会写入额外模型路径。安装成功时，概览页目前只处理错误提示，尚无成功消息。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在确认 startComfy 在 adopt 代码块之后是否包含 writeExtraModelPaths。
+
+正在查看 startComfy 的代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+startComfy 中存在潜在 bug：在 adopt、writeExtraModelPaths 之后才捕获 `s`，可能引发时序问题。
+
+确认 saveSettings 使用的是启动前的 `s`，其中 installDir 已是通过 adopt 查找到的有效路径。listExistingComfyInstalls 的查找顺序为：优先配置路径，无效则跳过；其次环境变量、PACKAGE_ROOT/comfy、home 目录等。
+
+若同时存在 bundled 与系统安装，配置中的默认路径优先。用户已克隆的 bundled 实例应被优先使用。接下来将更新 README，并检查 catalog.ts 的 modelDest 与 config.ts 的 publicSettings 是否完整。
+
+确认 adopt 后的 saveSettings 会立即写入 pythonPath，因此后续 loadSettings 能正确读取最新值。catalog 模型路径显示无需调整。正在考虑增加 Windows 驱动器根目录扫描，以覆盖 Home 目录之外的 ComfyUI 安装位置。
+
+补充了 Windows 驱动器根目录扫描的具体种子路径，包括 C、D、E 盘下的 `ComfyUI` 与 `ComfyUI_windows_portable`。`comfyRootAt` 会自动识别嵌套的 ComfyUI 文件夹。接下来将更新 README 并同步调整 seeds 配置。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 extra_model_paths.yaml 是否以目录形式存在。
+
+确认 upsertYamlSection 的行为：若文件仅含注释示例，会追加新内容；若已有配置则替换对应段落，保留前导注释。首次写入时，若原文件为空，则直接写入正文并换行。
+
+Windows 路径中的反斜杠可能被 YAML 解析器误解释为转义字符。因此 YAML 文件中将使用正斜杠或引号包裹路径，避免解析问题。formatOsPath 仅用于界面显示，不改变 YAML 内容。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\config.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Settings.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\config.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Settings.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现一处逻辑问题：`listExistingComfyInstalls` 包含了配置中的 installDir。
+
+确认 installComfy 的逻辑正确：有效配置目录优先使用，否则回退到 existing 列表中的首个有效路径。
+
+另外，Manager 进程可能需要重启才能加载最新代码。deploy.ts 由 Vite 中间件导入，而 Vite 中间件又依赖 app.ts，因此修改后需重启以确保生效。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+安装时会先找本机已有的 ComfyUI，找到就直接用，不再克隆一份。
+
+- **概览**会列出已发现的安装。有则按钮是「使用已有安装」，没有才「安装 ComfyUI」。
+- 复用时只把配置的**模型目录**写进那份 Comfy 的 `extra_model_paths.yaml`（不覆盖你原来的其它路径配置）。权重仍然下到设置里的模型目录。
+- 目录、Python、数据路径在界面上按系统显示：Windows 是 `D:\...`，macOS / Linux 是 `/...`。
+
+请重启 `npm run manager` 后再看概览页。
+
+---
+
+_**User**_
+
+安装comfyui要安装cuda相关依赖
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望在安装 ComfyUI 时一并安装 CUDA 相关依赖。
+
+ComfyUI 的 requirements.txt 通常不包含带 CUDA 的 PyTorch。需要先检测 NVIDIA GPU 和 CUDA 版本，再单独安装对应版本的 PyTorch。
+
+接下来将读取当前代码和 ComfyUI 的 requirements.txt，确认现有安装流程。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先看当前安装流程和本机/ComfyUI 对 CUDA、PyTorch 的处理方式。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,md,json}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "torch|cuda|nvidia|pip"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "torch|cuda|nvidia|pip",
+  "topFiles": [
+    {
+      "matchCount": 6,
+      "uri": "comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager\\src\\api\\download.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 8
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge\comfymanager`** (0 files)
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在准备为 ComfyUI 安装 CUDA 相关依赖。
+
+正在确认 PyTorch CUDA 版本与 ComfyUI 的兼容性，准备查找最新的官方安装指南和对应 wheel 链接。
+
+已确定 Windows 10 环境的处理方案。将检测 NVIDIA 显卡与 CUDA 版本，自动匹配对应的 PyTorch CUDA wheel 并在安装依赖前完成 torch 的 CUDA 版本安装。对于捆绑安装的场景，会强制使用带 CUDA 支持的 torch；对于已有 ComfyUI 实例，若未安装 CUDA 版本则补充安装。
+
+已明确区分三种安装场景：全新克隆与捆绑更新时强制安装 CUDA 版本的 PyTorch；复用外部现有实例时跳过 pip 以避免破坏其环境。用户要求安装 ComfyUI 时必须包含 CUDA 依赖。
+
+已定位到核心问题：requirements.txt 中的 torch 未指定 CUDA 索引，若先安装 CPU 版本再执行 pip install -r requirements.txt，pip 可能因版本兼容而跳过降级，导致 CPU 版本残留。因此必须先通过 --index-url 安装 CUDA 版本的 torch，再执行 requirements.txt 的安装。
+
+进一步确认 requirements.txt 中的 torch 未指定版本号，pip 可能在后续安装中将其替换为 CPU 版本。因此考虑两种方案：先单独安装 CUDA 版本的 torch，再执行 requirements.txt（pip 通常不会重复安装已满足的包）；或者直接在 pip install -r requirements.txt 时追加 --extra-index-url 参数，强制从 CUDA 源拉取。
+
+已确定采用 extra-index-url 方案。将通过 nvidia-smi 检测显卡并解析
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "PyTorch pip install CUDA extra-index-url cu128 cu126 2026"
+}
+```
+Result:
+
+````json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [](https://pydevtools.com/handbook/explanation/installing-cuda-python-packages.md)\n2. [Medium](https://xhinker.medium.com/pytorch-installation-hell-the-cuda-version-trap-that-stops-so-many-and-how-to-escape-it-4153184fa159)\n3. [https://pytorch.org/](https://pytorch.org/)\n4. [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)\n5. [Links for torch](https://download.pytorch.org/whl/cu126/torch/)\n\nSynthesis:\nTo install PyTorch with specific CUDA support, use the --index-url flag to point to the PyTorch wheel repository for that version [1][2]. As of August 2026, you should use the following pattern:\n\npip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128\n\nReplace cu128 with cu126 for CUDA 12.6 or the relevant version matching your driver [2]. Always verify the required version by running nvidia-smi to check your CUDA support [2]. For the most accurate and up-to-date command tailored to your specific environment, use the official tool at pytorch.org [2][3].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003e\u003c/title\u003e\n\u003curl\u003ehttps://pydevtools.com/handbook/explanation/installing-cuda-python-packages.md\u003c/url\u003e\n\u003ccontent\u003ePyTorch hosts its own package index at `download.pytorch.org/whl/`. Users select their CUDA version by pointing pip or uv at the matching URL:\n...\n```shell\n# CUDA 12.8\npip install torch --index-url https://download.pytorch.org/whl/cu128\n...\n# CPU only\npip install torch --index-url https://download.pytorch.org/whl/cpu\n...\nThe package name stays `torch` everywhere. The index determines which binary gets installed. PyTorch 2.11.0 ships variants for CUDA 12.6, 12.8, and 13.0, plus ROCm 7.2 and CPU-only builds.\n...\n```shell\npip install cudf-cu12 --extra-index-url=\n...\n://pypi.nvidia.com\n...\n\"pytorch-cu128\n...\n.pytorch.org/whl/cu128\"\n...\nTwo dra
+… (output truncated)
+````
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+<summary>Tool use: **web_fetch**</summary>
+
+Parameters:
+
+```json
+{
+  "url": "https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/README.md"
+}
+```
+Result:
+
+```json
+{
+  "markdown": "\n\n# ComfyUI\n**The most powerful and modular AI engine for content creation.**\n\n[![Website][website-shield]][website-url]\n[![Dynamic JSON Badge][discord-shield]][discord-url]\n[![Twitter][twitter-shield]][twitter-url]\n[![Matrix][matrix-shield]][matrix-url]\n \n[![][github-release-shield]][github-release-link]\n[![][github-release-date-shield]][github-release-link]\n[![][github-downloads-shield]][github-downloads-link]\n[![][github-downloads-latest-shield]][github-downloads-link]\n\n[matrix-shield]: https://img.shields.io/badge/Matrix-000000?style=flat\u0026logo=matrix\u0026logoColor=white\n[matrix-url]: https://app.element.io/#/room/%23comfyui_space%3Amatrix.org\n[website-shield]: https://img.shields.io/badge/ComfyOrg-4285F4?style=flat\n[website-url]: https://www.comfy.org/\n \n[discord-shield]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2Fcomfyorg%3Fwith_counts%3Dtrue\u0026query=%24.approximate_member_count\u0026logo=discord\u0026logoColor=white\u0026label=Discord\u0026color=green\u0026suffix=%20total\n[discord-url]: https://discord.com/invite/comfyorg\n[twitter-shield]: https://img.shields.io/twitter/follow/ComfyUI\n[twitter-url]: https://x.com/ComfyUI\n\n[github-release-shield]: https://img.shields.io/github/v/release/comfyanonymous/ComfyUI?style=flat\u0026sort=semver\n[github-release-link]: https://github.com/comfyanonymous/ComfyUI/releases\n[github-release-date-shield]: https://img.shields.io/github/release-date/comfyanonymous/ComfyUI?style=flat\n[github-downloads-shield]: https://img.shields.io/github/downloads/comfyanonymous/ComfyUI/total?style=flat\n[github-downloads-latest-shield]: https://img.shields.io/github/downloads/comfyanonymous/ComfyUI/latest/total?style=flat\u0026label=downloads%40latest\n[github-downloads-link]: https://github.com/comfyanonymous/ComfyUI/releases\n\n \n \n \n\nComfyUI is the AI creation engine for visual professionals who demand control over every model, every para
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查阅 ComfyUI 说明文档，寻找 torch 和 CUDA 的安装命令。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": true,
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-tools\\9410f369-5ecf-48fa-abd4-7a4b8866cf4b.txt",
+  "pattern": "torch|cuda|pip install"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-tools\\9410f369-5ecf-48fa-abd4-7a4b8866cf4b.txt",
+  "pattern": "torch|cuda|pip install",
+  "topFiles": [
+    {
+      "matchCount": 32,
+      "uri": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-tools\\9410f369-5ecf-48fa-abd4-7a4b8866cf4b.txt"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 32
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (1 file)
+
+| File |
+|------|
+| `../.\.env.example` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+ComfyUI 官方文档要求 NVIDIA 20 系列及以上显卡需安装 cu130 或更高版本的 CUDA 依赖。
+
+旧版 10 系列显卡需安装 cu126。官方推荐通过 PyTorch 官方索引安装 torch、torchvision 和 torchaudio，随后执行 requirements.txt。计划检测 GPU 型号并解析 CUDA 版本，再映射到对应 wheel：CUDA 13.x 对应 cu130，CUDA 12.8+ 可选 cu128 或 cu130，CUDA 12.6 对应 cu126，旧版 10 系列同样使用 cu126。
+
+nvidia-smi 显示的 CUDA 版本是驱动支持的最大版本，并非已安装的版本。若驱动支持 12.8，则可运行 cu126；若不支持 13.0，则必须使用 cu126。因此按 nvidia-smi 的 CUDA Version 逐级映射：≥13.0 → cu130，≥12.8 → cu128，≥12.6 → cu126，以此类推。若检测到 20 系列及以上显卡，即使驱动版本较低，也优先尝试 cu130。
+
+将通过 nvidia-smi 提取 GPU 名称与驱动版本，再映射到对应 CUDA wheel 标签。若系统缺少 nvidia-smi，会在 Windows 下检查 nvcc 或 CUDA_PATH，否则回退到 CPU 版本以避免错误安装默认 CUDA。用户当前在 Windows 上且很可能配备 NVIDIA 显卡，因此会优先为其检测并安装正确的 CUDA torch 依赖。
+
+若检测不到 nvidia-smi，Windows 与 Linux 默认尝试 cu130，macOS 则跳过 CUDA 并改用 Metal。安装顺序严格遵循官方流程：先以 `--extra-index-url` 单独安装 torch、torchvision、torchaudio，再执行 `pip install -r requirements.txt`，确保其余包仍从 PyPI 获取。同时考虑是否加入 xformers。
+
+xformers 不在 ComfyUI 默认依赖中，因此跳过。torch 的 CUDA 相关库（如 cublas）会随 CUDA wheel 自动安装，无需额外处理。
+
+对于复用外部 Python 环境的情况，若检测到该环境缺少 CUDA 支持（torch.cuda.is_available() 返回 False），则自动为其安装 CUDA 版本的 torch，确保兼容性。
+
+为避免破坏已自带 CUDA 的便携式安装，仅在外部复用环境检测到缺少 CUDA 支持时才安装 CUDA torch，不再重复安装全部依赖。同时，"同步模型路径"操作也应重新安装 CUDA torch，确保 bundled 更新后仍正确配置 CUDA 依赖。
+
+计划将依赖安装逻辑提取为 `installPythonDeps` 函数，统一处理 CUDA 检测与 torch 安装。对于外部复用环境，仅在检测到缺少 CUDA 支持时才安装 CUDA torch，避免覆盖用户自定义的其他包；而对全新或 bundled 安装始终强制安装 CUDA 版本的 torch。
+
+正在将安装逻辑拆分为两个独立函数：`installCudaTorch` 负责通过 `--extra-index-url` 安装带 CUDA 的 torch、torchvision 与 torchaudio；`installRequirements` 负责后续安装 requirements.txt。这样可以确保 torch 始终使用正确的 CUDA wheel，而 requirements.txt 也沿用同一索引地址，避免依赖被替换。
+
+正在细化实现方案。`detectAccel` 将返回包含加速器类型、wheel 标签、索引地址及 CUDA 版本的结构化对象。`installRequirements` 会复用 `--extra-index-url`，确保 requirements.txt 与 torch 使用同一来源。`detectNvidia` 通过 `run()` 同步调用 nvidia-smi，并用正则提取 CUDA Version 字段。
+
+决定改用 `--query-gpu=name --format=csv,noheader` 更精确地提取 GPU 型号，替代正则匹配。将为 nvidia-smi 调用添加超时保护。10 系列显卡通过正则 `/GTX 10\d\d|GeForce GTX 1[06]/i` 识别，固定使用 cu126。20 系列及以上显卡通过 `/RTX (20|30|40|50)|GTX 16/i` 识别，优先选择 cu130，否则回退到驱动支持的最高版本。
+
+新增 COMFYUI_CUDA 环境变量，允许手动指定 cu130、cu126 或 cpu。状态栏将展示 CUDA 版本与对应 wheel 标签。若
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将使用 spawnSync 调用 nvidia-smi 检测 GPU 加速支持，供状态检查和安装流程复用。
+
+已从 node:child_process 导入 spawnSync，并定义了 AccelKind 类型。detectAccel 函数优先读取 COMFYUI_CUDA 环境变量，若设为 cpu 则返回 CPU 配置；若匹配 cu\d+ 格式则按 CUDA 处理。
+
+若环境变量匹配 cu\d+，返回对应 CUDA 配置并指向 PyTorch 的对应索引源。macOS 平台直接返回 MPS 配置。Windows 下通过 nvidia-smi 查询 GPU 名称，提取首个有效结果作为 gpu 字段。
+
+同时调用 nvidia-smi 提取 CUDA 版本号。若 nvidia-smi 执行失败或未检测到 GPU，则回退到默认的 cu130 配置，确保 Windows 和 Linux 用户仍能正常安装。
+
+detectAccel 在检测到 GPU 时，会调用 pickCudaTag 生成具体的 CUDA 标签。该函数优先匹配系列 10 的 GPU（如 GTX 10xx、GTX 16xx、Tesla P40、Quadro P 系列），将其映射为 cu126；其余情况则根据 CUDA 主版本号自动选择对应标签。
+
+pickCudaTag 已按 CUDA 版本精确映射：13.x 及以上返回 cu130，12.8–12.9 返回 cu128，12.6–12.7 返回 cu126，12.4–12.5 返回 cu124，12.1–12.3 返回 cu121，11.8–12.0 返回 cu118。若 nvidia-smi 完全不可用，macOS 仍走 MPS 回退，避免无 NVIDIA 显卡的机器误装 CUDA 依赖。
+
+若 nvidia-smi 执行失败或未检测到 GPU，将回退到 CPU 配置而非默认 cu130，避免无 NVIDIA 显卡的机器下载 CUDA 依赖。用户要求 CUDA 时，若存在 GPU 但 nvidia-smi 不在 PATH 中，仍按默认 cu130 处理。
+
+新增了 `torchCudaReady` 函数，用于在 Python 环境中检测 torch 是否支持 CUDA。`installCudaDeps` 将依据 `detectAccel` 结果输出加速配置标签，并针对 CUDA 场景执行 torch、torchvision、torchaudio 的 pip 升级安装。
+
+`installCudaDeps` 会根据 `detectAccel` 的结果区分处理：CUDA 场景使用 `--extra-index-url` 指定 PyTorch 的对应索引源安装；CPU 场景则安装 CPU 版本。若检测到 macOS（MPS）环境，直接通过 PyPI 安装标准 PyTorch 即可。安装成功后，若存在 `requirements.txt` 
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+安装流程会按显卡选 CUDA 版 PyTorch（ComfyUI 推荐 cu130 / 老卡 cu126），再装 `requirements.txt`，避免 pip 装成 CPU 版。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已成功替换 spawnSync 的导入。
+
+第二次替换 displayMaybePath 失败，因为新代码块以相同函数开头。需要重新读取该函数及其附近代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+detectAccel 似乎已被插入。
+
+正在继续阅读文件。虽然替换失败提示未找到，但第186行确实存在 detectAccel，需要进一步确认原因。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现代码存在函数前置调用问题：`installCudaDeps` 和 `torchCudaReady` 在定义之前就调用了 `run` 和 `appendLog`。
+
+确认 JavaScript 函数声明提升机制可解决该问题，异步函数与普通函数均会被提升。接下来需要检查 spawnSync 导入是否已添加。
+
+正在更新 `installComfy` 以调用 `installCudaDeps`，并调整 `comfyStatus` 以包含加速器状态。已确认 `run` 的前置调用因函数提升而安全。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现代码中存在函数调用顺序问题：`installCudaDeps` 和 `torchCudaReady` 在 `run` 函数定义之前就调用了它。不过函数声明会被提升，因此这不会导致运行时错误。
+
+还需更新概述、长 pip 按钮文本、README 及环境变量说明。
+
+正在检查 `installCudaDeps` 与 `run` 的文件顺序，确认没有重复或破坏调用链。`torchCudaReady` 仅在已有安装分支触发，全新克隆不会提前调用它。
+
+已确认现有安装的兼容逻辑：若缺少 PyTorch，torchCudaReady 会返回 false 并触发 CUDA 依赖安装；外部路径仅需 torch，捆绑路径则包含完整依赖。
+
+按钮文案将改为“安装 ComfyUI（含 CUDA）”，安装期间显示“安装依赖中（PyTorch 较大）…”，以提示用户 PyTorch 下载较慢。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+The string to replace was not found in the file.
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要修复 Overview 页面的 PageHead 描述。
+
+检查 installComfy 替换是否残留重复闭合标签。README 中替换 COMFYUI_CUDA 时可能误删了 INSTALL_DIR 表格行，需确认括号是否正确。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+README表格中意外删除了COMFYUI_INSTALL_DIR。
+
+正在修复Overview页面的头部组件。已确认JavaScript中两个函数声明的提升机制没有问题。接下来将验证Overview按钮和加速行是否已更新，并修正README表格。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+PageHead 替换可能因首次尝试失败而重试。
+
+怀疑上次读取的是替换前的旧内容，准备重新读取第24行确认。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现潜在的代码顺序问题：`installCudaDeps` 在 `run` 和 `appendLog` 函数之前定义。
+
+JavaScript 的函数提升机制保证了 `installCudaDeps` 调用 `run` 和 `appendLog` 时不会出错。同时注意到 `torchCudaReady` 也定义在 `run` 之前。另外确认 Windows 下 `nvidia-smi` 路径没有空格，无需额外处理。
+
+进一步检查 Windows 下 `nvidia-smi` 的调用方式。若使用完整路径，考虑将 `shell` 参数设为 `false`；若仅通过 `PATH` 查找，则保持 `true` 以便 cmd.exe 自动定位。目前认为直接通过 `cmd.exe` 运行完整路径即可正常工作。
+
+考虑为 pip 安装添加 `--timeout 300` 以应对大体积 wheel 的下载超时。PyTorch 下载体积较大，用户需重启管理器才能生效。对于已配置 CUDA 的现有 ComfyUI 实例，脚本会跳过重复安装，但用户仍可选择升级 CUDA 版本的 PyTorch。
+
+区分了 bundled 与 external 模式下的 CUDA 依赖处理逻辑。bundled 模式始终重新安装依赖；external 模式下若 ComfyUI 已配置 CUDA 则跳过。未提供强制重装选项。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\api\\deploy.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\comfymanager\\src\\pages\\Overview.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在准备 ComfyUI 安装所需的 CUDA 依赖说明。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+安装 ComfyUI 时会一并装 **CUDA 版 PyTorch**（`torch` / `torchvision` / `torchaudio`），再装 `requirements.txt`，避免 pip 从 PyPI 装成 CPU 版。
+
+选择规则（与 ComfyUI 文档一致）：
+
+- 用 `nvidia-smi` 看显卡和驱动 CUDA 版本
+- **20 系及以上**：默认 `cu130`（驱动不够则降到 `cu128` / `cu126`）
+- **10 系**：`cu126`
+- 没有 NVIDIA：装 CPU 版
+- 可用环境变量 `COMFYUI_CUDA=cu130`（或 `cu126` / `cpu`）强制指定
+
+概览页会显示「加速」一行。点安装后 PyTorch 包比较大，可能要几分钟。请先重启 `npm run manager`。
+
+---
+
+_**User**_
+
+支持windows和ubutun下的安装，可以从干净的系统安装。
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望 ComfyManager 支持 Windows 和 Ubuntu 的安装，并能在干净系统上直接安装。
+
+正在分析干净系统可能缺失的依赖项：Git、Python 3.10+、pip、venv 等。计划增加操作系统检测功能，在缺少必要组件时自动安装并创建独立虚拟环境来运行 ComfyUI。
+
+不会自动安装 NVIDIA 驱动程序，避免系统级改动和重启需求。PyTorch CUDA wheel 已包含 CUDA 运行时，可直接使用。Windows 将通过 winget 安装 Git 和 Python，Ubuntu 则通过 apt-get 安装 git、python3、python3-venv、python3-pip 和 python3-dev。安装完成后会在 installDir/.venv 中创建独立虚拟环境。
+
+正在检查 deploy.ts 的安装流程，以确定干净系统上的具体缺口。Windows 上若未安装 Python，系统自带的 python 命令可能无法正常工作；Ubuntu 则需要确保已安装 python3-venv 才能创建虚拟环境。pip 可能也不存在，需要通过 ensurepip 来安装。在 Ubuntu 上执行 apt 时，若当前用户不是 root，应提示使用 sudo 或提供清晰的命令。
+
+正在细化安装流程。计划新增 `ensurePrereqs()` 函数，根据操作系统自动安装缺失的依赖包。Windows 侧通过 winget 或 choco 安装 Git 和 Python；Ubuntu 侧通过 apt 安装 git、python3、python3-pip、python3-venv、python3-dev、build-essential、libgl1、libglib2.0-0 等基础库，并提示用户使用 sudo。随后将在 ComfyUI 目录下创建独立的 `.venv` 虚拟环境，安装 CUDA 版 PyTorch 并执行 `pip install -r requirements.txt`。
+
+正在调整 NVIDIA 驱动的处理策略。PyTorch CUDA wheel 已包含 CUDA 运行时，因此只需安装 NVIDIA 显卡驱动即可。在干净 Ubuntu 上，若未安装驱动，GPU 不可用但 CPU 可运行。不会自动执行 `ubuntu-drivers autoinstall`，而是检测到无驱动后仅打印安装说明。安装流程将保持适度激进：自动安装 git、Python 3.12、venv、pip 及 ComfyUI 所需的基础 Linux 库。
+
+正在查看 deploy.ts、Overview 和 README 以了解现有安装流程。Windows 侧将通过 winget 安装 Git 和 Python 3.12，并在安装后刷新 PATH 环境变量。Ubuntu 侧考虑通过 `ubuntu-drivers` 自动安装推荐的 NVIDIA 驱动，同时会明确提示用户可能需要重启系统才能生效。
+
+正在细化 Ubuntu 的 apt 安装命令，包含 ffmpeg 等额外依赖。若非 root 用户，将先尝试 `sudo -n` 提权，失败则抛出明确的 sudo 命令供手动执行。
+
+确认了 venv 创建的具体步骤：在 installDir 下运行 `python -m venv .venv`，并确保系统已安装 python3-venv 包。
+
+明确了安装流程的五步顺序：先确保系统前置条件，再查找或克隆 ComfyUI，接着创建虚拟环境，然后安装 CUDA 依赖，最后写入额外模型路径配置。
+
+正在设计 `findSystemPython()` 函数，用于自动定位系统中的 Python 解释器，包括 python3.12、python3.11、python3.10、python3、python 以及 Windows 下的 `py -3.12` 和常见安装路径。同时会处理 `ensurepip` 以确保 pip 可用。计划在 Overview 界面展示当前操作系统类型和前置条件的检测状态。
+
+最终决定在 Ubuntu 上提供可选的 NVIDIA 驱动安装，而非自动执行。若检测到缺少驱动，将尝试安装 `nvidia-driver-535`
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先看清当前安装链路，再补上 Windows / Ubuntu 干净系统所需的 Git、Python、venv 和系统库。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\pages\Overview.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在考虑将前置检查逻辑单独提取到 `prereq.ts`，或直接放在 `deploy.ts` 中。
+
+决定将启动检查逻辑提取到 `comfy-bootstrap.ts`。该模块将定义 `HostOs` 类型，并实现跨平台操作系统检测函数。
+
+已完成 `comfy-bootstrap.ts` 的核心函数设计。包括 `detectHostOs`、`which`、`findSystemPython`、`commandOk`、`probePrereqs` 和 `ensurePrereqs` 等函数。Windows 安装计划通过 `winget` 获取 Git 和 Python。
+
+已确定 Windows 下 winget 安装 Git 与 Python 3.12 的具体命令。注意到 winget 安装后当前进程的 PATH 可能未更新，因此需要在多个可能路径中搜索 Python 与 Git。Ubuntu 端则计划通过 apt 安装 git、python3、python3-pip、python3-venv、python3-dev 和 python3-setuptools。
+
+补充了 Ubuntu 端的额外依赖包，包括 build-essential、libgl1、ffmpeg、wget、curl 等。
+
+设计了 `aptInstall` 函数：若当前为 root 则直接调用 apt；否则通过 `sudo -n` 检查权限并静默执行 apt-get update 与 install。
+
+针对 Ubuntu 清净系统，计划通过 `ubuntu-drivers autoinstall`
+</details></think>
+
+---
+
+_**User**_
+
+Git、Python不需要安装，会手动安装
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户说明 Git 和 Python 无需由 ComfyManager 安装，将手动完成。
+
+ComfyUI 将支持 Windows 与 Ubuntu 的干净系统安装。Git 和 Python 由用户手动安装，不再通过 winget 或 apt 自动获取。
+
+正在梳理 Windows 与 Ubuntu 干净系统安装的剩余工作：
+
+- 创建虚拟环境隔离系统 Python
+- 区分 python3 与 python 命令
+- 在虚拟环境中安装 pip
+- 检测 Git 与 Python 缺失并给出明确错误
+- 处理 Windows 路径刷新与 py 启动器
+- 补充 Linux 系统库（libgl 等）
+
+Ubuntu 可能缺少 python3-venv，因此不自动安装该依赖，而是尝试 `python -m venv`，若失败则提示用户手动安装。Windows 上将使用 `py -3`、`python`、`python3` 等命令跨平台定位 Python。
+
+状态界面将展示操作系统类型，以及 Git 与 Python 是否已就绪，不会自动安装它们。
+
+Ubuntu 上创建虚拟环境后，将直接安装 torch+cuda 与 requirements。Windows 与 Ubuntu 的 shell 执行方式也会区分处理。
+
+这比完整引导更保守：仅做最小改动，重点是虚拟环境隔离、跨平台 Python/Git 检测和清晰报错。
+
+Python 命令将按版本号递减顺序探测，要求不低于 3.10。Git 直接检测版本。虚拟环境优先复用便携版 embedded Python，否则在安装目录创建 .venv。流程上先校验环境，再克隆或复用现有 ComfyUI，随后安装 CUDA 与依赖，并写入额外路径。
+
+将新增 `probeCmd` 辅助函数统一探测命令是否存在。Ubuntu 上若 `pip` 不可用，则改用 `python3 -m pip`。虚拟环境创建失败时，会提示用户手动安装 `python3-venv` 或执行 `ensurepip`。现在开始编写代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+Git 和 Python 由你本机自备。安装流程会在 Windows / Ubuntu 上检测它们是否可用，并在 ComfyUI 目录里建独立虚拟环境，不再代装。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将添加 `probe()` 辅助函数来检测命令是否存在。
+
+将添加操作系统检测、系统 Python 查找、Git 状态检查及虚拟环境创建等辅助函数。若缺少 Git 或 Python，会提示用户手动安装。安装流程将改为先检查前置条件，再创建虚拟环境并克隆代码。README 和概述界面也会同步更新，说明 Git 与 Python 需自行安装，并区分 Windows 与 Ubuntu 场景。
+
+Windows 上将使用 `py -3` 启动器创建虚拟环境，并把 `.venv/Scripts/python.exe` 作为 Python 路径。`findSystemPython` 返回 `{ cmd, args }` 结构，例如 `py -3` 或 `python3`。若 OpenCV 安装失败，会提示用户手动安装 `libgl1`。接下来将实现 `probeVersion` 函数来检测命令版本。
+
+已实现 `probeVersion` 函数：通过 `spawnSync` 调用命令并解析输出中的版本号，要求 Python 3.10 以上。Windows 上将按优先级尝试 `settings pythonPath`、`py -3.12`、`py -3.11`、`py -3`、`python` 及 `python3` 等候选路径。
+
+已确定 Linux 上的 Python 候选顺序为 `python3.12`、`python3.11`、`python3.10`、`python3`、`python`。Git 将通过 `spawnSync` 检测其版本。
+
+`ensureVenv` 的具体逻辑如下：
+- 若已存在虚拟环境则直接返回
+- 否则查找系统 Python
+- 若无系统 Python 则抛出错误
+- 在安装目录下创建 `.venv` 目录
+- 使用系统 Python 命令执行 `venv` 创建
+- 失败时若为 Linux 提示手动安装 `python3-venv`
+- Windows 下 Python 路径指向 `.venv/Scripts/python.exe`，Linux 下指向 `.venv/bin/python`
+
+创建虚拟环境后，将自动升级 pip、setuptools 与 wheel，并保存 pythonPath。若检测到 python_embeded，则跳过虚拟环境步骤。installComfy 会先调用 hostPrereqs 检查 Git 与 Python 状态；若复用现有环境且包含 python_embeded，则无需 Git；仅在克隆代码时才强制需要 Git。同时新增了 hostOs() 函数用于识别操作系统类型。
+
+macOS 与 Linux（含 Ubuntu）的识别逻辑已补全。Linux 下通过读取 `/etc/os-release` 获取系统名称，Ubuntu 单独标记。Windows 上的 Python 与 Git 安装提示也已明确：Python 需从 python.org 安装 3.10+ 并勾选加入 PATH；Git 请前往 git-scm.com 下载。
+
+Ubuntu 上的安装提示将补充为 `sudo apt install git python3 python3-venv python3-pip`。
+
+`pythonBin()` 的兜底策略已调整：不再直接使用 `py` 启动器，而是优先通过 `findSystemPython` 获取真实可执行文件路径。虚拟环境创建完成后，该路径即为实际的 `python.exe` 或 `python` 可执行文件。若复用的现有环境未包含虚拟环境且 `pythonPath` 为空，则回退到 `"python"` 或 `"python3"`，并启用 `shell: true` 以兼容 shell 启动。
+
+正在实现 `resolveSystemPython()` 函数。该函数将优先读取用户自定义的 `pythonPath`，随后按优先级尝试多种候选命令（如 `py -3 -c "import sys; print(sys.executable)"`），最终返回系统 Python 的完整可执行路径及其版本号。
+
+正在完善 `resolveSystemPython()` 的实现细节。该函数将通过 `spawnSync` 调用候选命令并解析其输出，提取版本号后过滤掉低于 Python 3.10 的版本，最终返回符合要求的系统 Python 可执行路径。
+
+`resolveSystemPython()` 已完成：它会从候选命令的输出中提取可执行文件路径，并替换其中的反斜杠以适配当前操作系统，随后返回该路径与版本号。`ensureVenv` 将直接使用这个真实可执行文件来创建虚拟环境。接下来会在 Overview 界面展示各系统的 Git 与 Python 状态，并保留 `change.focused.executable` 标记。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\comfymanager\src\api\deploy.ts</summary>
 
 </details></tool-use>

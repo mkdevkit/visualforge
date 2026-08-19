@@ -1,4 +1,4 @@
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { createWriteStream, existsSync, writeFileSync, readFileSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { homedir } from "node:os";
@@ -25,7 +25,106 @@ function pythonBin() {
   if (custom) return custom;
   const detected = detectComfyPython(loadSettings().comfy.installDir);
   if (detected) return detected;
-  return process.platform === "win32" ? "python" : "python3";
+  return resolveSystemPython()?.executable || (process.platform === "win32" ? "python" : "python3");
+}
+
+export function hostOs() {
+  if (process.platform === "win32") return { id: "windows" as const, label: "Windows" };
+  if (process.platform === "darwin") return { id: "macos" as const, label: "macOS" };
+  try {
+    const text = readFileSync("/etc/os-release", "utf8");
+    const pretty = text.match(/^PRETTY_NAME="?([^"\n]+)/m)?.[1] || "";
+    const id = (text.match(/^ID="?([^"\n]+)/m)?.[1] || "linux").toLowerCase();
+    return { id: id === "ubuntu" ? "ubuntu" as const : "linux" as const, label: pretty || "Linux" };
+  } catch {
+    return { id: "linux" as const, label: "Linux" };
+  }
+}
+
+function probeGit() {
+  const r = spawnSync("git", ["--version"], {
+    encoding: "utf8",
+    timeout: 8000,
+    windowsHide: true,
+    shell: process.platform === "win32",
+  });
+  const ok = r.status === 0;
+  const os = hostOs();
+  return {
+    ok,
+    version: ok ? String(r.stdout || r.stderr || "").trim() : "",
+    hint: ok
+      ? ""
+      : os.id === "windows"
+        ? "未检测到 Git。请自行安装 https://git-scm.com 并勾选加入 PATH 后重试。"
+        : "未检测到 Git。请自行安装，例如：sudo apt install git",
+  };
+}
+
+export function resolveSystemPython() {
+  const custom = loadSettings().comfy.pythonPath.trim();
+  const tries: Array<{ cmd: string; args: string[] }> = [];
+  if (custom) tries.push({ cmd: custom, args: [] });
+  if (process.platform === "win32") {
+    tries.push(
+      { cmd: "py", args: ["-3.12"] },
+      { cmd: "py", args: ["-3.11"] },
+      { cmd: "py", args: ["-3.10"] },
+      { cmd: "py", args: ["-3"] },
+      { cmd: "python", args: [] },
+      { cmd: "python3", args: [] },
+    );
+  } else {
+    tries.push(
+      { cmd: "python3.12", args: [] },
+      { cmd: "python3.11", args: [] },
+      { cmd: "python3.10", args: [] },
+      { cmd: "python3", args: [] },
+      { cmd: "python", args: [] },
+    );
+  }
+  for (const t of tries) {
+    const r = spawnSync(t.cmd, [...t.args, "-c", "import sys; print('%d.%d' % sys.version_info[:2]); print(sys.executable)"], {
+      encoding: "utf8",
+      timeout: 8000,
+      windowsHide: true,
+      shell: process.platform === "win32",
+    });
+    if (r.status !== 0) continue;
+    const lines = String(r.stdout || "").trim().split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+    const ver = lines[0] || "";
+    const [major, minor] = ver.split(".").map(Number);
+    if (!major || minor < 0 || major < 3 || (major === 3 && minor < 10)) continue;
+    const executable = lines[1] || "";
+    if (!executable) continue;
+    return { executable, version: ver };
+  }
+  return null;
+}
+
+function pythonHint() {
+  const os = hostOs();
+  if (os.id === "windows") {
+    return "未检测到 Python 3.10+。请自行从 https://www.python.org 安装，并勾选 Add python.exe to PATH。";
+  }
+  if (os.id === "ubuntu") {
+    return "未检测到 Python 3.10+。请自行安装，例如：sudo apt install python3 python3-venv python3-pip";
+  }
+  return "未检测到 Python 3.10+。请自行安装 python3、python3-venv、python3-pip。";
+}
+
+export function hostPrereqs() {
+  const git = probeGit();
+  const py = resolveSystemPython();
+  const venv = detectComfyPython(loadSettings().comfy.installDir);
+  return {
+    os: hostOs(),
+    git,
+    python: py
+      ? { ok: true as const, version: py.version, executable: displayMaybePath(py.executable) || py.executable, hint: "" }
+      : { ok: false as const, version: "", executable: "", hint: pythonHint() },
+    venvPython: venv ? displayMaybePath(venv) : "",
+  };
 }
 
 export function isComfyRoot(dir: string) {
@@ -183,6 +282,126 @@ function displayMaybePath(p: string) {
   return p;
 }
 
+export function detectAccel() {
+  const override = (process.env.COMFYUI_CUDA || "").trim().toLowerCase();
+  if (override === "cpu") {
+    return {
+      kind: "cpu" as const,
+      tag: "cpu",
+      extraIndexUrl: "https://download.pytorch.org/whl/cpu",
+      label: "CPU",
+      gpu: "",
+      cudaVersion: "",
+    };
+  }
+  if (/^cu\d+$/.test(override)) {
+    return {
+      kind: "cuda" as const,
+      tag: override,
+      extraIndexUrl: `https://download.pytorch.org/whl/${override}`,
+      label: `CUDA ${override}`,
+      gpu: "",
+      cudaVersion: "",
+    };
+  }
+  if (process.platform === "darwin") {
+    return {
+      kind: "mps" as const,
+      tag: "",
+      extraIndexUrl: "",
+      label: "Apple Silicon / MPS",
+      gpu: "",
+      cudaVersion: "",
+    };
+  }
+
+  const smiBin = process.platform === "win32" && existsSync("C:\\Windows\\System32\\nvidia-smi.exe")
+    ? "C:\\Windows\\System32\\nvidia-smi.exe"
+    : "nvidia-smi";
+  const gpuInfo = spawnSync(smiBin, ["--query-gpu=name", "--format=csv,noheader"], {
+    encoding: "utf8",
+    timeout: 8000,
+    windowsHide: true,
+    shell: process.platform === "win32",
+  });
+  const gpu = String(gpuInfo.stdout || "")
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean)[0] || "";
+  const header = spawnSync(smiBin, [], {
+    encoding: "utf8",
+    timeout: 8000,
+    windowsHide: true,
+    shell: process.platform === "win32",
+  });
+  const cudaVersion = `${header.stdout || ""}\n${header.stderr || ""}`.match(/CUDA Version:\s*([\d.]+)/i)?.[1] || "";
+  const nvidiaOk = Boolean(gpu) || (header.status === 0 && cudaVersion);
+
+  if (!nvidiaOk) {
+    return {
+      kind: "cpu" as const,
+      tag: "cpu",
+      extraIndexUrl: "https://download.pytorch.org/whl/cpu",
+      label: "CPU（未检测到 NVIDIA GPU）",
+      gpu: "",
+      cudaVersion: "",
+    };
+  }
+
+  const tag = pickCudaTag(gpu, cudaVersion);
+  return {
+    kind: "cuda" as const,
+    tag,
+    extraIndexUrl: `https://download.pytorch.org/whl/${tag}`,
+    label: [gpu, cudaVersion ? `驱动 CUDA ${cudaVersion}` : "", tag].filter(Boolean).join(" · "),
+    gpu,
+    cudaVersion,
+  };
+}
+
+function pickCudaTag(gpu: string, cudaVersion: string) {
+  if (/GTX\s*1[06]\d{2}|Tesla P40|Quadro P\d/i.test(gpu)) return "cu126";
+  const v = Number.parseFloat(cudaVersion || "13");
+  if (v >= 13) return "cu130";
+  if (v >= 12.8) return "cu128";
+  if (v >= 12.6) return "cu126";
+  if (v >= 12.4) return "cu124";
+  if (v >= 12.1) return "cu121";
+  if (v >= 11.8) return "cu118";
+  return "cu130";
+}
+
+async function torchCudaReady(cwd: string) {
+  const r = await run(pythonBin(), ["-c", "import torch; print('CUDA' if torch.cuda.is_available() else 'CPU')"], cwd);
+  return /\bCUDA\b/.test(r.log);
+}
+
+async function installCudaDeps(cwd: string, alsoRequirements: boolean) {
+  const accel = detectAccel();
+  appendLog(`加速：${accel.label}`);
+  const torchArgs = ["-m", "pip", "install", "--upgrade", "torch", "torchvision", "torchaudio"];
+  if (accel.kind === "cuda") {
+    torchArgs.push("--extra-index-url", accel.extraIndexUrl);
+  } else if (accel.kind === "cpu") {
+    torchArgs.push("--extra-index-url", accel.extraIndexUrl);
+  }
+  const torch = await run(pythonBin(), torchArgs, cwd);
+  appendLog(torch.log);
+  if (torch.code !== 0) {
+    throw new Error(
+      `安装 PyTorch 失败${accel.kind === "cuda" ? `（需要 ${accel.tag} CUDA 轮子）` : ""}。请确认已装 NVIDIA 驱动与 Python 3.10+。\n${torch.log.slice(-1200)}`,
+    );
+  }
+  if (alsoRequirements && existsSync(join(cwd, "requirements.txt"))) {
+    const req = ["-m", "pip", "install", "-r", "requirements.txt"];
+    if (accel.extraIndexUrl) req.push("--extra-index-url", accel.extraIndexUrl);
+    const pip = await run(pythonBin(), req, cwd);
+    appendLog(pip.log);
+    if (pip.code !== 0) throw new Error(`安装 Python 依赖失败。请确认已安装 Python 3.10+。\n${pip.log.slice(-800)}`);
+  }
+  return accel;
+}
+
 export async function comfyStatus() {
   const s = loadSettings().comfy;
   const proc = loadJson<ComfyProc>(procFile(), {});
@@ -197,6 +416,8 @@ export async function comfyStatus() {
     installDir: formatOsPath(s.installDir),
     modelsDir: formatOsPath(s.modelsDir),
     python: displayMaybePath(pythonBin()),
+    accel: detectAccel(),
+    prereqs: hostPrereqs(),
     pid: alive ? proc.pid : undefined,
     processRunning: alive,
     api: ping,
@@ -227,36 +448,81 @@ function appendLog(text: string) {
   writeFileSync(logFile(), `${prev}${text}\n`, "utf8");
 }
 
+function venvPythonPath(installDir: string) {
+  return process.platform === "win32"
+    ? join(installDir, ".venv", "Scripts", "python.exe")
+    : join(installDir, ".venv", "bin", "python");
+}
+
+async function ensureVenv(installDir: string) {
+  const portable = detectComfyPython(installDir);
+  if (portable && !portable.replace(/\\/g, "/").includes("/.venv/") && !portable.replace(/\\/g, "/").includes("/venv/")) {
+    return portable;
+  }
+  const existing = venvPythonPath(installDir);
+  if (existsSync(existing)) {
+    saveSettings({ comfy: { ...loadSettings().comfy, pythonPath: existing } });
+    return existing;
+  }
+  const sys = resolveSystemPython();
+  if (!sys) throw new Error(pythonHint());
+  mkdirSync(installDir, { recursive: true });
+  appendLog(`创建虚拟环境：${formatOsPath(join(installDir, ".venv"))}（Python ${sys.version}）`);
+  const created = await run(sys.executable, ["-m", "venv", join(installDir, ".venv")], installDir);
+  appendLog(created.log);
+  if (created.code !== 0 || !existsSync(existing)) {
+    const extra = hostOs().id === "ubuntu" || hostOs().id === "linux"
+      ? " Ubuntu/Debian 请确认已自行安装 python3-venv：sudo apt install python3-venv"
+      : "";
+    throw new Error(`无法创建 Python 虚拟环境。${extra}\n${created.log.slice(-800)}`);
+  }
+  const pip = await run(existing, ["-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"], installDir);
+  appendLog(pip.log);
+  saveSettings({ comfy: { ...loadSettings().comfy, pythonPath: existing } });
+  return existing;
+}
+
+function requireGit() {
+  const git = probeGit();
+  if (!git.ok) throw new Error(git.hint);
+}
+
 export async function installComfy() {
   const current = loadSettings();
   const existing = listExistingComfyInstalls();
   const configured = current.comfy.installDir;
   const found = isComfyRoot(configured) ? resolve(configured) : existing[0] || "";
   if (found) {
-    const pythonPath = current.comfy.pythonPath.trim() || detectComfyPython(found);
+    const bundled = isBundledInstall(found);
+    const pythonPath = bundled
+      ? await ensureVenv(found)
+      : current.comfy.pythonPath.trim() || detectComfyPython(found) || (await ensureVenv(found));
     saveSettings({
       comfy: {
-        ...current.comfy,
+        ...loadSettings().comfy,
         installDir: found,
         pythonPath,
       },
     });
     writeExtraModelPaths();
     appendLog(`使用已安装 ComfyUI：${formatOsPath(found)}\n模型目录：${formatOsPath(loadSettings().comfy.modelsDir)}`);
-    if (isBundledInstall(found)) {
-      const pip = await run(pythonBin(), ["-m", "pip", "install", "-r", "requirements.txt"], found);
-      appendLog(pip.log);
-      if (pip.code !== 0) throw new Error(`安装 Python 依赖失败。请确认已安装 Python 3.10+。\n${pip.log.slice(-800)}`);
+    let accel = detectAccel();
+    if (bundled || !(await torchCudaReady(found))) {
+      accel = await installCudaDeps(found, bundled);
     }
     return {
       ok: true,
       reused: true,
-      bundled: isBundledInstall(found),
+      bundled,
+      accel,
+      os: hostOs(),
       installDir: formatOsPath(found),
       modelsDir: formatOsPath(loadSettings().comfy.modelsDir),
       pythonPath: displayMaybePath(pythonBin()) || pythonBin(),
     };
   }
+  requireGit();
+  if (!resolveSystemPython()) throw new Error(pythonHint());
   const { installDir } = loadSettings().comfy;
   mkdirSync(installDir, { recursive: true });
   if (!comfyInstalled()) {
@@ -264,16 +530,17 @@ export async function installComfy() {
     const name = installDir.split(/[/\\]/).pop() || "ComfyUI";
     const cloned = await run("git", ["clone", "--depth", "1", "https://github.com/comfyanonymous/ComfyUI.git", name], parent);
     appendLog(cloned.log);
-    if (cloned.code !== 0) throw new Error(`克隆 ComfyUI 失败。请确认已安装 Git。\n${cloned.log.slice(-800)}`);
+    if (cloned.code !== 0) throw new Error(`${probeGit().ok ? "克隆 ComfyUI 失败。" : probeGit().hint}\n${cloned.log.slice(-800)}`);
   }
-  const pip = await run(pythonBin(), ["-m", "pip", "install", "-r", "requirements.txt"], installDir);
-  appendLog(pip.log);
-  if (pip.code !== 0) throw new Error(`安装 Python 依赖失败。请确认已安装 Python 3.10+。\n${pip.log.slice(-800)}`);
+  await ensureVenv(installDir);
+  const accel = await installCudaDeps(installDir, true);
   writeExtraModelPaths();
   return {
     ok: true,
     reused: false,
     bundled: true,
+    accel,
+    os: hostOs(),
     installDir: formatOsPath(installDir),
     modelsDir: formatOsPath(loadSettings().comfy.modelsDir),
   };
