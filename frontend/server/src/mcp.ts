@@ -160,11 +160,12 @@ export function createVisualForgeMcp() {
   server.registerTool(
     "generate_image",
     {
-      description: "文生图或图生图。参考图可传本机绝对路径或已上传的 relPath。",
+      description: "文生图或图生图。参考图可传本机绝对路径或已上传的 relPath。engine=qwen 走千问云，默认用工位设置。",
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         negativePrompt: z.string().optional(),
         size: z.string().optional().describe("如 1024*1024"),
         n: z.number().optional(),
@@ -192,7 +193,8 @@ export function createVisualForgeMcp() {
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         negativePrompt: z.string().optional(),
         duration: z.number().optional(),
         resolution: z.string().optional(),
@@ -228,7 +230,8 @@ export function createVisualForgeMcp() {
         prompt: z.string().optional(),
         lyrics: z.string().optional(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         isInstrumental: z.boolean().optional(),
         title: z.string().optional(),
       },
@@ -250,7 +253,8 @@ export function createVisualForgeMcp() {
       inputSchema: {
         text: z.string(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         voice: z.string().optional(),
         languageType: z.string().optional(),
         instructions: z.string().optional(),
@@ -274,7 +278,8 @@ export function createVisualForgeMcp() {
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         duration: z.number().optional(),
         title: z.string().optional(),
       },
@@ -296,7 +301,8 @@ export function createVisualForgeMcp() {
       inputSchema: {
         voicePrompt: z.string(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         targetModel: z.string().optional(),
         previewText: z.string().optional(),
         preferredName: z.string().optional(),
@@ -319,7 +325,8 @@ export function createVisualForgeMcp() {
       inputSchema: {
         prompt: z.string().optional(),
         model: z.string().optional(),
-        workflowId: z.string().optional().describe("该工位生效工作流 id，与 model 独立"),
+        workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
+        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
         image: z.string().optional().describe("参考图：本机路径或 relPath"),
         title: z.string().optional(),
       },
@@ -472,7 +479,9 @@ async function statusSnapshot() {
   return {
     ok: true,
     name: "VisualForge",
-    engine: "ComfyUI",
+    engine: "VisualForge",
+    tools: ["comfyui", "qwen"],
+    engines: s.engines,
     dataDir: s.dataDir,
     managerUrl: s.managerUrl,
     mcp: mcpEndpoint(s.host, s.port),

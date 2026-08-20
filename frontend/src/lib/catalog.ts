@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api, uploadFile } from "./api";
-import type { Catalog, FeatureId, ModelDef } from "./types";
+import { readQwenPrefs, resolveQwenEnabled } from "./qwen-prefs";
+import type { Catalog, FeatureId, ModelDef, StationEngine } from "./types";
+import { QWEN_CATALOG } from "./qwen-catalog";
 
 const EMPTY_CATALOG: Catalog = {
   image: [],
@@ -114,6 +116,36 @@ export function useCatalog() {
     };
   }, []);
   return catalog;
+}
+
+export function useQwenCatalog(): Catalog {
+  return {
+    ...EMPTY_CATALOG,
+    ...QWEN_CATALOG,
+    loadError: "",
+  };
+}
+
+export function useStationEngine(feature: FeatureId | FeatureId[]) {
+  const features = Array.isArray(feature) ? feature : [feature];
+  const [engine, setEngineState] = useState<StationEngine>("comfyui");
+  const [qwenOffered, setQwenOffered] = useState(false);
+  useEffect(() => {
+    api
+      .settings()
+      .then((r) => {
+        const qwen = r.settings.qwen as { enabled?: boolean } | undefined;
+        const engines = {
+          ...readQwenPrefs().engines,
+          ...((r.settings.engines as Record<string, StationEngine> | undefined) || {}),
+        };
+        const offered = resolveQwenEnabled(qwen) && features.some((id) => engines[id] === "qwen");
+        setQwenOffered(offered);
+        setEngineState(offered ? "qwen" : "comfyui");
+      })
+      .catch(() => undefined);
+  }, [features[0]]);
+  return { engine, setEngine: setEngineState, qwenOffered };
 }
 
 export async function uploadAll(files: File[]) {

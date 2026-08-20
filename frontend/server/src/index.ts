@@ -39,6 +39,15 @@ const server = http.createServer((req, res) => {
 server.requestTimeout = 0;
 server.headersTimeout = 0;
 server.timeout = 0;
+server.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`端口 ${settings.port} 已被占用（多半是昨晚留下来的旧生成进程）。`);
+    console.error(`PowerShell：netstat -ano | findstr :${settings.port}`);
+    console.error(`然后：Stop-Process -Id <LISTENING 的 PID> -Force`);
+    process.exit(1);
+  }
+  throw err;
+});
 server.listen(settings.port, settings.host, () => {
   console.log(`VisualForge API  http://${settings.host}:${settings.port}`);
   console.log(`MCP              http://${settings.host}:${settings.port}/mcp`);

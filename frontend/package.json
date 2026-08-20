@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node ../scripts/check-node.cjs && concurrently -n api,web -c cyan,magenta \"tsx watch server/src/index.ts\" \"vite\"",
+    "dev": "node ../scripts/check-node.cjs && vite",
+    "dev:api": "tsx watch server/src/index.ts",
     "dev:web": "vite",
     "mcp": "tsx server/src/mcp-stdio.ts",
     "build": "vite build && tsc -p server/tsconfig.json",

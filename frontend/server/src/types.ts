@@ -4,6 +4,7 @@ export type TaskStatus = "queued" | "running" | "succeeded" | "failed" | "cancel
 
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
+export type StationEngine = "comfyui" | "qwen";
 
 export interface StationWorkflow {
   id: string;
@@ -30,12 +31,21 @@ export interface ComfySettings {
   apiKey: string;
 }
 
+export interface QwenSettings {
+  enabled: boolean;
+  apiKey: string;
+  workspaceId: string;
+  baseUrl: string;
+}
+
 export interface AppSettings {
   dataDir: string;
   host: string;
   port: number;
   managerUrl: string;
   comfy: ComfySettings;
+  qwen: QwenSettings;
+  engines: Record<FeatureId, StationEngine>;
   features: Record<FeatureId, ComfyFeatureConfig>;
 }
 
@@ -106,6 +116,7 @@ export interface ModelDef {
 }
 
 export interface GenerateImageBody {
+  engine?: StationEngine;
   model?: string;
   prompt: string;
   negativePrompt?: string;
@@ -123,6 +134,7 @@ export interface GenerateImageBody {
 }
 
 export interface GenerateVideoBody {
+  engine?: StationEngine;
   model?: string;
   prompt: string;
   negativePrompt?: string;
@@ -144,6 +156,7 @@ export interface GenerateVideoBody {
 }
 
 export interface GenerateMusicBody {
+  engine?: StationEngine;
   model?: string;
   prompt?: string;
   lyrics?: string;
@@ -157,6 +170,7 @@ export interface GenerateMusicBody {
 }
 
 export interface GenerateTtsBody {
+  engine?: StationEngine;
   model?: string;
   text: string;
   voice?: string;
@@ -170,6 +184,7 @@ export interface GenerateTtsBody {
 }
 
 export interface VoiceDesignBody {
+  engine?: StationEngine;
   model?: string;
   targetModel?: string;
   voicePrompt: string;
@@ -181,6 +196,7 @@ export interface VoiceDesignBody {
 }
 
 export interface GenerateSfxBody {
+  engine?: StationEngine;
   model?: string;
   prompt: string;
   duration?: number;
@@ -191,6 +207,7 @@ export interface GenerateSfxBody {
 }
 
 export interface Generate3dBody {
+  engine?: StationEngine;
   model?: string;
   prompt?: string;
   image?: string;

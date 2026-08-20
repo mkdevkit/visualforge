@@ -2,9 +2,13 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { bodyLimit } from "hono/body-limit";
 import { existsSync, readFileSync } from "node:fs";
-import { extname } from "node:path";
-import { loadSettings, saveSettings, ensureDataLayout } from "./config.js";
+import { extname, join } from "node:path";
+import { spawn } from "node:child_process";
+import { loadSettings, saveSettings, ensureDataLayout, isPlaceholderSecret, FRONTEND_ROOT } from "./config.js";
+import type { AppSettings } from "./types.js";
 import { ComfyError, pingComfy } from "./lib/comfy.js";
+import { DashScopeError } from "./lib/dashscope.js";
+import { qwenCatalog } from "./lib/qwen-catalog.js";
 import { FEATURE_LABELS } from "./lib/features.js";
 import { fetchManagerRuntime, managerUrl } from "./lib/manager-client.js";
 import { mcpEndpoint } from "./mcp.js";
@@ -29,16 +33,48 @@ app.use("*", cors({ origin: "*", allowMethods: ["GET", "POST", "PATCH", "PUT", "
 app.use("/api/*", bodyLimit({ maxSize: 80 * 1024 * 1024 }));
 
 app.onError((err, c) => {
-  const statusRaw = err instanceof ComfyError ? err.status : 500;
+  const statusRaw = err instanceof ComfyError ? err.status : err instanceof DashScopeError ? err.status : 500;
   const status = ([400, 401, 403, 404, 500, 502] as const).includes(statusRaw as 400) ? (statusRaw as 400 | 401 | 403 | 404 | 500 | 502) : 500;
   return c.json(
     {
       ok: false,
       error: err.message,
-      code: err instanceof ComfyError ? err.code : "INTERNAL",
+      code: err instanceof ComfyError ? err.code : err instanceof DashScopeError ? err.code : "INTERNAL",
+      detail: err instanceof DashScopeError ? err.raw : undefined,
     },
     status,
   );
+});
+
+app.get("/api/ping", (c) => {
+  const s = loadSettings();
+  return c.json({
+    ok: true,
+    engine: "VisualForge",
+    tools: ["comfyui", "qwen"],
+    port: s.port,
+    pid: process.pid,
+    qwen: { enabled: Boolean(s.qwen.enabled), configured: Boolean(s.qwen.apiKey) },
+  });
+});
+
+function isLoopbackHost(c: { req: { header: (name: string) => string | undefined } }) {
+  const host = (c.req.header("host") || "").split(":")[0].replace(/^\[|\]$/g, "");
+  return host === "127.0.0.1" || host === "localhost" || host === "::1";
+}
+
+app.post("/api/server/restart", (c) => {
+  if (!isLoopbackHost(c)) return c.json({ ok: false, error: "只允许本机重启生成服务" }, 403);
+  const script = join(FRONTEND_ROOT, "scripts/restart-api.cjs");
+  const child = spawn(process.execPath, [script, String(loadSettings().port)], {
+    cwd: FRONTEND_ROOT,
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+    env: process.env,
+  });
+  child.unref();
+  return c.json({ ok: true, restarting: true });
 });
 
 app.get("/api/health", async (c) => {
@@ -52,9 +88,12 @@ app.get("/api/health", async (c) => {
   return c.json({
     ok: true,
     name: "VisualForge",
-    engine: "ComfyUI",
+    engine: "VisualForge",
+    tools: ["comfyui", "qwen"],
+    engines: s.engines,
     dataDir: s.dataDir,
     managerUrl: s.managerUrl,
+    qwen: { enabled: Boolean(s.qwen.enabled), configured: Boolean(s.qwen.apiKey), baseUrl: s.qwen.baseUrl },
     manager,
     mcp: {
       url: mcpEndpoint(s.host, s.port),
@@ -81,13 +120,23 @@ app.get("/api/models", async (c) => {
   }
 });
 
+function maskSecret(value: string) {
+  if (!value) return "";
+  return `${value.slice(0, 4)}••••`;
+}
+
 function publicSettings() {
   const s = loadSettings();
   return {
     ...s,
     comfy: {
       ...s.comfy,
-      apiKey: s.comfy.apiKey ? `${s.comfy.apiKey.slice(0, 4)}••••` : "",
+      apiKey: maskSecret(s.comfy.apiKey),
+    },
+    qwen: {
+      ...s.qwen,
+      apiKey: maskSecret(s.qwen.apiKey),
+      configured: Boolean(s.qwen.apiKey),
     },
   };
 }
@@ -102,11 +151,34 @@ app.get("/api/settings", (c) => {
 
 app.put("/api/settings", async (c) => {
   const body = await c.req.json();
-  const patch: { managerUrl?: string; dataDir?: string } = {};
+  const patch: Parameters<typeof saveSettings>[0] = {};
   if (typeof body.managerUrl === "string") patch.managerUrl = body.managerUrl.replace(/\/+$/, "");
   if (typeof body.dataDir === "string") patch.dataDir = body.dataDir;
+  if (body.qwen && typeof body.qwen === "object") {
+    const q = body.qwen as { enabled?: boolean; apiKey?: string; workspaceId?: string; baseUrl?: string };
+    patch.qwen = {};
+    if (typeof q.enabled === "boolean") patch.qwen.enabled = q.enabled;
+    if (typeof q.apiKey === "string" && !isPlaceholderSecret(q.apiKey)) patch.qwen.apiKey = q.apiKey.trim();
+    if (typeof q.workspaceId === "string") patch.qwen.workspaceId = q.workspaceId;
+    if (typeof q.baseUrl === "string") patch.qwen.baseUrl = q.baseUrl.replace(/\/+$/, "");
+  }
+  if (body.engines && typeof body.engines === "object") {
+    patch.engines = body.engines as AppSettings["engines"];
+  }
   saveSettings(patch);
   return c.json({ ok: true, settings: publicSettings() });
+});
+
+app.get("/api/qwen/models", (c) => {
+  return c.json({ ok: true, ...qwenCatalog });
+});
+
+app.get("/api/qwen/ping", (c) => {
+  const s = loadSettings();
+  if (!s.qwen.apiKey) {
+    return c.json({ ok: false, error: "未配置千问 API Key。请到设置页填写，或访问 https://www.qianwenai.com/ 申请。" }, 400);
+  }
+  return c.json({ ok: true, baseUrl: s.qwen.baseUrl, workspace: Boolean(s.qwen.workspaceId), platform: "https://www.qianwenai.com/" });
 });
 
 app.get("/api/comfy/ping", async (c) => {
@@ -279,11 +351,12 @@ app.get("/api/files/*", (c) => {
 app.get("/api/openapi.json", (c) => {
   return c.json({
     openapi: "3.0.3",
-    info: { title: "VisualForge Local API", version: "0.2.0", description: "ComfyUI 本地多模态工坊" },
+    info: { title: "VisualForge Local API", version: "0.3.0", description: "视铸本地多模态工坊：ComfyUI 或千问云" },
     servers: [{ url: `http://${loadSettings().host}:${loadSettings().port}` }],
     paths: {
       "/api/health": { get: { summary: "健康检查" } },
-      "/api/models": { get: { summary: "从 ComfyManager 读取模型目录" } },
+      "/api/models": { get: { summary: "从 ComfyManager 读取 ComfyUI 模型目录" } },
+      "/api/qwen/models": { get: { summary: "千问云模型目录（与 ComfyUI 目录分开）" } },
       "/api/upload": { post: { summary: "上传参考文件" } },
       "/api/images/generate": { post: { summary: "生图 / 图生图" } },
       "/api/videos/generate": { post: { summary: "生视频（异步）" } },

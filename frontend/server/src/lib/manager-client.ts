@@ -39,7 +39,7 @@ let cache: { at: number; url: string; data: ManagerRuntime } | null = null;
 export async function fetchManagerRuntime(force = false): Promise<ManagerRuntime> {
   const url = managerUrl();
   if (!force && cache && cache.url === url && Date.now() - cache.at < 2000) return cache.data;
-  const res = await fetch(`${url}/api/runtime`);
+  const res = await fetch(`${url}/api/runtime`, { signal: AbortSignal.timeout(4000) });
   const raw = await res.text();
   if (!raw.trim()) throw new Error(`ComfyManager ${url}/api/runtime 返回空响应（HTTP ${res.status}）`);
   let json: ManagerRuntime;

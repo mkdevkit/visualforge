@@ -33,7 +33,7 @@ export function Layout() {
             </NavLink>
           ))}
         </nav>
-        <p className="px-2 text-[11px] leading-relaxed text-mute/80">生成工坊 · ComfyUI 由 ComfyManager 管理</p>
+        <p className="px-2 text-[11px] leading-relaxed text-mute/80">生成工坊 · ComfyUI 本机，或千问云</p>
       </aside>
       <main className="forge-scroll min-w-0 flex-1 overflow-auto">
         <Outlet />

@@ -86,13 +86,18 @@ export function Dropzone({
 
 export function ErrorBox({ error }: { error?: string }) {
   if (!error) return null;
-  return <div className="rounded-xl border border-red-900/50 bg-red-950/30 px-3 py-2 text-sm text-red-200">{error}</div>;
+  return (
+    <div className="rounded-xl border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-all text-red-200">
+      {error}
+    </div>
+  );
 }
 
-export function Spinner({ label }: { label: string }) {
+export function Spinner({ label, tone = "comfy" }: { label: string; tone?: "comfy" | "qwen" }) {
+  const color = tone === "qwen" ? "border-qwen/20 border-t-qwen text-qwen" : "border-brass/20 border-t-brass text-brass";
   return (
-    <div className="flex items-center gap-3 text-sm text-brass">
-      <span className="size-4 animate-spin rounded-full border-2 border-brass/20 border-t-brass" />
+    <div className={`flex items-center gap-3 text-sm ${tone === "qwen" ? "text-qwen" : "text-brass"}`}>
+      <span className={`size-4 animate-spin rounded-full border-2 ${color}`} />
       {label}
     </div>
   );

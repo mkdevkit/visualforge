@@ -2,9 +2,10 @@ import { PageHead } from "../components/PageHead";
 import { useSettings } from "../lib/settings";
 
 const endpoints = [
-  ["GET", "/api/health", "健康检查（含 ComfyManager 状态）"],
-  ["GET", "/api/models", "从 ComfyManager /api/runtime 读取工位模型与工作流"],
-  ["GET/PUT", "/api/settings", "ComfyManager 地址与成品目录"],
+  ["GET", "/api/health", "健康检查（含 ComfyManager 与千问配置状态）"],
+  ["GET", "/api/models", "从 ComfyManager 读取 ComfyUI 工位模型与工作流（千问不用这个）"],
+  ["GET", "/api/qwen/models", "千问云静态目录（视铸生成服务自带，不经过 ComfyManager）"],
+  ["GET/PUT", "/api/settings", "ComfyManager 地址、千问 Key、工位工具、成品目录"],
   ["POST", "/api/upload", "上传参考文件"],
   ["POST", "/api/images/generate", "生图 / 图生图"],
   ["POST", "/api/videos/generate", "生视频（返回 task）"],
@@ -29,7 +30,7 @@ export function ApiDocs() {
   const mgr = settings?.managerUrl || "http://127.0.0.1:18788";
   return (
     <section className="mx-auto max-w-4xl px-8 py-10">
-      <PageHead kicker="Open API" title="本地调用" desc={`生成接口和 MCP 在 18787。ComfyUI 部署、模型与工作流在 ComfyManager ${mgr}。`} />
+      <PageHead kicker="Open API" title="本地调用" desc={`生成接口和 MCP 在 18787。请求体可带 engine=comfyui 或 qwen。ComfyUI 部署在 ComfyManager ${mgr}；千问走 qianwenai.com / DashScope。`} />
       <div className="overflow-hidden rounded-2xl border border-line">
         <table className="w-full text-left text-sm">
           <tbody>

@@ -57,6 +57,7 @@ export interface DesignedVoice {
 
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
+export type StationEngine = "comfyui" | "qwen";
 
 export interface StationWorkflowRef {
   id: string;
@@ -86,6 +87,14 @@ export interface AppSettingsView {
     baseUrl: string;
     apiKey: string;
   };
+  qwen: {
+    enabled?: boolean;
+    apiKey: string;
+    workspaceId: string;
+    baseUrl: string;
+    configured?: boolean;
+  };
+  engines: Record<FeatureId, StationEngine>;
   features: Record<FeatureId, ComfyFeatureConfig>;
 }
 
@@ -158,4 +167,6 @@ export interface Catalog {
   features?: Partial<Record<FeatureId, ComfyFeatureConfig>>;
   managerUrl?: string;
   loadError?: string;
+  platform?: string;
+  protocol?: string;
 }

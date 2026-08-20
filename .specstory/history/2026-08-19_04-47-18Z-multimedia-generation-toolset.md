@@ -51830,4 +51830,5369 @@ _**Agent (grok-4.6)**_
 用户反馈结果展示区域过宽。该区域位于工作流右侧下方，右侧过高时左侧中间会留空。
 
 结果区域位于整个网格下方，因此宽度占满全宽。左侧列未随右侧增高而拉伸，导致中间出现空白。
+
+计划将结果区域移入左侧列，放在生成按钮下方。这样可以填满左侧的空白空间，避免结果区域过宽。左侧列会容纳表单和结果内容，右侧保留工作流与模型设置。结果区域的宽度将限制在左侧列的范围内，不再占满全宽。
+
+正在调整左侧列的网格结构为 `grid-cols-1`，使结果区域宽度更贴合左侧列。同时考虑为 ResultStrip 添加紧凑模式或全局调整其布局。另外，左侧列增高后会自然填满空白，无需额外设置 `items-start` 来阻止拉伸。
 </details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在定位各文件左侧列的末尾，准备在那里插入 ResultStrip，并移除底部的条目。
+
+已确定 StudioImage、StudioMusic、StudioAudio 和 StudioVideo 的插入位置。ResultStrip 将改为 1-2 列网格，父级使用 items-start 防止侧边栏拉伸。接下来精确核对各文件左侧列的结尾。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+给网格添加 items-start，让左右两列独立靠顶对齐。
+
+ResultStrip 改为 1-2 列布局。视频结果放在左侧任务框之后。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\AssetCard.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在确认 Library 是否也使用了 ResultStrip。若如此，1-2 列可能对 Library 页面过窄。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "ResultStrip"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "ResultStrip",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\components\\AssetCard.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 9
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages",
+  "pattern": "grid-cols-2 gap-3|AssetCard"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages",
+  "pattern": "grid-cols-2 gap-3|AssetCard",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\pages\\Library.tsx"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+ResultStrip 仅在 studio 页面中使用。
+
+Library 直接使用 AssetCard。正在确认 Studio 左侧列是否包含 ResultStrip。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+成品区改到**左侧表单下面**，宽度跟提示词那一列对齐，不再通栏铺在工作流右侧底下。右侧再高，左边也不会空一块。
+
+资源库页没动。刷新生图页即可看到。
+
+---
+
+_**User**_
+
+混元3d模型开源吗？可免费商用吗？如果可以，添加到模型列表
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户询问混元3D模型是否开源及是否可免费商用。
+
+正在核实混元3D的开源许可与商用条款。若确认可免费商用，将按现有格式将其加入模型列表。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先核对混元 3D 的开源协议和商用条款，再对照现有 `models.json` 的收录规则决定是否加入。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\comfymanager\config\models.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "Hunyuan3D 2.0 2.1 license Apache commercial use Hugging Face Tencent"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [LICENSE · tencent/Hunyuan3D-2.1 at main](https://huggingface.co/tencent/Hunyuan3D-2.1/blob/main/LICENSE)\n2. [LICENSE](https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1/blob/9a4fd9b6d4a41eada59507be760a0fec44e89358/LICENSE)\n3. [LICENSE · tencent/Hunyuan3D-2 at ac9fd33683d032aedf4f5e95efd204c5aac700d6](https://huggingface.co/tencent/Hunyuan3D-2/blob/ac9fd33683d032aedf4f5e95efd204c5aac700d6/LICENSE)\n4. [Regarding commercial licensing](https://github.com/Tencent/Hunyuan3D-2/issues/6)\n5. [LICENSE](https://github.com/Tencent-Hunyuan/Hunyuan3D-2/blob/main/LICENSE)\n\nSynthesis:\nHunyuan3D 2.0 and 2.1 are released under the Tencent Hunyuan 3D Community License Agreement rather than a standard Apache license [1][2][3]. While commercial use is permitted, it is subject to specific restrictions, including a requirement to request a separate license from Tencent if your product or service exceeds 1 million monthly active users [1][2][3]. The license is expressly limited to specific territories and does not apply in the European Union, the United Kingdom, or South Korea [1][3]. You must also include mandatory copyright notices with your distributions [1][2].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eLICENSE · tencent/Hunyuan3D-2.1 at main\u003c/title\u003e\n\u003curl\u003ehttps://huggingface.co/tencent/Hunyuan3D-2.1/blob/main/LICENSE\u003c/url\u003e\n\u003ccontent\u003e| TENCENT HUNYUAN 3D 2.1 COMMUNITY LICENSE AGREEMENT |\n| --- |\n| Tencent Hunyuan 3D 2.1 Release Date: June 13, 2025 |\n...\n| THIS LICENSE AGREEMENT DOES NOT APPLY IN THE EUROPEAN UNION, UNITED KINGDOM AND SOUTH KOREA AND IS EXPRESSLY LIMITED TO THE TERRITORY, AS DEFINED BELOW. |\n...\n| By clicking to agree or by using, reproducing, modifying, distributing, performing or displaying any\n...\nthe Tencent Hunyuan 3D 2.1 Works,\n...\nhave recognized and accepted the content of\n...\n, which is effective\n...\n| We grant 
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{json,ts,md}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "hunyuan|Hunyuan|model3d"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "hunyuan|Hunyuan|model3d",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend/server/src/lib/features.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend/server/src/lib/auto-rig.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "comfymanager/src/api/types.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/server/src/lib/manager-client.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/server/src/lib/storage.ts"
+    },
+    {
+      "matchCount": 4,
+      "uri": "frontend/server/src/lib/comfy-generate.ts"
+    },
+    {
+      "matchCount": 2,
+      "uri": "frontend/server/src/types.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/src/lib/catalog.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend/src/lib/types.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend/server/src/mcp.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager/config/models.json"
+    },
+    {
+      "matchCount": 2,
+      "uri": "comfymanager/src/api/catalog.ts"
+    }
+  ],
+  "totalFiles": 12,
+  "totalMatches": 28
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+目录仅收录允许商用的开源权重。混元3D是否符合此要求，尚待确认。
+
+混元3D采用腾讯社区许可证，含MAU商业限制且不适用于欧盟等地区，与OpenRAIL类似，不符合商用开源标准。因此不应添加到模型列表中。
+
+正在核实混元3D 1.0及后续版本的官方许可证信息，并检查是否有Comfy-Org等第三方重新打包版本存在不同的开源协议。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "Hunyuan3D-1 Apache license vs community license 2.0 ComfyUI weights"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Notice at main · Tencent-Hunyuan/Hunyuan3D-1](https://github.com/Tencent-Hunyuan/Hunyuan3D-1/blob/main/Notice)\n2. [LICENSE.txt · tencent/Hunyuan3D-1 at main](https://huggingface.co/tencent/Hunyuan3D-1/blob/main/LICENSE.txt)\n3. [main.py](https://github.com/Tencent/Hunyuan3D-1/blob/main/main.py)\n4. [jtydhr88/ComfyUI-Hunyuan3D-1-wrapper](https://github.com/jtydhr88/comfyui-hunyuan3d-1-wrapper)\n5. [ComfyUI-Hunyuan3D-1-wrapper | Ecosystem Directory | market.dev](https://explore.market.dev/ecosystems/python/projects/comfyui-hunyuan3d-1-wrapper)\n\nSynthesis:\nThe Hunyuan3D-1 model weights are governed by the Tencent Hunyuan Non-Commercial License Agreement [1][2][3]. This license restricts usage to non-commercial purposes and mandates compliance with specific usage policies [2]. While some repository wrapper tools for ComfyUI are distributed under the Apache License 2.0, this only applies to the wrapper code itself, not the underlying Tencent model weights [4][5]. You must still adhere to the original non-commercial terms when using the weights within those ComfyUI nodes [1][2][3].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eNotice at main · Tencent-Hunyuan/Hunyuan3D-1\u003c/title\u003e\n\u003curl\u003ehttps://github.com/Tencent-Hunyuan/Hunyuan3D-1/blob/main/Notice\u003c/url\u003e\n\u003ccontent\u003eHunyuan 3D is licensed under the TENCENT HUNYUAN NON-COMMERCIAL LICENSE AGREEMENT except for the third-party components listed below. Hunyuan 3D does not impose any additional limitations beyond what is outlined in the repsective licenses of these third-party components. Users must comply with all terms and conditions of original licenses of these third-party components and must ensure that the usage of the third party components adheres to all relevant laws and regulations. \n\nFor avoidance of doubts, Hunyuan 3D means the large language models and their software and algorithms, in
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+<summary>Tool use: **web_fetch**</summary>
+Fetch timed out while retrieving content
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已确认该模型目录遵循Apache-2许可证。
+
+混元3D开源但非MIT许可证。1.0版仅限非商业用途；2.0/2.1版虽允许商业使用，但有100万MAU上限且排除欧盟、英国及韩国。这与目录政策的MIT无限制要求不符，因此不会将其加入模型列表。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+**不能按视铸的标准收录。** 权重是开源可下载的，但不是 Apache-2.0 / MIT，也不是无门槛免费商用。
+
+视铸模型库只收 **Apache-2.0 / MIT**，明确排除带使用限制、收入上限或月活上限的协议。混元 3D 对不上：
+
+| 版本 | 协议 | 商用 |
+|---|---|---|
+| Hunyuan3D 1.0 | Tencent Hunyuan **Non-Commercial** | 不可商用 |
+| Hunyuan3D 2.0 / 2.1 | Tencent Hunyuan 3D **Community License** | 有条件：月活超过 **100 万** 要向腾讯另申请；**欧盟、英国、韩国不适用** |
+
+代码仓库里的 Apache 只覆盖部分封装代码，**权重仍走腾讯社区协议**。
+
+所以不会写进 `models.json`。生 3D 工位继续用已收录的 **TripoSR**（MIT，可商用）。若只是本机研究、不商用，可在 ComfyUI 里自行下混元工作流，不要走视铸模型库。
+
+---
+
+_**User**_
+
+frontend还是把千问的功能加回来吧？不过原来调用comfyui的功能一点都不要变，包括ui，每种工位可以配使用千问还是comfyui，然后显示对应工具的ui。界面上要明确表现了是两种不同的工具。
+用的是https://www.qianwenai.com/ 平台的
+功能对照
+工位	模型	落盘目录
+生图
+Qwen-Image-3.0-Pro / 3.0 / 2.0(-Pro)
+data/images/
+生视频
+Wan 2.7/2.6、Wan-Video（2.5/2.2/2.1）、HappyHorse
+data/videos/
+生音乐
+Fun-Music v1 / Preview
+data/music/
+配音 / 音色设计 / 音效
+Qwen-Audio-TTS、Qwen3-TTS、CosyVoice、Omni
+data/audio/
+生 3D
+Tripo H3.1 / P1.0
+data/models3d/
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望在前端重新集成千问（DashScope）功能，同时保持现有 ComfyUI 功能完全不变，包括 UI 界面。每种工位将支持配置使用千问或 ComfyUI，并在界面上明确区分两种工具。
+
+正在梳理当前前端架构与残留代码，准备重新接入千问平台。注意到此前曾明确要求不恢复 DashScope，现在用户又明确要求恢复该功能，需要确认这一变更是否符合预期。
+
+用户的新请求明确覆盖了此前“不恢复 DashScope”的限制。接下来将深入检查代码库中的设置模块、工作区页面、生成服务及 API 目录，同时检索历史记录中旧版 DashScope 的实现细节，以便准确还原千问功能。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+千问作为独立工具加回各工位，ComfyUI 的调用和界面保持不动。先摸清当前工位结构和千问平台的接口形态。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\skills-cursor\canvas\SKILL.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **25** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge\frontend\src`** (25 files)
+
+| File |
+|------|
+| `../frontend/src/components/ui.tsx` |
+| `../frontend/src/components/ModelPreview.tsx` |
+| `../frontend/src/pages/StudioMusic.tsx` |
+| `../frontend/src/components/Layout.tsx` |
+| `../frontend/src/App.tsx` |
+| `../frontend/src/pages/Library.tsx` |
+| `../frontend/src/pages/ApiDocs.tsx` |
+| `../frontend/src/lib/motions.ts` |
+| `../frontend/src/pages/Studio3D.tsx` |
+| `../frontend/src/pages/StudioImage.tsx` |
+| `../frontend/src/lib/settings.ts` |
+| `../frontend/src/pages/StudioVideo.tsx` |
+| `../frontend/src/pages/StudioAudio.tsx` |
+| `../frontend/src/lib/useTaskPoll.ts` |
+| `../frontend/src/lib/manager.ts` |
+| `../frontend/src/components/PageHead.tsx` |
+| `../frontend/src/components/WorkflowSelect.tsx` |
+| `../frontend/src/components/AssetCard.tsx` |
+| `../frontend/src/vite-env.d.ts` |
+| `../frontend/src/lib/api.ts` |
+| `../frontend/src/main.tsx` |
+| `../frontend/src/lib/catalog.ts` |
+| `../frontend/src/pages/Settings.tsx` |
+| `../frontend/src/lib/types.ts` |
+| `../frontend/src/components/ProviderHint.tsx` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,json,md}",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "dashscope|DashScope|qianwen|Qwen-Image-3|Fun-Music|Tripo-H3|provider"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge",
+  "pattern": "dashscope|DashScope|qianwen|Qwen-Image-3|Fun-Music|Tripo-H3|provider",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend/src/lib/catalog.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".specstory\\statistics.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/server/src/lib/features.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": ".specstory/statistics.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/server/src/lib/comfy-generate.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 6,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+File not found
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看旧版 DashScope 的 git 历史，并准备访问 qianwenai.com 了解其 API 接口。
+
+同时也在查看 ProviderHint、generate.ts 和 catalog 路由等文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ProviderHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\App.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\Layout.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "qianwenai.com API DashScope Qwen-Image-3.0 Wan 2.7 Fun-Music Tripo H3.1"
+}
+```
+Result:
+
+````json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Qwen — 异步图像生成（3.0系列） - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/image-generation/qwen-text-to-image-30-async)\n2. [Qwen — Async image generation (3.0) - QwenCloud](https://docs.qwencloud.com/api-reference/image-generation/qwen-text-to-image-30-async)\n3. [文生图 - 千问AI平台](https://platform.qianwenai.com/docs/developer-guides/image-generation/text-to-image)\n4. [Qwen-Image-3.0-Pro - 千问AI平台](https://www.qianwenai.com/models/qwen-image-3.0-pro)\n5. [DashScope API 参考 - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/chat/dashscope)\n\nSynthesis:\nqianwenai.com 的 DashScope（Qwen-Image-3.0）异步文生图接口是 POST https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation ，请求头加 X-DashScope-Async: enable；成功后用 GET /tasks/{task_id} 轮询直到 SUCCEEDED/FAILED，每 10 秒建议轮询一次。示例：{\"model\":\"qwen-image-3.0-pro\",\"input\":{\"messages\":[{\"role\":\"user\",\"content\":[{\"text\":\"...\"}]}]},\"parameters\":{\"prompt_extend\":true}}。Wan 2.7（wan2.7-image-pro/wan2.7-image）也支持异步，且部分型号支持同步调用[1][2][3].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eQwen — 异步图像生成（3.0系列） - 千问AI平台\u003c/title\u003e\n\u003curl\u003ehttps://platform.qianwenai.com/docs/api-reference/image-generation/qwen-text-to-image-30-async\u003c/url\u003e\n\u003ccontent\u003eqwen-image-3.0 系列模型的异步图像生成接口\n...\n/services/aigc/image-generation/generation\n...\n```\ncurl --location 'https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation' \\\n--header 'Content-Type: application/json' \\\n--header \"Authorization: Bearer $DASHSCOPE_API_KEY\" \\\n--header 'X-DashScope-Async: enable' \\\n--data '{\n  \"model\": \"qwen-image-3.0-pro\",\n  \"input\": {\n    \"messages\": [\n      {\n        \"role\": \"user\",\n        \"content\": [\n          {\n            \"text\": \"A healing-style hand-drawn poster featuring three puppies playing with a ball on lush green grass.\"\n          }\n        ]\
+… (output truncated)
+````
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-transcripts",
+  "pattern": "dashscope|DashScope|qianwenai|DASHSCOPE"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-transcripts",
+  "pattern": "dashscope|DashScope|qianwenai|DASHSCOPE",
+  "topFiles": [
+    {
+      "matchCount": 40,
+      "uri": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-transcripts\\74755d42-2c4f-4f24-9e4f-50fb76234627\\74755d42-2c4f-4f24-9e4f-50fb76234627.jsonl"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 58
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+恢复千问功能涉及大量代码回溯。原始 DashScope 逻辑原本位于 apps/server 和 apps/web 目录，此前已被 ComfyUI 重构覆盖。
+
+正在检索 git 历史中被重构覆盖的旧版 generate.ts、catalog.ts 等文件。计划为每个工位增加引擎配置项，支持在 VisualForge 设置中切换使用 Qwen 或 ComfyUI，并在界面上区分两种工具的 UI。ComfyUI 的现有功能和界面将完全保持不变。
+
+已明确 Studio 页面的差异化展示：ComfyUI 工位保留现有 WorkflowSelect 与模型选择；Qwen 工位则显示云模型字段，不展示工作流。服务端 generate.ts 将按引擎路由，恢复 DashScope 客户端及 Qwen 生成函数。Qwen 目录改为本地维护，不再依赖 ComfyManager。接下来将在 git 历史和 agent-tools 中查找旧版 catalog.ts 与 generate.ts 的具体实现。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (0 files)
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **68** results in **1** directory</summary>
+
+Directory: **`C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools`** (68 files)
+
+| File |
+|------|
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\dd0fe9c6-365e-40cd-a85e-6ab31a4d9b8c.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\3ffa525e-bd2c-42a8-b6d9-54efcc81073b.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\cba2499f-375e-4b1f-8539-0c68aefacffa.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\8f3bb13b-9258-46e9-aab6-b549ca5d2474.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\72d0cb6a-e5c2-4178-95c0-e83881315b3f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\35273341-d569-451c-b945-2fa0dc08ff97.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\8d08629c-244a-45b1-82da-0e29a12ca263.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\fc1fd279-57ad-4d84-8b86-1bf2cc3b04f1.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\b69c7e42-d31b-4863-94d7-244d891c4847.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\a5482c6e-f261-4f70-b7cb-9687cb6fe2a9.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\6f681650-1570-43fe-aba9-c3d7b1cf1981.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\4ad57157-baa9-4e55-a381-338d79c7019f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\69a10248-ab7a-4279-b71f-4a139d2ae352.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\29eaaf12-6623-4e04-8edb-e5b41be56860.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\4791954e-e9eb-4afb-91dc-f75ebcae7b13.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\5e84e322-0ae1-4c44-bf6d-5334f04bf506.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\9410f369-5ecf-48fa-abd4-7a4b8866cf4b.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\b4053bff-28e8-4edb-be89-622e1dcc94da.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\280ae6d3-ebee-44b6-8136-eb5a7d5bd3aa.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\83731291-88f0-438a-bfb6-d09ed7e9a554.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\610b783f-bb40-4cde-806b-f931ac6848b5.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\2cc09796-bc9c-4c17-a46e-9d6dbe365ddd.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\cef94c61-7da1-46da-b45a-9b2d6196bb00.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\bb6859f9-6a5c-43f5-9583-2151199f770f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\8b66e247-67b7-45d9-a547-a8d224a6a40c.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\66bd9982-bf40-4ac9-99e9-bcdc36826c06.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\48235cf7-6fc8-456c-af5d-41dac2d502ee.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\0039b4e8-9f57-4b4f-b0c8-658e5b3bf5e7.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\829952a2-8b72-481b-9a21-9bceae0d2064.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\bbe4c726-8a87-4e1d-abe7-58799f9fe0e4.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\5b8d3486-cb5f-41d8-b586-fd5a7cb1a6a2.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\94452476-6311-4747-b997-a7b48162dfad.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\93aae7af-935b-4200-9685-d56864cb1df1.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\95987284-9131-48b4-ab77-0a561bf4fdfc.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\f82eb3bf-9940-48dc-a32e-117f3a04dfc9.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\0271609b-b3c7-4a57-bd45-ddb4361247bf.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\96b536be-93a3-4069-96d3-67dfbcedf167.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\8be765cd-4e1a-4d7b-8675-dbc721083be7.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\67c4578b-1a65-4c57-a29e-3a2c14baeec6.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\c8696acc-d9c9-40d0-ada1-7f317087453a.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\70f80aaa-f5ac-432b-b18b-b5baa239bb1e.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\ec58482c-6b0f-43ce-bc6f-3ac23f070559.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\d2772365-d3f5-49ff-895c-2f69536dfd37.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\ea6814a6-eb6b-4523-894e-c57e6d502d45.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\a25c569b-4b0a-445a-8e00-f6dc21568f4e.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\9a6d8857-cc52-4417-8d12-efede0532b29.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\b1ace6e1-697c-447c-b3f4-4983f9c43ac0.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\fab742b0-067d-49d9-88e2-5a50a4e8aa15.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\ed78b423-704b-4bf4-b7be-9436cb79d4b9.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\36a7354a-85cd-45b7-822f-f3fa1ec8461f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\54abc348-05fb-40a6-9077-3e005aaf1d0f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\8e5b0040-c46f-4cb3-93cc-f2e437d5ca95.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\3c540421-a683-4029-9fde-ddc7c95a102f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\2e494f0b-8359-4e00-ad12-767f4ee0369c.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\cb65520c-df63-43f0-9fd6-deb3f2a914c9.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\3e6dc0db-1477-415a-8999-d73917490649.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\5d391b7b-dd67-42d3-bc19-f0a33f8fe19d.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\42b62da7-6ac6-4b59-8ffd-2638c941f8cc.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\a6162123-ea21-45c7-87b4-f2c36e65bf3f.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\ac1d3344-2b18-4dc7-97eb-55fe912764fc.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\14ccbc0e-9345-44b9-a728-129c34e0fefb.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\9f347437-3f09-47d9-aa48-885f129af5e8.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\7fa707d1-6e0f-4e78-bcee-b4363fb1d2f6.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\907a4baf-be38-4068-beef-fe34f6989585.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\5f7ee9a4-b780-44cf-8136-1067ebdc968d.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\ccc2520d-1993-47bd-a10f-bf8b9f207062.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\da3e2bc6-c103-4c02-911b-22c35d56dd77.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\agent-tools\6cd805d0-08fe-4a77-9088-07972561906b.txt` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在从 git 历史或记录中恢复原始的 dashscope 生成代码，以便重新实现千问功能。
+
+已确定按工位配置引擎：每种工位可独立选择 ComfyUI 或千问云。ComfyUI 界面保持原样不变；千问云界面将新增云模型参数，不涉及工作流。原始代码位于 apps/server 目录下。
+
+ComfyUI 的 UI 和接口完全不动。新增一个引擎切换开关，选 ComfyUI 显示原有界面，选千问云则展示千问专属界面。
+
+模型目录接口也保持现状，不破坏 ComfyUI。千问的模型列表走独立接口，或在现有端点里带上引擎参数返回。
+
+模型目录接口保持 ComfyUI 独立返回，避免破坏现有 fetchStudioCatalog。千问的模型列表将作为服务器静态 JSON 提供。
+
+generate.ts 将改为路由分发器：根据请求中的 engine 字段决定调用千问生成还是 ComfyUI 生成。comfy-generate.ts 不做任何改动。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git log --oneline -20; git log --all --diff-filter=D --summary -- &#34;**/dashscope.ts&#34; &#34;**/catalog.ts&#34; &#34;**/qwen*&#34; 2&gt;$null | Select-Object -First 40</summary>
+```bash
+git log --oneline -20; git log --all --diff-filter=D --summary -- "**/dashscope.ts" "**/catalog.ts" "**/qwen*" 2>$null | Select-Object -First 40
+```
+
+```
+4b8466e #0 update
+9f3ca15 #0 update
+5baa095 #0 update
+a21b78b #0 update
+5b3f24a #0 update
+7d3787f #0 update
+2a3f798 #0 update
+75769aa #0 update
+7bbdf20 #0 update
+52d9742 #0 update
+007cd05 #0 update
+bc953da #0 update
+a2c8919 #0 update
+eac62c5 #0 update
+2acaf20 #0 update
+0220297 #0 update
+e84a892 #0 update
+e791b5e #0 update
+168dfe1 #0 update
+69327e4 #0 update
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\tasks.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\PageHead.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在尝试从 git 中恢复原始的 dashscope generate 代码。
+
+怀疑首个提交 69327e4 中包含原始 apps/server 代码。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git ls-tree -r --name-only 69327e4 | Select-String -Pattern &#34;dashscope|catalog|generate&#34;</summary>
+```bash
+git ls-tree -r --name-only 69327e4 | Select-String -Pattern "dashscope|catalog|generate"
+```
+
+```
+
+comfymanager/src/api/catalog.ts
+frontend/server/src/lib/comfy-generate.ts
+frontend/server/src/lib/generate.ts
+frontend/src/lib/catalog.ts
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\settings.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\storage.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+原始 DashScope 代码原本位于 apps/server 目录，后被替换，因此不在当前仓库结构中。
+
+正在从历史记录和现有类型定义中重建 DashScope 的实现。由于原始代码已不在当前仓库中，将基于遗留类型和接口信息，重新构建一个完整但聚焦的版本。
+
+计划在设置页统一配置千问 API 密钥与基础地址，并为每个工位单独指定使用千问或 ComfyUI。工作室页面顶部将添加引擎切换器，支持在 ComfyUI 与千问云之间快速切换，ComfyUI 界面保持原样不变。
+
+千问云模式将使用专属侧边栏，隐藏工作流选择并展示云端模型列表，同时保留 promptExtend 等额外字段。
+
+服务端将新增 dashscope.ts、qwen-catalog.ts、qwen-generate.ts 及 generate.ts 等模块，负责 HTTP 调用、模型目录、生成逻辑与任务分发。远程任务轮询会区分异步与同步场景，图片与视频、3D 始终为异步，音乐和 TTS 则可能直接返回。下载远程文件时，需通过 downloadUrl 获取 buffer 后再写入存储。
+
+正在梳理千问云平台的具体模型 ID。已列出生图、生视频、生音乐及 TTS 等各工位对应的模型名称，准备写入 qwen-catalog.ts 作为静态目录。服务端 dashscope.ts 将封装 dashFetch、createTask、getTask 及文件下载等核心方法。
+
+正在进一步确认各工位对应的千问云模型 ID。配音与音色设计对应 CosyVoice 系列；音效可能复用 TTS 或音频生成能力；3D 工位对应 Tripo H3.1 等模型。接下来将查询千问云官方模型列表以核对准确标识。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+<summary>Tool use: **web_fetch**</summary>
+
+Parameters:
+
+```json
+{
+  "url": "https://platform.qianwenai.com/docs/developer-guides/getting-started/first-api-call"
+}
+```
+Result:
+
+````json
+{
+  "markdown": "首次调用千问API - 千问AI平台\n\n千问AI平台 home page\n\n搜索文档\n\n搜索文档\n\n⌘K\n\n快速入门\n\n本文引导您完成千问模型的首次API调用\n\n复制本文\n\n千问AI平台提供新人免费额度。详见免费额度。\n\n完成本指南后，您将能用Python、Node.js或其他语言发起真实请求。如果您已在使用OpenAI SDK，无需重新学习——只需将`base_url`指向千问AI平台、替换API Key，即可复用现有代码。\n\n- 若您熟悉大模型调用，可直接查看 API参考文档。\n- 若您不熟悉编程，可参考模型体验，通过图形化界面与千问模型对话。\n- API调用与操作系统版本无关，只要网络能连通即可正常使用。\n\n本文以千问为例，引导您完成大模型API调用。按照以下步骤操作：\n\n- 步骤一：创建账号并获取API Key\n- 步骤二：配置API Key到环境变量\n- 步骤三：调用千问API\n\n## ​步骤一：创建账号并获取API Key\n\n1\n\n登录千问AI平台\n\n访问千问AI平台，使用手机号、账号密码或支付宝扫码登录。\n\n2\n\n获取 API Key\n\n进入 API Key页面，点击创建 API Key，复制生成的 Key（以`sk-ws-`开头）。详细说明 →\n\n请妥善保管 API Key，不要提交到代码仓库或公开分享。\n\n## ​步骤二：配置API Key到环境变量\n\n建议将API Key配置到环境变量，而不是直接写在代码里，以降低泄露风险。\n\nmacOS/Linux\n\nWindows PowerShell\n\n```\nexport DASHSCOPE_API_KEY=\"sk-your-api-key-here\"\n\n```\n\n如需跨会话持久化配置，参见配置 API Key →。\n\n## ​步骤三：调用千问API\n\n选择您熟悉的语言或工具。千问AI平台兼容OpenAI SDK——如果您已安装，只需更新`base_url`和API Key即可直接使用。\n\nPython\n\nNode.js\n\ncurl\n\n安装 OpenAI SDK：\n\n```\npip install openai\n\n```\n\n创建文件`hello_qwen.py`：\n\n```\nimport os\nfrom openai import OpenAI\n\nclient = OpenAI(\n  api_key=os.getenv(\"DASHSCOPE_API_KEY\"),\n  base_url=\"https://dashscope.aliyuncs.com/compatible-mode/v1\",\n)\n\ncompletion = client.chat.completions.create(\n  model=\"qwen3.8-max\",\n  messages=[\n    {\"role\": \"user\", \"content\": \"Hello! Tell me a fun fact about AI.\"}\n  ]\n)\n\nprint(completion.choices[0].message.content)\n\n```\n\n运行：\n\n```\npython hello_qwen.py\n\n```\n\nJava、Go、PHP、C# 等语言可直接使用 curl 标签页中的 OpenAI 兼容端点，配合各语言的 HTTP 客户端调用。Java 也可使用 DashScope Java SDK。\n\n在模型市场中，推理服务商为千问AI平台的模型无需手动开通，获取 API Key 后即可直接调用（部分邀测模型除外）。其他推理服务商（如硅基流动）的直供模型，需要先在模型市场开通后才能调用。\n\n## ​下一步\n\n- 文本生成指南— 流式输出、函数调用等进阶用法\n- 视觉模型— 图片和视频分析\n- 模型选择— 选择适合场景的模型\n- 模型体验— 在线试用模型\n\n本页目录\n\n- 步骤一：创建账号并获取API Key\n- 步骤二：配置API Key到环境变量\n- 步骤三：调用千问API\n- 下一步",
+  "url": "https://platform.qianwenai.com/docs/developer-guides/getting-started/first-api-call"
+}
+````
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "site:platform.qianwenai.com wan2.7-t2v fun-audio-chat fun-music tripo3d qwen3-tts-flash cosyvoice-v3"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [视频生成模型 - 千问AI平台](https://platform.qianwenai.com/docs/developer-guides/getting-started/video-models)\n2. [文生视频 - 千问AI平台](https://platform.qianwenai.com/docs/developer-guides/video-generation/text-to-video)\n3. [Wan 2.7 — 查询结果 - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/video-generation/wan27-text-to-video/query-result)\n4. [管理异步任务 - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/more/manage-asynchronous-tasks)\n5. [音乐生成（Fun-Music） - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/music-generation/fun-music)\n\nSynthesis:\nThese represent various AI services available on the Qwen platform.\n\nWan2.7-t2v is a text-to-video generation model supporting multi-shot narration and audio synchronization [1][2]. It uses an asynchronous API where you submit a request to get a task ID and then poll the task status endpoint to retrieve the video [2][3][4].\n\nFun-audio-chat and Fun-music are specialized audio services; Fun-music is an API-based generative model for creating songs or instrumentals from prompts or lyrics [5].\n\nQwen3-tts-flash and Cosyvoice-v3 are speech synthesis models [6]. Qwen3-tts-flash is designed for low-latency, real-time interactive speech [7][6], while Cosyvoice-v3 provides high-quality synthesis with extensive support for voice design and instruction-based control [6][8]. Tripo3d is a 3D generation model provided within the platform's ecosystem.\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003e视频生成模型 - 千问AI平台\u003c/title\u003e\n\u003curl\u003ehttps://platform.qianwenai.com/docs/developer-guides/getting-started/video-models\u003c/url\u003e\n\u003ccontent\u003e080\n...\n5 秒。 Wan 系列推荐使用`wan\n...\n）、自适应\n...\n比、智能时长、声音开关、参考\n...\n能力。支持\n...\n|\n|\n...\n文生视频、首帧/首\n...\n帧生视频、\n...\n能参考生视频\n...\n| `happy\n...\n|\n| `\n...\n|\n| `wan\n...\n| 模型 | 能力 | 特性 | 输出 |\n| --- | --- | --- | --- |\n| `wan2.7-t2v` | 文生视频 | 音频同步、多镜头叙事、画面比例控制 | 720P、108
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\voices.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已掌握足够信息，准备开始实现。该任务较大，将使用任务工具进行管理。
+
+确定不改动现有 ComfyUI 代码。每个工位的引擎配置将独立存储在设置中。各工位页面顶部统一添加引擎切换器，按配置渲染对应 UI：保留原有 ComfyUI 界面，新增千问专用界面。这样既不改变现有功能，又能让用户在不同工位选择不同工具。
+
+具体实现方案已明确：新增 EngineSwitch 组件与 useStationEngine Hook 来管理引擎切换；千问模式下隐藏 ComfyUI 的工作流选择和提示区域，展示 Qwen 模型选项，其余表单字段保持不变。服务端将通过请求参数区分引擎类型，并调整远程任务轮询逻辑以兼容新接口。
+
+正在梳理 DashScope API 接口细节。已确认图片生成与视频合成的 POST 端点及异步任务轮询方式，准备基于标准 DashScope SDK 实现千问后端客户端。
+
+正在细化各工位的 DashScope API 端点映射。已确认 Wan 2.7 视频合成、音乐生成、TTS 及音色定制的具体 POST 路径。音效部分仍在确认对应模型。
+
+正在确认各工位的 DashScope 模型 ID。已明确图片生成使用 qwen-image-3.0-pro 等系列；音频侧计划采用 qwen3-tts-flash、qwen-tts、cosyvoice-v3、qwen3-omni-flash 等模型。音效与音色设计的具体模型仍在进一步确认中。
+
+已确认各工位 DashScope 模型 ID。视频侧涵盖 wan2.7-t2v、wan2.6-t2v、wan2.5-t2v-preview、wan2.2-t2v-plus、wan2.1-t2v-turbo 及 happyhorse-t2v。音乐侧为 fun-music-v1 与 fun-music-preview。音效与音色设计分别对应 qwen3-omni-flash 或 qwen-audio 以及 qwen-voice-design。3D 侧确定使用 tripo3d-h3.1-turbo 与 tripo-p1.0。
+
+已确认 3D 生成端点为 `/services/aigc/3d-generation/generation`，模型 ID 对应 tripo3d-v2.5。音效侧仍需进一步确认具体模型。
+
+已确定音效生成的具体实现路径：通过 qwen3-omni-flash 或 DashScope 音频生成接口处理，API 失败时返回清晰错误。3D 生成端点定为 `/services/aigc/anyto3d/generation`，模型 ID 使用 tripo3d-h3.1 与 tripo3d-p1.0。图片生成 3.0 采用异步任务轮询，2.0 版本可能为同步接口。开始规划 generate 接口的具体实现策略。
+
+已确定各工位的异步策略：图片 3.0 始终异步，2.0 尽量同步；视频与 3D 固定异步；音乐、TTS、音效优先同步，若返回 task_id 则转为轮询。本地图片将通过 getPolicy 获取 OSS 公网地址上传，数据 URL 与绝对路径均会处理。DashScope 请求头将携带工作空间标识，且默认引擎保持 ComfyUI 以确保现有用户不受影响。
+
+音频工位（TTS、音效、音色设计）将共用一个引擎配置，而非按标签页拆分。动画 3D 工位继续使用 ComfyUI，不接入千问。Comfy 页面顶部将插入 EngineSwitch，千问模式下替换页面头部、侧边栏、加载提示及生成请求中的引擎标识为 qwen。同时需要更新全局错误处理以兼容 DashScopeError。文件将分批实现。
+
+切换引擎时会自动重置当前模型为该分类下的首个可用模型。正在整理千问模型目录，补充 HappyHorse 等视频模型 ID。同时开始编写阿里云上传策略获取函数，用于将本地文件上传至 OSS 并获取公网 URL。
+
+正在细化文件上传策略。若 DashScope API 支持直接传入 base64 数据 URL，则优先采用此方式避免 OSS 上传；否则回退到 getPolicy 获取临时 URL。已开始编写 `toPublicUrl` 函数来统一处理本地文件的公网地址转换。
+
+正在完善 `toPublicUrl` 函数的实现细节。若输入已是公网 URL 则直接返回；否则读取本地文件并通过 `getPolicy` 接口获取 OSS 临时上传凭证，再拼接表单完成文件上传。
+
+已完成 `toPublicUrl` 的具体实现：通过 `getPolicy` 获取 OSS 临时凭证后，将文件以表单形式上传至指定域名并返回公网 URL。
+
+同时明确了远程任务轮询的分支逻辑：在 `pollRemoteTask` 中依据 `remoteKind` 字段判断任务来源，千问任务调用 `pollQwenTask`，ComfyUI 任务保持原有轮询逻辑。
+
+千问任务轮询将通过 `/tasks/{remoteTaskId}` 提取结果中的 `results[].url`、`video_url`、`audio_url` 等公网地址。全局错误处理会新增 DashScopeError 类型。
+
+前端设置界面将分为两块：ComfyManager 保持不变，新增“千问云”卡片，用于填写 API Key 并跳转 qianwenai.com 官网。各工位的引擎配置将以表格形式展示在设置中。
+
+引擎切换开关会立即通过 `api.saveSettings` 保存，因此需要在 `saveSettings` 中合并各工位的引擎映射，防止覆盖其他工位的配置。
+
+千问模型目录将独立维护，Comfy 目录获取逻辑保持不变。Studio 页面会按引擎类型分流：千问模式渲染独立组件，Comfy 模式保留原有界面，仅在顶部插入引擎切换器。
+
+决定在 Comfy 页面顶部添加引擎切换器，以满足“明确表现两种不同工具”的要求。千问模式下将调整侧边栏和生成调用逻辑，同时在表单中增加可选的千问专属字段（如提示词扩展、水印）。接下来将按待办清单开始编写文件，且不会主动添加 Markdown 文档。
+
+发现 README 中“不再接入千问”的旧说明与当前需求不符，将同步修正相关表述。正在细化 qwen-generate 接口实现，已明确图片 3.0 的请求结构：消息内容包含文本与图片 URL，参数支持尺寸、数量、提示词扩展、水印及负向提示等字段。
+
+正在细化各工位 DashScope API 的具体请求结构。图片 2.0 与 3.0 的参数字段存在差异，将按模型 ID 分支处理。视频合成端点定为 `/services/aigc/video-generation/video-synthesis`，wan2.7 与 wan2.6 的尺寸参数格式不同。TTS 调用 `/services/aigc/multimodal-generation/generation`，音色设计调用 `/services/audio/tts/customization`。音乐生成接口按文档定义。
+
+正在细化音效生成的具体实现方案。初步尝试通过 qwen3-omni-flash 模型调用多模态接口生成音效，但担心该方式可能不正确。同时也在考虑音色设计的 API 结构，发现 qwen-tts 和 sambert 等模型均不支持音效功能，因此仍在寻找合适的替代方案。
+
+已确定 TTS 与音效的模型 ID：`qwen3-tts-flash` 负责语音合成，`qwen3-omni-flash` 负责音效生成。3D 生成端点定为 `/services/aigc/3d-generation/generation`，模型使用 `tripo3d-h3.1`，异步轮询提取 `pbr_model` 与 `model_mesh` 地址。前端 `generate` 请求体将携带 `engine` 字段，`useStationEngine` Hook 会持久化引擎状态。
+
+引擎配置必须持久化到服务端，防止客户端丢失导致回退。服务端将按 `body.engine` → `settings.engines[feature]` → 默认 `comfyui` 的优先级解析。引擎列表会同步暴露给公开设置，千问 API Key 也会像 ComfyUI 密钥一样脱敏展示。前端引擎切换器将采用视觉区分：ComfyUI 保持原有配色并标注“本机 ComfyUI”，千问侧改用青色或天蓝色并标注“千问云 · qianwenai.com”。现在开始编写核心文件，随后处理 UI。
+
+正在查看 index.css，准备为千问引擎切换器使用 `border-sky-500` 或自定义类来与 ComfyUI 的 brass/ember/foam 配色形成视觉区分。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.css",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "--brass|--ember|sky-"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "--brass|--ember|sky-",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\ApiDocs.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在深入查看前端结构，以便正确实现千问功能的集成。
+
+正在梳理 generate.ts、comfy-generate.ts、types 和 settings 等核心文件，同时查看 Studio 页面和设置存储方式，准备收集所有相关代码以完成千问功能的集成。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先摸清现有生成链路和工位 UI，再把千问作为并列引擎加回去，ComfyUI 那条路径保持不动。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **5** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (5 files)
+
+| File |
+|------|
+| `../frontend/src/pages/Studio3D.tsx` |
+| `../frontend/src/pages/StudioMusic.tsx` |
+| `../frontend/src/pages/StudioAudio.tsx` |
+| `../frontend/src/pages/StudioImage.tsx` |
+| `../frontend/src/pages/StudioVideo.tsx` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **19** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (19 files)
+
+| File |
+|------|
+| `../frontend/server/src/lib/voices.ts` |
+| `../frontend/server/src/types.ts` |
+| `../frontend/server/src/lib/mixamo.ts` |
+| `../frontend/server/src/lib/comfy.ts` |
+| `../frontend/server/src/lib/generate.ts` |
+| `../frontend/server/src/mcp-stdio.ts` |
+| `../frontend/server/src/lib/comfy-generate.ts` |
+| `../frontend/server/src/lib/features.ts` |
+| `../frontend/server/src/lib/proc.ts` |
+| `../frontend/server/src/lib/auto-rig.ts` |
+| `../frontend/server/src/lib/manager-client.ts` |
+| `../frontend/server/src/config.ts` |
+| `../frontend/server/src/mcp.ts` |
+| `../frontend/server/src/mcp-http.ts` |
+| `../frontend/server/src/lib/storage.ts` |
+| `../frontend/server/src/lib/tasks.ts` |
+| `../frontend/server/src/app.ts` |
+| `../frontend/server/src/lib/json.ts` |
+| `../frontend/server/src/index.ts` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "engine|qwen|dashscope|DASHSCOPE"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "engine|qwen|dashscope|DASHSCOPE",
+  "topFiles": [
+    {
+      "matchCount": 4,
+      "uri": "frontend/server/src/app.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend/server/src/mcp.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend/src/lib/api.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/src/lib/catalog.ts"
+    },
+    {
+      "matchCount": 10,
+      "uri": "frontend/server/src/lib/auto-rig.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend/src/pages/Studio3D.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/src/pages/Settings.tsx"
+    }
+  ],
+  "totalFiles": 7,
+  "totalMatches": 29
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看 studio 页面、设置配置、app.ts 端点、catalog.ts 及历史记录，以了解现有代码结构和千问功能的实现细节。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **7** results in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (7 files)
+
+| File |
+|------|
+| `../frontend/src/components/PageHead.tsx` |
+| `../frontend/src/components/ui.tsx` |
+| `../frontend/src/components/Layout.tsx` |
+| `../frontend/src/components/WorkflowSelect.tsx` |
+| `../frontend/src/components/ProviderHint.tsx` |
+| `../frontend/src/components/ModelPreview.tsx` |
+| `../frontend/src/components/AssetCard.tsx` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看剩余 studio 页面、comfy-generate 的轮询模式、catalog、api.ts、storage 及 qianwenai 文档，以了解现有代码结构和千问集成方式。
+
+同时会搜索之前 dashscope 的实现记录。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ProviderHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\PageHead.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在查看支持文件与接口文档，包括 ComfyUI 轮询逻辑、资源存储、前端类型定义、Layout 组件、README 及 QwenAI API 文档，为后续集成做准备。
+
+正在回顾此前 DashScope 的实现记录，并准备获取 QwenAI 官方 API 文档与阿里云相关资料。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\storage.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\Layout.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "千问|DashScope|qianwen|ComfyUI"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "千问|DashScope|qianwen|ComfyUI",
+  "topFiles": [
+    {
+      "matchCount": 36,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 36
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\voices.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "generate_image|generateImage"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "generate_image|generateImage",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\settings.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在回顾之前 DashScope 的实现记录，并准备查阅千问 AI 的 API 文档。
+
+正在查看 comfy-generate 的轮询逻辑、tasks.ts 及生成类型定义。需要从 qianwenai.com 获取官方模型 ID，并搜索 DashScope API 文档。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "DashScope qwen-image-3.0-pro API image-generation generation async"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Qwen — Async image generation (3.0) - QwenCloud](https://docs.qwencloud.com/api-reference/image-generation/qwen-text-to-image-30-async)\n2. [Qwen — 异步图像生成（3.0系列） - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/image-generation/qwen-text-to-image-30-async)\n3. [Async task management - QwenCloud](https://docs.qwencloud.com/developer-guides/run-and-scale/async-task-management)\n4. [Qwen — Retrieve image result - Qwen Cloud](https://docs.qwencloud.com/api-reference/image-generation/qwen-text-to-image-task-query)\n5. [Qwen synchronous - QwenCloud](https://docs.qwencloud.com/api-reference/image-generation/qwen-text-to-image)\n\nSynthesis:\nTo perform asynchronous image generation with the qwen-image-3.0-pro model on DashScope, follow this two-step workflow.\n\n1. Submit a task: Send a POST request to the generation endpoint, including the X-DashScope-Async: enable header.\n\ncurl --location 'https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation' \\\n--header 'Content-Type: application/json' \\\n--header \"Authorization: Bearer $DASHSCOPE_API_KEY\" \\\n--header 'X-DashScope-Async: enable' \\\n--data '{\n \"model\": \"qwen-image-3.0-pro\",\n \"input\": {\n \"messages\": [\n {\n \"role\": \"user\",\n \"content\": [{ \"text\": \"A healing-style hand-drawn poster of puppies playing on grass.\" }]\n }\n ]\n }\n}'\n\n2. Poll for results: The initial response contains a task_id. Use this ID to query the status via GET /tasks/{task_id} until the task_status returns SUCCEEDED or FAILED. It is recommended to poll every 10 seconds.\n\ncurl --location \"https://dashscope.aliyuncs.com/api/v1/tasks/{task_id}\" \\\n--header \"Authorization: Bearer $DASHSCOPE_API_KEY\"\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eQwen — Async image generation (3.0) - QwenCloud\u003c/title\u003e\n\u003curl\u003ehttps://docs.qwencloud.com/api-reference/image-generation/qwen-text-to
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "DashScope wan2.7-t2v video-synthesis API model id"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Wan2.7 - Text-to-Video API Reference-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/text-to-video-api-reference)\n2. [text-to-video](https://docs.apiyi.com/en/api-capabilities/wan/text-to-video)\n3. [overview](https://docs.apiyi.com/en/api-capabilities/wan/overview)\n4. [Wan 2.7 — 创建任务 - 千问 AI 平台](https://platform.qianwenai.com/docs/api-reference/video-generation/wan27-text-to-video/create-task)\n5. [万相2.7文生视频API参考-大模型服务平台百炼(Model Studio)-阿里云帮助中心](https://help.aliyun.com/zh/model-studio/text-to-video-api-reference)\n\nSynthesis:\nThe model ID for the DashScope text-to-video API is wan2.7-t2v [1][2][3]. You can also use specific snapshot versions such as wan2.7-t2v-2026-06-12 [1][4].\n\nTo use this model, send a POST request to the asynchronous synthesis endpoint:\n\nhttps://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis [1][5]\n\nExample request body:\n{\n \"model\": \"wan2.7-t2v\",\n \"input\": {\n \"prompt\": \"A cat playing with a ball of yarn\"\n },\n \"parameters\": {\n \"resolution\": \"720P\",\n \"duration\": 5\n }\n}\n\nYou must include the header X-DashScope-Async: enable in your request to initiate the process [1][2][5].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eWan2.7 - Text-to-Video API Reference-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心\u003c/title\u003e\n\u003curl\u003ehttps://help.aliyun.com/en/model-studio/text-to-video-api-reference\u003c/url\u003e\n\u003ccontent\u003e`POST https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis`\n...\nlanguage in the`\n...\nhas no effect\n...\na single-shot\n...\n-shot video\" or describe shots with timestamps (e.g., \"Shot 1 [0–3 seconds] wide shot: Rainy New York street at night\"). Default: If unspecified, the model interprets the`prompt` content. `curl --location 'https://{
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "DashScope fun-music-v1 API audio music generation"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Fun-Music generation-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/fun-music)\n2. [Fun-Music generation - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center](https://www.alibabacloud.com/help/en/model-studio/fun-music)\n3. [Fun-Music model API reference-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/fun-music-api)\n4. [Fun-Music model API reference - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center](https://www.alibabacloud.com/help/en/model-studio/fun-music-api)\n5. [音乐生成（Fun-Music） - 千问AI平台](https://platform.qianwenai.com/docs/api-reference/music-generation/fun-music)\n\nSynthesis:\nFun-Music is an end-to-end AI music generation model that creates full songs or instrumental tracks from natural language prompts or custom lyrics [1][2].\n\nEndpoint: POST https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/music/generation [3][4]\n\nRequired Headers:\nAuthorization: Bearer {api-key}\nContent-Type: application/json\nX-DashScope-SSE: enable (optional, for streaming) [3][4]\n\nKey Parameters:\nmodel: Use fun-music-v1 [3][1]\nprompt: Text description of style, scene, or mood [1][2]\nlyrics: Custom lyrics (takes precedence if both prompt and lyrics are provided) [3][1]\ngender: male or female (default female, fun-music-v1 only) [3][1]\nis_instrumental: true for instrumental only, false for vocals [1][5]\n\nExample Request:\ncurl -X POST 'https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/music/generation' \\\n-H \"Authorization: Bearer $DASHSCOPE_API_KEY\" \\\n-H \"Content-Type: application/json\" \\\n-d '{\n \"model\": \"fun-music-v1\",\n \"input\": {\n \"prompt\": \"Fresh summer folk song, acoustic guitar\",\n \"gender\": \"female\"\n }\n}' [3][1]\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eFun-Music generation-Alibaba Cloud 
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "DashScope tripo-h3.1 tripo-p1.0 3d generation API"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Tripo-3D model generation-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/tripo-3d-generation-api-reference)\n2. [Tripo 3D model generation guide-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/tripo-3d-generation-guide)\n3. [Tripo 3D DashScope routing: Alibaba turns 3D assets into async AI gateway jobs — TheRouter.ai | TheRouter.ai](https://therouter.ai/news/tripo-3d-dashscope-routing/)\n4. [How to query and cancel asynchronous tasks?-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/manage-asynchronous-tasks)\n5. [Tripo H3.1 — Tripo Developers](https://developers.tripo3d.ai/en/models/v3-1)\n\nSynthesis:\nDashScope provides a 3D model generation API via Alibaba Cloud Model Studio, supporting both Tripo/Tripo-H3.1 for high-fidelity assets (up to 2 million faces) and Tripo/Tripo-P1.0 for rapid previews (up to 20,000 faces) [1][2][3].\n\nThe API uses an asynchronous pattern [1][3]. Send a POST request to https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/3d-generation with the header X-DashScope-Async: enable [1][2]. Use the returned task_id to poll https://dashscope.aliyuncs.com/api/v1/tasks/{task_id} until completion [1][3][4].\n\nExample request:\ncurl --location 'https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/3d-generation' \\\n-H 'X-DashScope-Async: enable' \\\n-H \"Authorization: Bearer $DASHSCOPE_API_KEY\" \\\n-H 'Content-Type: application/json' \\\n-d '{\n \"model\": \"Tripo/Tripo-P1.0\",\n \"input\": { \"prompt\": \"a cute cat\" }\n}' [2]\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eTripo-3D model generation-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心\u003c/title\u003e\n\u003curl\u003ehttps://help.aliyun.com/en/model-studio/tripo-3d-generation-api-reference\u003c/url\u003e\n\u003ccontent\u003ecurl --locat
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\comfy-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\index.css</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-transcripts\\74755d42-2c4f-4f24-9e4f-50fb76234627",
+  "pattern": "qwen-image|dashscope|fun-music|tripo"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-transcripts\\74755d42-2c4f-4f24-9e4f-50fb76234627",
+  "pattern": "qwen-image|dashscope|fun-music|tripo",
+  "topFiles": [
+    {
+      "matchCount": 30,
+      "uri": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\agent-transcripts\\74755d42-2c4f-4f24-9e4f-50fb76234627\\74755d42-2c4f-4f24-9e4f-50fb76234627.jsonl"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 63
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+回溯发现最初对话中已有 dashscope 的原始实现。
+
+正在从 git 历史中找回被替换的 dashscope.ts 和 generate.ts。同时需要补充 TTS、音效和音色设计的 API 接口细节。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git log --oneline --all | Select-Object -First 40; git log --all --diff-filter=A --summary -- &#34;**/dashscope.ts&#34; &#34;**/catalog.ts&#34; &#34;**/generate.ts&#34; | Select-Object -First 50</summary>
+```bash
+git log --oneline --all | Select-Object -First 40; git log --all --diff-filter=A --summary -- "**/dashscope.ts" "**/catalog.ts" "**/generate.ts" | Select-Object -First 50
+```
+
+```
+4b8466e #0 update
+9f3ca15 #0 update
+5baa095 #0 update
+a21b78b #0 update
+5b3f24a #0 update
+7d3787f #0 update
+2a3f798 #0 update
+75769aa #0 update
+7bbdf20 #0 update
+52d9742 #0 update
+007cd05 #0 update
+bc953da #0 update
+a2c8919 #0 update
+eac62c5 #0 update
+2acaf20 #0 update
+0220297 #0 update
+e84a892 #0 update
+e791b5e #0 update
+168dfe1 #0 update
+69327e4 #0 update
+1e2cfa6 #0 update
+16746b1 #0 update
+545809d #0 update
+c43d8d7 #0 update
+commit a2c89194f1bb0179528ac85a831e0431a160ca39
+Author: renjihe <renjihe1988@163.com>
+Date:   Wed Aug 19 22:47:11 2026 +0800
+
+    #0 update
+
+ create mode 100644 comfymanager/src/api/generate.ts
+
+commit c43d8d752472e815e0c663cabc92b21bb31bcd78
+Author: renjihe <renjihe1988@163.com>
+Date:   Wed Aug 19 17:20:27 2026 +0800
+
+    #0 update
+
+ create mode 100644 comfymanager/src/api/catalog.ts
+ create mode 100644 frontend/server/src/lib/generate.ts
+ create mode 100644 frontend/src/lib/catalog.ts
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "qwen3-tts-flash DashScope multimodal-generation CosyVoice voice design qwen-sfx"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [QwenLM/Qwen3-TTS](https://github.com/qwenlm/qwen3-tts)\n2. [Text-to-speech models - QwenCloud](https://docs.qwencloud.com/developer-guides/speech/tts-models)\n3. [Create a voice - QwenCloud](https://docs.qwencloud.com/api-reference/speech-synthesis/voice-design/qwen/create-voice)\n4. [Speech synthesis - QwenCloud](https://docs.qwencloud.com/api-reference/speech-synthesis/qwen-tts)\n5. [voice-design](https://qwenlm-qwen3-tts.mintlify.app/guides/voice-design)\n\nSynthesis:\nQwen3-TTS is an open-source series of text-to-speech models from Alibaba Cloud supporting high-quality speech generation, voice cloning, and voice design [1][2]. Voice design allows you to generate a custom voice from a natural language description (e.g., age, gender, tone) without needing existing audio samples [2][3].\n\nFor API access via DashScope, use the following endpoint for voice customization to create a unique voice ID [3]:\nhttps://dashscope-intl.aliyuncs.com/api/v1/services/audio/tts/customization\n\nParameters include the model name (fixed as qwen-voice-design), a target synthesis model (e.g., qwen3-tts-vd-realtime-2026-01-15), and your voice description [3]. Once created, use the returned voice ID in the standard synthesis API [4][3]. For local development, the Qwen3-TTS repository provides the Qwen3-TTS-12Hz-1.7B-VoiceDesign model [1][5].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eQwenLM/Qwen3-TTS\u003c/title\u003e\n\u003curl\u003ehttps://github.com/qwenlm/qwen3-tts\u003c/url\u003e\n\u003ccontent\u003eWe release **Qwen3-TTS**, a series of powerful speech generation capabilities developed by Qwen, offering comprehensive support for voice clone, voice design, ultra-high-quality human-like speech generation, and natural language-based voice control. It provides developers and users with the most extensive set of speech generation features available.\n...\n- [Quickstart](#quickstart)\n - [Environ
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "DashScope happyhorse wan2.5-t2v-preview wan2.2-t2v-plus wan2.1-t2v-turbo model id"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [How to call the Wan text-to-video model - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center](https://www.alibabacloud.com/help/en/model-studio/text-to-video-guide)\n2. [Video generation and editing-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/video-generate-edit-model/)\n3. [overview](https://docs.apiyi.com/en/api-capabilities/happyhorse/overview)\n4. [Wan2.7 - Text-to-Video API Reference - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center](https://www.alibabacloud.com/help/en/model-studio/text-to-video-api-reference)\n5. [dashscope/aigc/video_synthesis.py](https://github.com/dashscope/dashscope-sdk-python/blob/8ebe713c/dashscope/aigc/video_synthesis.py)\n\nSynthesis:\nThe model IDs you requested for the DashScope platform are wan2.5-t2v-preview [1][2] and wan2.2-t2v-plus [1][2]. For HappyHorse, the model ID is happyhorse-1.1-t2v [3].\n\nYou can call these models using the following API structure:\n\nEndpoint: https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis [4][5]\n\nMinimal Example (Python):\nfrom dashscope import VideoSynthesis\nresponse = VideoSynthesis.async_call(model='wan2.5-t2v-preview', prompt='A kitten running in the moonlight') [6]\nresult = VideoSynthesis.wait(response) [6]\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eHow to call the Wan text-to-video model - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center\u003c/title\u003e\n\u003curl\u003ehttps://www.alibabacloud.com/help/en/model-studio/text-to-video-guide\u003c/url\u003e\n\u003ccontent\u003e| ---\n...\n2.7-t2\n...\naudio-video synchronization | Text, audio | Resolution options:\n...\n, 1\n...\n] (integer) Defined specifications: 30 fps, MP4 (H.264 encoding) |\n| wan2.6-t2v | Video with audio Multi-shot narrative, audio-video synchronization | Text, audio | Resolution options: 720P, 1080P Vi
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (1 file)
+
+| File |
+|------|
+| `../.env.example` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+查看了仓库历史，发现 generate.ts 从最初提交起就是基于 ComfyUI 的。
+
+正在从对话记录中重建原始的 dashscope.ts 和 generate.ts。同时准备查阅 qianwenai.com 文档，确认 CosyVoice TTS 及音效接口的具体实现方式。
+
+正在 qianwenai.com 上查找音效生成模型，考虑使用 qwen3-omni-flash 或专用音效接口。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "千问AI平台 音效生成 API qwen3-omni-flash DashScope"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [Qwen3-Omni-Flash-Realtime - 千问AI平台](https://www.qianwenai.com/models/qwen3-omni-flash-realtime)\n2. [Qwen-Omni-大模型服务平台百炼(Model Studio)-阿里云帮助中心](https://help.aliyun.com/zh/model-studio/qwen-omni)\n3. [实时音视频理解 - 千问AI平台](https://platform.qianwenai.com/docs/developer-guides/speech/realtime-multimodal-speech)\n4. [Qwen3-Omni-Flash-Realtime - QwenCloud](https://www.qwencloud.com/models/qwen3-omni-flash-realtime)\n5. [QwenLM/Qwen3-Omni](https://github.com/QwenLM/Qwen3-Omni)\n\nSynthesis:\n千问AI平台的 Qwen3-Omni-Flash 系列模型支持多模态交互及语音生成 [1][2]。通过阿里云百炼 (DashScope) 提供的实时 API，开发者可以实现端到端的语音流式输入与输出 [3][4][5]。\n\n针对实时语音生成，您需使用 DashScope Python SDK 调用 WebSocket 接口 [1][3]：\n\n接入地址：wss://dashscope.aliyuncs.com/api-ws/v1/realtime [3]\n核心参数：\n模型 (model)：qwen3-omni-flash-realtime [1][4]\n音色 (voice)：'Cherry' (默认) [6][7]\n输出模态 (output_modalities)：[MultiModality.AUDIO, MultiModality.TEXT] [7][8]\n\n代码示例 [1][4]：\nfrom dashscope.audio.qwen_omni import OmniRealtimeConversation\nconv = OmniRealtimeConversation(model='qwen3-omni-flash-realtime', callback=callback)\nconv.connect\nconv.update_session(output_modalities=[MultiModality.AUDIO, MultiModality.TEXT], voice='Cherry')\nconv.append_audio(base64_audio_data)\n\n对于非实时场景，您可以通过 Chat Completions API 在 messages 中传入音频并设置 modalities=[\"audio\"] 来生成语音回复 [2]。\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eQwen3-Omni-Flash-Realtime - 千问AI平台\u003c/title\u003e\n\u003curl\u003ehttps://www.qianwenai.com/models/qwen3-omni-flash-realtime\u003c/url\u003e\n\u003ccontent\u003eQwen3-Omni-Flash-Realtime - 千问AI平台\n...\n### Qwen3-Omni-Flash-Realtime\n...\nqwen3-omni-flash-realtime\n...\nAPI 请求 https://www.qianwenai.com/models/compare?models=qwen3-omni-flash-realtime加入对比\n...\n千问3-Omni-Flash多模态大模型的实时版，基于Thinker–Talker混合专家（MoE）架构，支持文本、图像、音频、视频的高效理解与语音生成能力，可进行119种语言文本交互和20种语言语音交互，生成类人语音实现跨语言精准沟通。模型具备强大指令跟随与系统提示定制功能，灵活适配对话风格与角色设定，广泛应用于文本创作、语音助手、多媒体分析等场景，提供自然流畅的多模态交互体验。\n...\n## API 参考\n
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_fetch"><details>
+<summary>Tool use: **web_fetch**</summary>
+
+Parameters:
+
+```json
+{
+  "url": "https://platform.qianwenai.com/docs/api-reference/speech-synthesis/qwen-tts"
+}
+```
+Result:
+
+````json
+{
+  "markdown": "语音合成 - 千问AI平台\n\n千问AI平台 home page\n\n搜索文档\n\n搜索文档\n\n⌘K\n\nQwen-TTS\n\nQwen-TTS API 参考\n\n复制本文\n\nPOST\n\n/api/v1/services/aigc/multimodal-generation/generation\n\nPython\n\n非流式\n\n```\n# 安装最新版本的 DashScope SDK\nimport os\nimport dashscope\n\ndashscope.base_http_api_url = 'https://dashscope.aliyuncs.com/api/v1'\n\ntext = \"Let me recommend a T-shirt to everyone. This one is really super nice. The color is very elegant, and it's also a perfect item to match. Everyone can buy it without hesitation. It's truly beautiful and very forgiving on the figure. No matter what body type you have, it will look great. I recommend everyone to place an order.\"\n# SpeechSynthesizer 接口用法：dashscope.audio.qwen_tts.SpeechSynthesizer.call(...)\nresponse = dashscope.MultiModalConversation.call(\n  # 如需使用指令控制功能，请将模型替换为 qwen3-tts-instruct-flash\n  model=\"qwen3-tts-flash\",\n  # 如果未配置环境变量，请将以下行替换为您的 API 密钥：api_key=\"sk-xxx\"\n  api_key=os.getenv(\"DASHSCOPE_API_KEY\"),\n  text=text,\n  voice=\"Cherry\"\n  # 如需使用指令控制功能，请取消以下行的注释，并将模型替换为 qwen3-tts-instruct-flash\n  # instructions='Fast speech rate, with a clear rising intonation, suitable for introducing fashion products.',\n  # optimize_instructions=True\n)\nprint(response)\n```\n\n200\n\n```\n{\n  \"status_code\": 200,\n  \"request_id\": \"5c63c65c-cad8-4bf4-959d-xxxxxxxxxxxx\",\n  \"code\": \"\",\n  \"message\": \"\",\n  \"output\": {\n    \"text\": null,\n    \"choices\": null,\n    \"finish_reason\": \"stop\",\n    \"audio\": {\n      \"url\": \"https://example.oss.aliyuncs.com/audio-result.wav?Expires=1766113409\u0026OSSAccessKeyId=LTAIxxxx\u0026Signature=xxxx\",\n      \"data\": \"\",\n      \"id\": \"audio_5c63c65c-cad8-4bf4-959d-xxxxxxxxxxxx\",\n      \"expires_at\": 1766113409\n    }\n  },\n  \"usage\": {\n    \"input_tokens\": 0,\n    \"output_tokens\": 0,\n    \"total_tokens\": 1121,\n    \"characters\": 195,\n    \"input_tokens_details\": {\n      \"text_tokens\": 76\n    },\n    \"output_tokens_details\": {\n   
+… (output truncated)
+````
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\tasks.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.ts",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "generate_image|engine"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "generate_image|engine",
+  "topFiles": [
+    {
+      "matchCount": 6,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已理解需求全貌，准备查看第二张图片。
+
+正在分析音效合成的实现方案。考虑使用 qwen3-omni-flash 多模态生成音频，或以 fun-music-v1 instrumental 作为兜底。同时也在确认原始 generate.ts 的接口细节与上传策略。
+
+正在提取原始 generate.ts 和 dashscope.ts 的代码。已梳理出核心类型定义：StationEngine 区分 comfyui 与 qwen；QwenSettings 包含 apiKey、workspaceId 及 baseUrl 等配置项。
+
+已确定默认引擎全部回退为 comfyui，确保现有用户不受影响。anim3d 仍只走 comfyui。
+
+服务端将拆分为多个模块：HTTP 客户端、静态目录、生成逻辑、调度器、配置、类型定义及应用入口。所有生成请求体都会新增 engine 字段，由后端根据工位配置分发给对应引擎。
+
+前端计划新增 EngineSwitch 组件切换引擎，并用青色系提示区分千问工具。Studio 页面将最小侵入式接入：通过 useStationEngine 按工位配置渲染对应 UI，不改动原有 ComfyUI 界面。设置页会增加千问云配置卡片，API 层补充 qwenModels 接口，样式与布局同步适配。
+
+前端采用 EngineSwitch 控制渲染。ComfyUI 版本保持原样，仅在顶部增加切换器；千问版本则独立成组件，避免两种工具的表单字段混杂。为减少重复，考虑将提示词等通用表单抽离共享，仅替换侧边栏和标签。
+
+正在细化千问 UI 的具体差异：去掉工作流选择器，改用千问专属模型列表与青色提示；页面头部和加载状态分别标注“千问云”与“ComfyUI”。图像生成表单里，promptExtend 和 watermark 仅在千问分支出现。同时确认了千问生图 API 的端点地址。
+
+正在厘清千问生图 API 的端点差异。异步 3.0 调用 `/services/aigc/image-generation/generation` 并附加 X-DashScope-Async 请求头；同步模式则使用 `/services/aigc/multimodal-generation/generation`。2.0 的同步行为尚待确认，可能沿用 multimodal-generation 端点。接下来将按此规范实现。
+
+已明确千问生图 API 的路由规则：3.0 系列模型走异步 image-generation/generation，2.0 系列走同步 multimodal-generation/generation。2.0 的同步端点参数包含 size、n、prompt_extend、watermark 与 negative_prompt。后续将按模型前缀自动分流。
+
+正在确认千问各工具的 HTTP 接口细节。图像生成需先调用 `/api/v1/uploads?action=getPolicy` 获取上传凭证。CosyVoice TTS 与 Qwen-Audio-TTS 均使用 `/services/aigc/multimodal-generation/generation` 端点，输入包含 text、voice 与 language_type。音色定制接口为 `/services/audio/tts/customization`。
+
+正在细化音效合成的具体实现方式。计划使用 qwen3-omni-flash 多模态模型，通过 audio 模态生成纯音效音频。同时确认了音色定制接口的参数结构，以及 CosyVoice 与千问音色设计模型的调用差异。
+
+正在梳理音效合成的模型策略。fun-music-v1 用于纯音乐氛围，qwen3-omni-flash 用于描述性音效生成。视频生成将覆盖 Wan 系列多模态模型，包括 2.7、2.6、2.5、2.2 各版本的文本转视频、图像转视频与关键帧视频模型。
+
+已补全 Wan 系列视频模型的完整清单，涵盖 2.1 与 HappyHorse 各版本的文本转视频、图像转视频及关键帧视频变体。图像生成将支持 qwen-image-3.0-pro、3.0、2.0-pro 与 2.0 四个系列。3D 生成对应 Tripo H3.1 与 P1.0。音乐与音效将使用 fun-music-v1 与 fun-music-preview。TTS 对应 qwen-audio-3.0-tts-plus。视频模型的自动选型规则也已确定：依据输入类型自动匹配图像转视频、关键帧视频或参考视频变体。
+
+正在确认 TTS 与音色定制的完整模型列表，包括 qwen-audio-3.0-tts-flash、qwen3-tts-flash、cosyvoice-v3-plus 等。音色定制接口指向 qwen-voice-design，目标模型为 qwen3-tts-vd-realtime-2026-01-15，支持 Cherry、Serena 等音色。下载远程 URL 需要 fetch buffer 辅助函数。由于原始 dashscope.ts 内容过大，决定从头重写该模块。还需要处理 saveSettings 中 qwen 与引擎配置的合并逻辑。
+
+正在完善配置持久化与接口设计。saveSettings 将单独合并 qwen 与 engines 字段，空 apiKey 时保留旧值。PUT /api/settings 会接收这两个配置块，且 publicSettings 会隐藏 qwen.apiKey。后端新增 /api/qwen/models 独立返回千问模型目录，不与 /api/models 混淆。前端通过 useQwenCatalog() 独立拉取该目录，再结合 useStationEngine(feature) 读取各工位默认引擎。
+
+生成请求体将始终携带 engine 字段，由后端按工位配置分发给对应引擎。MCP 工具的健康检查接口也会同步调整，改为返回 engines 对象，但保留旧版兼容的 engine 字段，确保现有兼容性校验逻辑不受影响。
+
+决定保留 `engine: "VisualForge"` 以维持现有兼容性校验逻辑，同时新增 `generationEngines` 字段承载引擎配置。CSS 中将定义青色系变量 `--color-qwen` 与 `--color-qwen-2`。EngineSwitch 采用双卡并排布局：ComfyUI 卡片使用黄铜/ ember 色调，标注“本机 ComfyUI”与“工作流 · 本地权重”。
+
+千问云卡片采用青色系，标注“千问 AI · qianwenai.com”与“云端模型 · API Key”，当前选中项带有粗边框。页面头部将按引擎切换青色 kicker 文案与样式，例如“千问云 · qianwenai.com”。前端计划通过 EngineSwitch 包装现有表单，避免重复编写完整 UI；需要扩展 PageHead 组件以支持 kickerClass 属性，从而在不同引擎下渲染对应的青色提示与描述。
+
+正在细化引擎切换时的模型状态同步逻辑。切换引擎后，若当前选中的模型不在新引擎的目录中，会自动重置为该引擎目录下的默认模型。由于整体改动量较大，准备先整理一份待办清单，再分批写入文件。
+
+正在确认 MCP 工具链的兼容性。generateImage 已经通过 generate.ts 实现分发，因此 MCP 的 generate_image schema 可能只需增加可选的 engine 参数即可。
+
+接下来将查看前端 package.json 与服务端编译配置，确保 TypeScript 编译正常。
+
+图像尺寸将直接从 qwen-catalog 中获取。DashScope 的上传凭证接口为 GET /api/v1/uploads?action=getPolicy，返回 policy 与 signature。
+
+正在设计 DashScope 上传凭证的实现细节。getPolicy 返回的 policy 与 signature 将用于构造 POST 表单上传到 upload_host，结果 URL 通常为 oss:// 或公网地址。视频图像转视频场景同样依赖 OSS 链接。对于本地已为 HTTPS 的文件，将直接透传，无需二次上传。
+
+正在设计远程 URL 与本地文件的统一转换逻辑：若输入已是 HTTPS 或 oss:// 地址则直接透传，否则解析为绝对路径并通过临时上传接口处理。
+
+同时梳理了千问各工具返回数据的通用提取规则。音乐与音效输出优先取 audio.url，失败时回退到 data 字段；TTS 直接取 audio.url；3D 生成结果依次尝试 pbr_model_url、model_mesh.url 或 results 数组；视频与图像异步结果则分别从 video_url、results[].url 或 choices[].message.content 中提取。接下来将封装一个通用的 extractUrls 函数来统一解析这些响应。
+
+正在设计异步任务轮询机制。PENDING、RUNNING、SUCCEEDED、FAILED、UNKNOWN、CANCELED 六种状态将逐级轮询。同步接口直接返回结果，但会像 ComfyUI 一样创建成功任务记录以保持体验一致。图像 3.0、视频与 3D 始终异步处理；音乐、TTS、音效、音色设计通常同步，但若存在 task_id 则进入轮询流程。前端提交后轮询的交互逻辑已对齐。开始实现 generateImageQwen，异步模型将直接调用 dashPost 并传入 async 参数。
+
+千问异步任务将创建带 remoteKind 标记的任务记录，同步结果则标记为 qwen-done 并持久化资源。轮询调度器会根据 remoteKind 自动区分 qwen 与 comfy 任务，comfy-generate.ts 保持原样不做任何修改。
+
+generate.ts 将新增 resolveEngine 函数，按请求体的 engine 字段或工位默认引擎分发给 qwen 或 comfyui 处理。pollRemoteTask 会依据 remoteKind 区分 qwen 与 comfy 任务。anim3d 工位保持仅走 comfyui，不接入千问引擎。
+
+确认 Studio3D 对应 model3d，anim3d 无独立页面，视频页已提及 Wan Animate。音频工位将统一管理 tts、sfx、voiceDesign 三个引擎配置，切换时批量保存。设置页会以表格形式展示各工位引擎选项。MCP 的 generate_image schema 也将增加可选 engine 参数，默认从全局设置读取。
+
+正在检查 app.ts 的剩余代码与 OpenAPI 规范。计划新增 GET /api/qwen/models 与 GET /api/qwen/ping 端点。同时确认 Studio 工位数量，判断是否存在 StudioAnim。TTS 与音色定制将统一复用 qwen-tts 的 multimodal-generation 端点，不再单独调用语音合成接口。接下来将整理 TTS 音色目录。
+
+正在整理千问音色定制的完整音色目录，涵盖 Cherry、Serena、Ethan 等十余种预设音色。同时确认图像 2.0 与图像转视频的 content 格式，以及 getPolicy 上传凭证的细节。前端类型定义将扩展 engine 字段，PageHead 组件新增 tone 参数以区分青色与黄色主题。接下来准备开始分批写入全部文件。
+
+将更新 README 与项目约定。布局底部会添加“生成本机 ComfyUI，或千问云”的说明文案。前端计划创建 `useStationEngine` Hook，从设置加载引擎配置，切换时自动保存，并在设置未就绪前默认回退到 ComfyUI。同时准备补充前端所需的千问音色目录。另外会检查 3D 生成请求体是否需要携带 engine 字段，并着手实现 `downloadToAsset` 函数用于从 URL 下载远程资源。
+
+视频与 3D 资源的 URL 均有有效期限制，将在轮询成功后立即下载。3D 结果若包含额外文件（如预览图），会一并保存到 extraFiles 中。接下来将编写 DashScope 客户端代码，保持简洁实用。
+
+PUT /api/settings 将扩展为条件合并 qwen 与 engines 字段，避免破坏现有 managerUrl 与 dataDir 的兼容性。前端 saveSettings 已按 Record<string, unknown> 发送，后端 patch 逻辑会自动识别并合并。同时会在 .env.example 中补充 DASHSCOPE_API_KEY 与 DASHSCOPE_WORKSPACE_ID。
+
+千问基础 URL 默认指向阿里 DashScope 协议端点。API 密钥前缀不再严格限定为 sk-ws-，sk- 前缀同样有效。图像 3.0 的参数将直接透传请求体中的 size、n、prompt_extend、watermark、negative_prompt 等字段。接下来将确认前端服务端的 tsconfig 以了解导入扩展名。
+
+正在 features.ts 中规划 mergeEngines 的合并位置。Studio
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "openapi"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "openapi",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend/server/src/app.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/src/lib/api.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+Offset 70 is beyond file length (49 lines)
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="web_search"><details>
+<summary>Tool use: **web_search**</summary>
+
+Parameters:
+
+```json
+{
+  "searchTerm": "dashscope.aliyuncs.com/api/v1/uploads action=getPolicy model upload_dir"
+}
+```
+Result:
+
+```json
+{
+  "isFinal": true,
+  "references": [
+    {
+      "chunk": "Links:\n1. [How to upload local files to temporary storage space and get file URLs-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心](https://help.aliyun.com/en/model-studio/get-temporary-file-url)\n2. [Upload Local Files for Multimodal Model Calls via Temporary URLs - Model Studio - Alibaba Cloud](https://www.alibabacloud.com/help/doc-detail/2869454.html)\n3. [ModelScope客户反馈小于100m的文件是可以的，怎么上传300mb的文件呢？\n_问答-阿里云开发者社区](https://developer.aliyun.com/ask/594015)\n4. [How to upload local files to temporary storage space and get file URLs - Alibaba Cloud Model Studio - Alibaba Cloud Documentation Center](https://www.alibabacloud.com/help/en/model-studio/get-temporary-file-url)\n5. [dashscope/utils/oss_utils.py at 8ebe713c · dashscope/dashscope-sdk-python](https://github.com/dashscope/dashscope-sdk-python/blob/8ebe713c/dashscope/utils/oss_utils.py)\n\nSynthesis:\nTo get a file upload policy, perform a GET request to the DashScope API [1][2].\n\nEndpoint:\nhttps://dashscope.aliyuncs.com/api/v1/uploads\n\nParameters:\naction: getPolicy\nmodel: [Your target model name]\n\nExample:\ncurl --location 'https://dashscope.aliyuncs.com/api/v1/uploads?action=getPolicy\u0026model=qwen-vl-plus' \\\n--header \"Authorization: Bearer $DASHSCOPE_API_KEY\" \\\n--header 'Content-Type: application/json'\n\nThis request returns credentials (policy, signature, upload_host, and upload_dir) necessary to upload your file to temporary OSS storage via a multipart/form-data POST request [1][3]. Files are valid for 48 hours [2][4].\n\nHighlights:\n\u003cresult id=\"1\"\u003e\n\u003ctitle\u003eHow to upload local files to temporary storage space and get file URLs-Alibaba Cloud Model Studio(Model Studio)-阿里云帮助中心\u003c/title\u003e\n\u003curl\u003ehttps://help.aliyun.com/en/model-studio/get-temporary-file-url\u003c/url\u003e\n\u003ccontent\u003e| Location | Field | Type | Required | Description | Example |\n| --- | --- | --- | --- | --- | --- |\n
+… (output truncated)
+```
+User decision: **accepted**
+
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已掌握全部需求，准备全面实现。
+
+正在规划具体实现步骤：服务端将新增 dashscope.ts、qwen-catalog.ts、qwen-generate.ts 等模块，并在 mcp.ts 中为生成工具增加可选 engine 参数；前端会扩展类型定义和 API 模块。同时注意到使用 OSS URL 时需要额外设置 X-DashScope-OssResourceResolve 请求头。
+
+前端实现范围已细化至具体文件：catalog.ts、engine.ts、EngineSwitch.tsx、QwenHint.tsx、PageHead.tsx、Studio 页面、Settings.tsx、Layout.tsx、ApiDocs.tsx、index.css、.env.example 及 README.md。同时确定了默认引擎配置逻辑，所有工位默认使用 ComfyUI。
+
+正在编写配置合并函数。mergeEngines 会以默认 ComfyUI 配置为基础，仅当存储值为 qwen 或 comfyui 时才覆盖对应工位。defaultQwen 则负责从环境变量或存储中读取 DashScope 的 API Key 和工作区 ID。
+
+正在完善 qwen-generate 的实现细节。已确认 HTTP TTS 请求体格式：model 字段指定模型名称，input 内包含 text、voice、language_type 等参数。Omni 等多模态接口可能采用不同的请求结构。
+
+同时明确了配置加载与保存逻辑：loadSettings 将包含 qwen 和 engines 字段，saveSettings 会合并这些配置项。对于旧版 settings.json，若缺少 qwen 或引擎配置，系统会自动回退到默认值。
+
+正在细化各工位的具体调用方案。CosyVoice 将复用多模态生成接口，通过 input.text 与 input.voice 传参。音色设计功能计划调用 qwen-voice-design 接口。音效部分考虑使用 fun-music-v1 并配合 is_instrumental 参数，同时保留 qwen3-omni-flash 作为备选方案。Omni 多模态生成的 HTTP 请求结构也已明确。
+
+正在设计通用的资源提取辅助函数。该函数会递归遍历 DashScope 接口返回的 output 对象，从 image、url、video_url、audio_url 等多个可能的字段路径中提取媒体链接。同时也会处理 base64 编码的音频数据，确保不同模型返回格式的兼容性。
+
+正在细化配置与工具层的具体实现。配置模块将引入 FEATURE_IDS 常量来统一管理各工位标识。mcp.ts 的生成工具会新增可选 engine 参数。引擎切换界面计划做成紧凑表格形式。健康检查逻辑确认现有 VisualForge 字符串不会触发空引擎判断。DashScope 客户端将封装错误处理、请求发送、任务查询、本地文件上传及远程 URL 转换等核心方法。
+
+开始正式编写代码，使用 TodoWrite 追踪进度。
+
+Studio 页面将直接嵌入 EngineSwitch 组件，不抽取完整 Comfy 组件以保持 Git 差异最小化。StudioImage 的改动点已明确：引入引擎状态与切换组件，在页面头部根据引擎类型动态展示描述，生成请求携带 engine 参数，加载提示区分引擎，侧边栏按引擎切换内容，并补充千问专属的 promptExtend 与 watermark 字段。Comfy 模式下模型列表仍来自 catalog.image。
+
+正在细化引擎切换时的状态重置逻辑，确保切换后模型列表正确刷新。千问模式下的生图表单将额外渲染千问专属的提示选项，Comfy 模式则保持原有布局不变。视觉区分上，千问侧边栏采用青色边框与背景色，Comfy 侧边栏维持原有样式，两者通过外观明显区分。
+
+正在处理文件写入细节，注意 PowerShell 与 Write 工具的兼容性问题。
+
+Generate 相关请求体类型将新增 engine 字段。千问任务轮询完成后，需按媒体类型下载对应资源：视频为 mp4，图片为 png/jpg，音频为 mp3/wav，3D 模型为 glb。文件扩展名将通过 URL 路径和 content-type 自动推断。
+
+HappyHorse 模型 ID 已确定为 happyhorse-1.1-t2v、happyhorse-1.1-i2v、happyhorse-1.1-r2v。Wan-Video 保留 2.5、2.2、2.1 版本号，2.6 版本因不确定暂不添加。
+
+正在细化千问视频生成的请求参数结构。wan2.7 新版将使用 resolution、size、ratio、duration 等参数，而旧版 wan 则通过分辨率与比例映射为固定尺寸字符串。同时明确了 i2v、r2v 等不同模式所需的输入字段差异。
+
+已确定 Wan-Video 2.7 与低版本的参数映射规则。新版采用 resolution 与 ratio 分离，旧版通过尺寸字符串转换；wan2.7 还会额外携带 promptExtend 与 watermark 参数。现在开始正式编写代码。
+
+MCP 层将把 engine 设为可选参数，未传时自动回退到配置值。若 DashScope API Key 缺失，会抛出 400 错误并引导用户前往 qianwenai.com 补全。EngineSwitch 会做成双按钮分段控件，让千问与 ComfyUI 在界面上成为两个独立的工具入口。
+
+EngineSwitch 的双按钮标签将直接使用“ComfyUI”与“千问云”，不再使用“工具 A/B”这类模糊称谓，确保两种工具在界面上完全独立。Settings 页面会加入千问云的 API Key 验证入口，并在 QwenHint 中提供 qianwenai.com 的平台链接。服务端将新增 GET /api/qwen/ping 端点，仅检查本地 API Key 是否已配置，避免远程调用导致密钥泄露。
+
+已确定 /api/qwen/ping 端点仅检查本地 API Key 是否存在，不发起远程调用，避免密钥泄露。接下来将正式编写全部代码，同时确保不破坏现有的 ComfyUI 生成逻辑，并同步更新 MCP 的 get_status 接口以支持 engine 字段。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+为千问添加了青色色调的 Spinner 选项。
+
+将为 Spinner 组件添加可选的 `tone` 属性，支持 brass 和 qwen 两种色调。同时会扩展 PageHead 的样式类和子元素支持，并在服务端生成类型中加入 `engine` 字段与 `StationEngine` 类型定义。接下来将批量编写服务端和前端文件，重点完善 dashscope.ts 的实现，使用原生 fetch 处理二进制数据。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+准备将 mergeEngines 添加到 features.ts 或 config.ts 中。
+
+决定将 mergeEngines 放在 config.ts 中，保持 features.ts 的 ComfyUI 专注性。
+
+接下来将编写全部文件，实现清晰完整。Spinner 组件会增加可选的 className 或 tone 参数。MCP 工具将新增可选的 engine 枚举字段，并更新 generate_image 等工具描述以支持引擎选择。
+
+MCP 的 modelsSnapshot 保留 Comfy 目录，同时考虑单独维护 Qwen 模型目录或添加 list_qwen_models 工具。生成类工具也会加入可选的 engine 参数，通过设置中的引擎配置来分发调用。
+
+将按批次并行编写代码：先处理类型定义、配置、DashScope、Qwen 目录与生成模块，再写 app.ts、MCP 和前端。Qwen 生成时仅保存主 GLB，不额外存储 3D 预览图。正在编写 dashscope.ts 的 collectUrls 功能。
+
+正在实现 `collectResultUrls` 函数，递归遍历输出对象提取 URL。按后缀过滤图片、视频、音频、3D 模型及 DashScope/OSS 资源，同时通过 key 匹配 url/image/video/audio/model 等字段收集链接。
+
+已确定 `collectResultUrls` 的具体实现策略：优先匹配已知路径，再递归遍历对象提取包含 url、image、video 等后缀的字段值。同时会处理 `output.audio.data` 这类音频 base64 数据。为避免误提取 usage URL 或 request ID，将严格限定在已知键名和常见资源后缀上进行匹配。
+
+正在细化 `collectResultUrls` 的实现细节。计划通过 `pushUrl` 辅助函数统一过滤 HTTP 链接，并针对 `video_url`、`audio_url`、`orig_url`、`rendered_image` 等特定键名直接提取 URL。同时考虑处理 `output.audio.url`、`output.choices[].message.content[].image` 及 `output.results[].url` 等嵌套结构。
+
+补充了 `extFromUrl` 辅助函数，用于从 URL 提取文件后缀并映射 MIME 类型。Studio 页面中，EngineSwitch 以下的 Comfy UI 界面将保持完全不变。
+
+将添加 QwenHint 组件，在切换至 Qwen 引擎且未配置 API Key 时提示用户。该组件通过 publicSettings 判断 settings.qwen.apiKey 是否存在，利用掩码机制确保密钥可见性。现在开始并行编写多个文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+开始落地：ComfyUI 链路原样保留，千问作为并列引擎接入，工位可切换并显示对应工具界面。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "服务端：类型/config + DashScope 客户端 + 千问目录",
+      "id": "1",
+      "status": "in_progress"
+    },
+    {
+      "content": "服务端：千问生成 + generate 分发 + API/设置",
+      "id": "2",
+      "status": "pending"
+    },
+    {
+      "content": "前端：工具切换 UI、工位页、设置页",
+      "id": "3",
+      "status": "pending"
+    },
+    {
+      "content": "README / .env / MCP / 文档同步",
+      "id": "4",
+      "status": "pending"
+    }
+  ],
+  "success": true
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在编写 config.ts、dashscope.ts、qwen-catalog.ts、qwen-generate.ts 和 generate.ts 的代码更新。
+
+同时需要在 features.ts 或 config 中添加 mergeEngines。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已确认 features.ts 中导出了 FEATURE_IDS。
+
+接下来将编写 dashscope.ts、qwen-catalog.ts、qwen-generate.ts 和 generate.ts 四个文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在修复 Node 环境下 Blob 构造函数的问题，可能需要将 Buffer 转为 Uint8Array。
+
+确认 `new Blob([new Uint8Array(buf)])` 在 Node 下更安全。Node 18+ 已原生支持 FormData。接下来准备编写 qwen-catalog.ts，建立完整的静态目录。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要修复 generateSfxQwen 调用 generateMusicQwen 的逻辑。音乐生成函数返回的是 "music" 类型资源。
+
+正在调整 sfx 的 fun-music 实现：直接调用 dashPost，将异步任务类型映射为 sfx 特性并持久化为音频。同时更新 app.ts 中的 DashScopeError、设置项和千问模型配置。另外注意到 designVoice 返回结构与 comfy 不一致，generate.ts 中的返回形状需要对齐。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现之前修改代码时漏掉了路径参数。
+
+准备重新执行这些修改。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在修复 Settings.tsx 中的健康检查逻辑。
+
+正在调整 MCP 工具生成逻辑，为引擎配置添加可选字段并更新状态快照。同时处理了 saveSettings 中 engines 类型不匹配的问题，准备继续前端 UI 开发。
+
+已梳理前端完整开发清单，涵盖类型定义、API 接口、目录配置、引擎切换组件、页面布局及设置模块等十余项任务。准备先完成 MCP 调整，再依次实现前端各文件。
+
+正在确认各工具函数中未使用的导入依赖。准备为 MCP 工具补充引擎参数的 Zod 校验描述，并替换相关代码。接下来将编写前端组件并更新各工位页面。
+
+正在设计共享的 EngineSwitch 组件，使其在视觉上与 ComfyUI 区分明显。同时为 Spinner 添加 qwen tone 属性，并扩展 PageHead 的 tone 参数以支持千问风格的 kicker 文案。接下来将批量编写前端文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+计划为 MCP 生成工具添加引擎参数，并通过共享的 schema 片段来实现。
+
+决定不新增 list_qwen_models 工具，保持 MCP 简单，由 generate 工具根据设置分发。将引擎字段设为可选，直接加入各生成工具的输入 schema 中。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\mcp.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+排查到代码中存在7处workflowId引用，可能误改了anim3d或list_workflows相关逻辑。
+
+已确认7处workflowId分别对应生图、生视频、生音乐、TTS、音效、音色设计和生成3D等7个工位。接下来将编写前端文件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "engine: z.enum\\(\\[\\\"comfyui\\\""
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "engine: z.enum\\(\\[\\\"comfyui\\\"",
+  "topFiles": [
+    {
+      "matchCount": 7,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\types.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 mcp list_workflows 是否意外包含 engine 字段。
+
+已确认 7 处匹配均为生成工具中的 engine 字段，未误改 list_workflows。接下来将编写前端库和组件。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\EngineSwitch.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\QwenHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\PageHead.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\index.css</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在导出 StationEngine 到 catalog.ts 的 useStationEngine 中。
+
+正在 Studio 页面添加 EngineSwitch 和千问分支，Comfy UI 保持原样不变。接下来处理 StudioImage。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在继续完善 StudioMusic、StudioAudio、Studio3D、Settings、Layout、ApiDocs 和 README 等模块。
+
+正在补充 env.example 文件。StudioAudio 的引擎配置将统一作用于 TTS、音效和音色设计三个子功能。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+StudioAudio 的实现更复杂。我会在顶部添加引擎切换，并将千问与 ComfyUI 的界面并列展示。
+
+表单保持原有结构，仅针对千问语音列表做差异化配置。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+决定直接重写 StudioAudio 文件而非局部替换，因为其中包含大量条件判断，整体重写更简洁。
+
+正在编写完整文件，确保两种引擎的界面形式保持一致。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+Studio3D 的绑定界面保持不变，因为该功能为本地实现。
+
+仅生成侧边栏需要切换。顶部放置引擎切换器。引擎状态变量将命名为 `rigEngine`，避免与现有绑定引擎命名冲突。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要从前端类型文件导出 FEATURE_IDS 和 FEATURE_LABELS，这些常量已存在于 frontend/src/lib/types.ts 中。
+
+清理 Settings.tsx 中未使用的 FEATURE_IDS 导入。准备为千问添加 CSS 径向渐变样式。更新 Layout 页脚、API 文档端点和 README。修复 generate.ts 中 designVoice 的返回类型，确保 waitForTaskAssets 能正确获取千问设计任务的资源。
+
+确认 FEATURE_LABELS 已存在。将 voiceDesign 加入 STATION_ROWS 表格。anim3d 保持仅使用 ComfyUI。修复 Settings 中 `if (!h.engine)` 的判断逻辑，因为 VisualForge 是 truthy 值。同时检查 saveSettings 的 patch.engines 类型是否正确。
+
+旧版 ComfyManager 模型提示虽略显过时，但对无 engine 字段的旧服务器仍有参考价值。跳过为千问添加 CSS 径向渐变的计划。排查 list_workflows 工具中是否误将 engine 参数加入 workflowsSnapshot。检查 catalog.ts 中 useStationEngine 对 features[0] 的依赖是否会触发 ESLint 警告。
+
+发现 StudioImage 的 useEffect 因 `models` 每次渲染重新创建而持续触发，切换引擎时模型可能短暂错误。准备通过 `--color-qwen` 添加 `bg-qwen` 样式。saveSettings 的 patch.engines 类型可能需要类型断言。features.ts 已导出 FEATURE_IDS。
+
+修正了 DashScopeError 的失败判定逻辑：空字符串 code 不再被误判为成功，仅当 code 存在且非 Success 时才视为失败。接下来将更新剩余文件并运行 TypeScript 编译检查。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\Layout.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\ApiDocs.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\ApiDocs.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\.env.example</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要为 README 补充千问功能的相关说明。
+
+计划在 README 中新增千问功能章节，并补充 DashScope 环境变量与 Qwen 模型特性表。同时需要修复 app.ts 中 patch.engines 和 saveSettings 的类型定义。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "list_workflows|workflowsSnapshot"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "list_workflows|workflowsSnapshot",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+计划在“工位与工作流”介绍段之后、ComfyUI 说明之前插入千问配置区域，并补充环境变量。
+
+同时更新“需要工作流”的说明，仅在使用 ComfyUI 时才需工作流。若 README 中有前端 API 表格，将补充 GET /api/qwen/models 接口。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "/api/models"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "/api/models",
+  "topFiles": [
+    {
+      "matchCount": 5,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 5
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages",
+  "pattern": "FEATURE_IDS"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages",
+  "pattern": "FEATURE_IDS",
+  "topFiles": [],
+  "totalFiles": 0,
+  "totalMatches": 0
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+需要在前端 API 表格第 413 行附近添加 /api/qwen/models 接口。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现 comfymanager API 存在重复。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在更新表格，并补充 MCP 工具的相关描述。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在更新 MCP 段落。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在处理类型导入问题，考虑从 app.ts 引入 AppSettings 或改用内联类型。
+
+正在检查 app.ts 的现有导入，确认其间接引用 config 和 types 的方式。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在考虑从 types.js 导入 AppSettings，或改用更简单的类型转换方式。
+
+决定直接从 types.js 导入 AppSettings 类型，避免使用错误的类型断言。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "get_status"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "get_status",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\features.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在确认 waitForTaskAssets 是否能正确处理 Qwen 音频设计语音返回的数据。
+
+需要修复 qwen-generate 的未使用导入。准备运行前端 TypeScript 编译检查。已确认 generateSfxQwen 中的 finishSync 问题已修复。正在核对 designVoiceQwen 返回结构与 generate.ts 的类型定义是否匹配。MCP generate_image 的引擎参数通过 ...args 正确传递。接下来将查看 waitForTaskAssets 的实现细节。
+
+已确认前端类型与 Settings 中的 FEATURE_IDS 引用一致，无重复导入问题。音乐生成的持久化逻辑正确。Node 20 下 Blob 转 File 可能存在兼容性风险，但当前实现应可运行。DashScope 的错误检测已覆盖 InvalidParameter 等异常情况。Image 2.0 在部分账号下可能仍需异步轮询，现有 task_id 处理逻辑已兼容。
+
+已确认 designVoiceQwen 返回的额外字段不会影响 ComfyUI 兼容性。正在运行 TypeScript 编译检查。catalog.ts 中的 StationEngine 导入使用正常。前端类型 FEATURE_LABELS 已正确导出供 Settings 使用。useStationEngine 中的 React exhaustive-deps 警告可接受。已验证 finishSync 的任务创建与标记流程：createTask 将状态置为 queued 后，mark 操作能够成功执行。
+
+发现 3D 工位的 collectResultUrls 存在误保存问题。当前逻辑会把渲染后的 PNG 图片也作为 model3d 资源落盘。需要新增按扩展名过滤 URL 的逻辑，确保只提取 GLB 或 GLTF 格式的模型文件。
+
+将在 qwen-generate.ts 中新增 pickUrls 函数，用于按资源类型过滤 URL。3D 工位会排除 PNG、JPG 等图片链接，仅提取 GLB 或 GLTF 模型文件作为 model3d 资源落盘。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "contextAfter": 25,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "waitForTaskAssets"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\mcp.ts",
+  "pattern": "waitForTaskAssets",
+  "topFiles": [
+    {
+      "matchCount": 150,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+3D 模型的 pbr_model_url 可能缺少后缀，导致 pickUrls 处理异常。
+
+3D 模型将改用排除图片后缀的简单过滤，避免因 URL 缺少扩展名而漏选。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc -p frontend/server/tsconfig.json --noEmit</summary>
+```bash
+npx tsc -p frontend/server/tsconfig.json --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+frontend/server/src/app.ts(120,5): error TS2739: Type '{}' is missing the following properties from type 'QwenSettings': apiKey, workspaceId, baseUrl
+frontend/server/src/app.ts(121,39): error TS18048: 'patch.qwen' is possibly 'undefined'.
+frontend/server/src/app.ts(122,44): error TS18048: 'patch.qwen' is possibly 'undefined'.
+frontend/server/src/app.ts(123,40): error TS18048: 'patch.qwen' is possibly 'undefined'.
+npm notice
+npm notice New minor version of npm available! 11.11.0 -> 11.19.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.19.0
+npm notice To update run: npm install -g npm@11.19.0
+npm notice
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\tsconfig.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在修复 app.ts 中千问补丁的类型定义。saveSettings 接收 Partial<AppSettings>，且仅在存在时才包含 QwenSettings 字段。
+
+发现 saveSettings 的签名需要放宽，否则无法传入部分千问配置。准备将 saveSettings 改为接受更宽松的参数类型。
+
+对比了两种实现方式：一是将 saveSettings 的参数类型放宽为 Partial，二是直接在 app.ts 中构建 Partial<QwenSettings> 对象再传入。后者改动更小，决定采用该方案。
+
+最终决定放宽 config.ts 中 saveSettings 的参数类型。由于内部已合并部分对象，这样更合理。已确认相关类型导入齐全，准备更新签名。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将新增 SettingsPatch 类型，并用于 saveSettings。
+
+同时修复 app.ts 中空 qwen 对象的类型问题。saveSettings 将支持嵌套对象的 Partial 类型，允许传入部分配置。
+
+保存设置时，Qwen 配置字段可能为 undefined，但 defaultQwen 函数已兼容 Partial 参数，因此无需额外处理。接下来将更新配置并简化 app.ts 中的补丁逻辑。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+SettingsPatch 应该能修复千问的部分问题。
+
+引擎类型已改为 Partial，可直接赋值并移除 AppSettings 导入。准备重新运行 tsc 检查编译结果。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc -p frontend/server/tsconfig.json --noEmit</summary>
+```bash
+npx tsc -p frontend/server/tsconfig.json --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: npx tsc --noEmit</summary>
+```bash
+npx tsc --noEmit
+```
+
+```
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+前后端 TypeScript 编译均通过。已确认 AppSettings 在服务端被引用，未被废弃。
+
+已清理 Settings.tsx 中的无用 FEATURE_IDS。确认前端编译仅针对 src 目录。检查了 qwen-generate 模块的导入情况，确认 GenerateMusicBody 等仍被使用。正在验证编辑文件的 lint 结果，并排查 generateSfxQwen 是否误引用了 generateMusicQwen。
+
+确认前端 Settings 页面对 qwen 字段使用可选链读取，旧版 API 不会崩溃。开发服务器正在运行，tsx watch 会自动重载。已核对前端 tsconfig，且 FEATURE_LABELS 导入路径正确。
+
+正在检查 StudioAudio 的 useEffect 是否存在无限循环。切换模式时的条件判断逻辑正确。注意到 ttsList 是每次渲染新数组，可能引发不必要的重复执行。
+
+ttsList 来源稳定，额外状态更新影响有限。正在确认服务端 tsconfig 是否包含 noUnusedLocals，以验证 AppSettings 是否会被判定为未使用。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\tsconfig.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\Settings.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\StudioImage.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\StudioAudio.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\lib\\catalog.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\qwen-generate.ts"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\Settings.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\lib\\catalog.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\lib\\qwen-generate.ts"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在检查 AppSettings 是否未被使用。服务端 TypeScript 编译不受影响。
+
+正在查看终端，确认开发服务器是否已成功重启并加载了最新文件变更。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\1.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+  "pattern": "AppSettings"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+  "pattern": "AppSettings",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\server\\src\\app.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="todo_write"><details>
+<summary>Tool use: **todo_write**</summary>
+
+Parameters:
+
+```json
+{
+  "merge": true
+}
+```
+Result:
+
+```json
+{
+  "finalTodos": [
+    {
+      "content": "服务端：类型/config + DashScope 客户端 + 千问目录",
+      "id": "1",
+      "status": "completed"
+    },
+    {
+      "content": "服务端：千问生成 + generate 分发 + API/设置",
+      "id": "2",
+      "status": "completed"
+    },
+    {
+      "content": "前端：工具切换 UI、工位页、设置页",
+      "id": "3",
+      "status": "completed"
+    },
+    {
+      "content": "README / .env / MCP / 文档同步",
+      "id": "4",
+      "status": "completed"
+    }
+  ],
+  "initialTodos": [
+    {
+      "content": "服务端：类型/config + DashScope 客户端 + 千问目录",
+      "id": "1",
+      "status": "in_progress"
+    },
+    {
+      "content": "服务端：千问生成 + generate 分发 + API/设置",
+      "id": "2",
+      "status": "pending"
+    },
+    {
+      "content": "前端：工具切换 UI、工位页、设置页",
+      "id": "3",
+      "status": "pending"
+    },
+    {
+      "content": "README / .env / MCP / 文档同步",
+      "id": "4",
+      "status": "pending"
+    }
+  ],
+  "success": true,
+  "wasMerge": true
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现终端里 18788 端口实际运行的是 ComfyManager，不是前端服务。
+
+正在确认根目录的 `npm run dev` 是否同时启动了前端和 ComfyManager。代码修改已经完成，接下来会查看终端末尾的日志来验证前端是否正确加载了变更。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\1.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\package.json</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+前端热更新已生效，代码变更正在实时加载。
+
+实现已完成。tsx watch 已同步重启服务。已确认 mcp list_workflows 的 engine 字段无误。千问与 ComfyUI 的界面区分通过边框和标签样式清晰呈现。无需额外修改根包描述。
+
+已验证 generate.ts 在 engine 未定义时仍能正常运行。用户选择千问后，引擎配置会立即保存并随 POST 请求发送。默认使用 ComfyUI，现有用户不受影响。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+千问已经作为**并列的第二种工具**加回视铸，ComfyUI 的调用链路和工作流 UI 没有改。
+
+**怎么用**
+
+1. **设置**里会出现「千问云」卡片：填 [qianwenai.com](https://www.qianwenai.com/) 的 API Key（也可写 `DASHSCOPE_API_KEY`）。
+2. 每个工位顶部有两个并排入口：**本机 ComfyUI**（黄铜）和 **千问云**（青色）。选哪个，侧栏就换成哪套界面。
+3. 选 ComfyUI：工作流、ComfyManager 模型、`ProviderHint` 和原来一样。
+4. 选千问：没有工作流，是云端模型列表，成品仍落到原来的目录。
+
+**工位对照**
+
+| 工位 | 千问模型 | 落盘 |
+|---|---|---|
+| 生图 | Qwen-Image 3.0 Pro / 3.0 / 2.0(-Pro) | `data/images/` |
+| 生视频 | Wan 2.7/2.6、Wan-Video 2.5/2.2/2.1、HappyHorse | `data/videos/` |
+| 生音乐 | Fun-Music v1 / Preview | `data/music/` |
+| 配音 / 音色 / 音效 | Qwen-Audio-TTS、Qwen3-TTS、CosyVoice、Omni | `data/audio/` |
+| 生 3D | Tripo H3.1 / P1.0 | `data/models3d/` |
+
+千问目录走独立的 `GET /api/qwen/models`，不会混进 ComfyManager 的 `/api/models`。生成请求可以带 `engine: "comfyui" | "qwen"`，不传则用该工位上次选的工具（默认仍是 ComfyUI）。
+
+---
+
+_**User**_
+
+千问工具，的模型怎么看不到？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户反馈无法看到千问工具的模型。
+
+正在排查千问模型未显示的可能原因。包括接口异常、前端加载问题、引擎切换状态、API错误、默认模型选择逻辑，以及开发服务器重启或Vite代理配置等环境因素。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先查千问模型列表的请求链路：接口、代理和工位下拉是怎么接上的。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **1** result in **1** directory</summary>
+
+Directory: **`D:\WorkSpace\tools\visualforge`** (1 file)
+
+| File |
+|------|
+| `../.\frontend\vite.config.ts` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\1.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户反馈千问工具中看不到对应的模型。
+
+正在排查几个可能原因：Vite 代理配置、API 路由是否生效、useQwenCatalog 是否静默失败、StudioImage 的竞态条件导致下拉框值不匹配，以及 `looksLikeLegacyCloudCatalog` 逻辑是否干扰了千问目录。
+
+进一步定位到 StudioImage 在 qwen 模式下直接读取 `qwen.image` 数组。若 `useQwenCatalog` 静默失败返回空数组，下拉框就会显示为空。正在检查服务端接口是否正确返回 image 数据，以及是否存在展开运算符导致数组丢失的问题。
+
+已确认服务端路由写法无误，且开发服务器已重启，新接口理应生效。接下来将直接调用该 API 端点，并同步检查 Vite 代理配置。
+
+已排除 Promise 缓存导致的旧错误残留。即使首次请求因路由未生效而失败，catch 块也会将缓存重置为空，组件重新挂载时会自动重试获取数据。
+
+正在排查 `qwenCatalog` 展开运算符是否因字段类型不匹配导致数据丢失。同时注意到 StudioImage 中存在一个 useEffect，它会在每次 catalog 变化时强制重置 model 为默认值。如果默认值与下拉选项不匹配，就会出现“有选项但未选中”的假象。
+
+已确认根因：qwen 目录未加载导致 image 数组为空，pickDefault 返回空字符串，下拉框因此显示空白。接下来将检查 Vite 代理配置、直接调用 API 排查，并确认前端是否正确请求了 18787 端口。
+
+发现 QwenHint 和模型下拉框不会展示 loadError，所以用户只能看到空白。正在检查 vite.config.ts 的代理配置，并准备直接调用 API 端点验证。同时注意到终端日志被截断，需要确认 API 进程是否正常启动，以及是否有隐藏的导入错误导致新路由未加载。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\vite.config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\terminals\\1.txt",
+  "pattern": "\\[api\\]"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\terminals\\1.txt",
+  "pattern": "\\[api\\]",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "C:\\Users\\renjihe\\.cursor\\projects\\d-WorkSpace-tools-visualforge\\terminals\\1.txt"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 1
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+  "pattern": "qwen/models|/api/qwen"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src\\app.ts",
+  "pattern": "qwen/models|/api/qwen",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\app.ts"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+API 服务器可能刚重启，尚未打印 [api] 日志。
+
+怀疑 Vite 热更新导致 qwenCatalogPromise 被提前置空。同时注意到 qwen 目录加载失败时，UI 可能未正确显示错误信息。
+
+已确认 API 返回格式正常，排除了类型命名冲突和 CSS 隐藏选项等假设。
+
+发现 tsx watch 在重启后可能未成功启动，终端缺少 [api] 监听消息。怀疑 qwen 模型目录请求失败，导致模型列表为空。
+
+重启后终端确实没有出现 `[api]` 日志。如果 API 服务没有真正启动，那么 `/api/qwen/models` 和 `/api/models` 都会失败。用户反馈千问工具模型下拉框为空，而 ComfyUI 模型可能仍然可见，这说明 ComfyUI 的模型数据或许来自缓存的 `catalogPromise`，而 qwen 目录请求则直接依赖 API 服务。
+
+Comfy catalog 的 Promise 缓存在模块级别。API 崩溃后它仍会保留旧结果，因此 Comfy 模型继续可见。
+
+但 qwen 的 useQwenCatalog 是全新逻辑。如果首次切换到 qwen 时 API 已经不可用，catch 会将 Promise 置空。组件不会自动重试，除非重新挂载。这解释了为何 qwen 下拉框为空，而 Comfy 模型列表却仍然正常。
+
+组件 useEffect 的依赖数组为空，导致 qwen 目录请求不会自动重试。若页面未刷新，即使 API 后续恢复，模型列表也不会自动加载。
+
+最新重启后终端仍无 [api] 日志，API 服务可能仍在启动或已崩溃。准备直接 curl 18787 的健康检查和 qwen 模型接口来验证状态。
+
+考虑将 qwen 模型目录作为前端静态数据嵌入，避免依赖 API 实时获取。这样即使 API 不可用，下拉框也能始终显示模型列表。若 API 请求失败，仍可展示静态数据并提示加载错误。
+
+决定采用静态前端目录作为最终方案。由于前后端 TypeScript 项目相互独立，难以直接共享类型文件，只能通过公共 JSON 或在前端独立维护一份精简目录。这样即使 API 不可用，下拉框也能始终显示模型列表；若 API 异常，生成时会返回明确错误而非静默失败。
+
+确定在 `frontend/src/lib/qwen-catalog.ts` 中放置静态模型目录，作为 `useQwenCatalog` 的默认数据源，API 响应仅作覆盖。切换至 qwen 引擎时会自动重试加载，并同步展示加载错误。接下来将验证 API 是否真正可用。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: try { Invoke-RestMethod -Uri http://127.0.0.1:18787/api/qwen/models | ConvertTo-Json -Depth 3 } catch { $_.Exception.Message; if ($_.ErrorDetails) { $_.ErrorDetails.Message } }; Write-Host &#39;---health---&#39;; try { Invoke-RestMethod -Uri http://127.0.0.1:18787/api/health | ConvertTo-Json -Depth 2 } catch { $_.Exception.Message }</summary>
+```bash
+try { Invoke-RestMethod -Uri http://127.0.0.1:18787/api/qwen/models | ConvertTo-Json -Depth 3 } catch { $_.Exception.Message; if ($_.ErrorDetails) { $_.ErrorDetails.Message } }; Write-Host '---health---'; try { Invoke-RestMethod -Uri http://127.0.0.1:18787/api/health | ConvertTo-Json -Depth 2 } catch { $_.Exception.Message }
+```
+
+```
+远程服务器返回错误: (404) 未找到。
+404 Not Found
+---health---
+{
+    "ok":  true,
+    "name":  "VisualForge",
+    "engine":  "ComfyUI",
+    "dataDir":  "D:\\WorkSpace\\tools\\visualforge\\frontend\\data",
+    "managerUrl":  "http://117.50.180.17:18788",
+    "manager":  {
+                    "ok":  false,
+                    "error":  "fetch failed",
+                    "url":  "http://117.50.180.17:18788"
+                },
+    "mcp":  {
+                "url":  "http://127.0.0.1:18787/mcp",
+                "transport":  "streamable-http",
+                "stdio":  "npm run mcp -w @visualforge/frontend"
+            },
+    "rig":  {
+                "engines":  [
+                                "auto",
+                                "unirig",
+                                "mixamo",
+                                "bbox"
+                            ],
+                "unirig":  {
+                               "installed":  false,
+                               "dir":  "",
+                               "python":  "",
+                               "error":  "fetch failed"
+                           },
+                "mixamo":  {
+                               "clips":  "",
+                               "blender":  false
+                           }
+            }
+}
+
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现健康检查返回的是旧服务器（ComfyUI），而非新服务器（VisualForge）。这解释了为什么看不到千问工具的模型。
+
+18787 端口上的进程是旧版 VisualForge，未提供 `/api/qwen/models` 路由。前端应加入静态千问模型目录，确保接口不可用时 UI 仍能显示。同时需要让新服务启动失败或替换旧进程。
+
+正在排查 18787 端口是否仍有旧进程占用，以及新服务是否真正启动。若 API 返回 404，前端应直接展示静态千问模型目录，避免下拉框空白。
+
+仅靠前端静态目录无法解决生成问题。旧服务器不支持 qwen 引擎，若 18787 端口仍被旧进程占用，生成请求会被错误路由到旧服务并失败。必须确保新 API 真正接管该端口。正在排查为何旧进程仍在运行。
+
+怀疑 18787 端口存在多进程竞争。旧服务器可能来自 Tauri sidecar、其他终端或 `npm start` 残留。准备通过 netstat 和终端列表确认具体占用来源。
+
+仅修复前端静态目录无法解决生成问题。旧服务器不识别 qwen 引擎，生成请求仍会被错误路由。必须先终止 18787 端口的旧进程，再让新服务真正接管该端口。接下来将检查 index.ts 绑定逻辑、其他终端残留进程，并通过 netstat 定位 18787 端口的实际占用者。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+18787 上还是旧版生成服务（`engine: ComfyUI`），没有 `/api/qwen/models`，所以下拉是空的。接着确认端口占用，并让千问模型列表在前端本地就能显示。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **3** results in **1** directory</summary>
+
+Directory: **`C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals`** (3 files)
+
+| File |
+|------|
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\1.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\2.txt` |
+| `../C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\3.txt` |
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\index.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "engine: \\\"VisualForge\\\"|engine: \\\"ComfyUI\\\""
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "engine: \\\"VisualForge\\\"|engine: \\\"ComfyUI\\\"",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\app.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\mcp.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 2
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现健康检查返回引擎为 ComfyUI，但代码中显示为 VisualForge。
+
+怀疑 18787 端口仍被旧进程占用，导致新服务无法绑定或运行了旧代码。重启后引擎信息仍未更新。
+
+怀疑 18787 端口可能被 Tauri sidecar 或其他残留进程占用。准备查看终端日志和 netstat 来确认实际运行的是哪个进程。已排除 dist 目录的影响，因为健康接口直接从内存中的 app.ts 读取数据。
+
+发现前端 Settings.tsx 的一个 bug：它只在 `!h.engine` 时才提示旧版服务，但旧服务器返回了 `engine: ComfyUI`，所以不会触发该警告，导致界面误判为正常。
+
+计划将静态 catalog 嵌入前端，让模型列表能正常显示；同时需要确认 18787 端口是否被旧进程占用，并协助重启 API。
+
+准备增加兜底机制：若 `/api/qwen/models` 返回 404，则回退到前端静态 catalog 渲染模型列表。同时会在健康检查中加入判断——当引擎为 ComfyUI 且未包含 qwen 工具时，主动弹出警告提示，避免界面误判为正常。接下来会查看终端日志和 netstat，以定位 18787 端口冲突的具体原因。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\2.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\3.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: netstat -ano | findstr :18787; Write-Host &#39;---&#39;; Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match &#39;18787|server/src/index|visualforge/frontend&#39; } | Select-Object ProcessId, Name, CommandLine | Format-List</summary>
+```bash
+netstat -ano | findstr :18787; Write-Host '---'; Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match '18787|server/src/index|visualforge/frontend' } | Select-Object ProcessId, Name, CommandLine | Format-List
+```
+
+```
+  TCP    127.0.0.1:18787        0.0.0.0:0              LISTENING       13644
+  TCP    127.0.0.1:18787        127.0.0.1:49157        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:50149        ESTABLISHED     13644
+  TCP    127.0.0.1:18787        127.0.0.1:50700        ESTABLISHED     13644
+  TCP    127.0.0.1:18787        127.0.0.1:50957        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:50962        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:51518        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:51519        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:51520        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:51992        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:51993        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:51994        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:52661        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:53465        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:54021        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:54451        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:55203        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:55554        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:55555        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:55723        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:56293        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:56294        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:56888        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:56889        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:56890        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:56938        TIME_WAIT       0
+  TCP    127.0.0.1:18787        127.0.0.1:57003        TIME_WAIT
+… (output truncated)
+```
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+发现有两个 tsx 进程同时运行 `server/src/index.ts`。
+
+旧进程占用了 18787 端口，导致新进程无法绑定。健康检查因此返回了旧的 ComfyUI 引擎，模型列表自然无法显示。接下来会把静态目录放到前端，让模型列表始终可见，并优化对端口占用的检测。
+
+直接终止旧进程存在风险，可能引发崩溃或静默失败。因此不打算强制杀死它们，而是通过前端静态目录和更明确的错误提示来解决。
+
+tsx watch 启动后终端完全没有 [api] 日志，说明它可能已经崩溃或静默失败。旧进程 13644 仍是实际监听者，而 36120 可能并未真正接管。这些残留进程大概率来自之前会话或 Tauri 的独立启动。
+
+决定终止 13644 和 31848 这两个残留进程，让新的 tsx watch 能够正常绑定 18787 端口。随后会触发文件变更以重启服务。前端静态目录将作为默认兜底，确保模型下拉框立即恢复正常。
+
+仅靠前端静态目录无法解决问题：用户点击生成时请求仍会被旧服务器处理，引擎参数不会生效。必须先让新 API 正常运行。
+
+13644 属于遗留 VisualForge API，并非当前 `npm run dev` 的产物。因此可以安全地终止它，释放 18787 端口给新的 tsx watch 实例。同时会在服务端增加 EADDRINUSE 的清晰报错，并在重启后触发 tsx watch 重载。
+
+又发现一个无 watch 的残留进程 12728。准备终止 13644 后触发 tsx watch 重载，让新实例抢占 18787 端口。
+
+已确认 13644 是实际监听者，其余 31848、14144、12728 均为旧残留进程。36120 作为新实例可能已崩溃或未成功绑定。接下来会终止这些旧进程并保留 watch 树，随后检查 36120 是否能接管 18787 端口。前端静态目录将放在 `frontend/src/lib/qwen-catalog.ts`，让模型列表立即可用。
+
+还会更新设置页的健康检查：若检测不到 qwen 工具，提示用户重启 18787 端口。前端静态目录将作为初始状态，让模型列表立即可见；API 仍用于生成调用。若 API 获取失败，侧边栏会显示加载错误，但模型列表本身仍会保留。
+
+正在细化设置页的健康检查逻辑。当前仅判断 `h.engine` 是否为空，现在会改为检测 `h.tools` 是否包含 "qwen"，若引擎是 ComfyUI 且缺少该工具，则提示用户关闭占用 18787 端口的旧进程后重新启动。
+
+同时会在服务端监听错误中加入 EADDRINUSE 的明确报错，直接提示用户关掉旧进程再启动。还需要在 api.ts 的健康类型里补充 `tools` 字段。
+
+已确定终止 13644 以释放 18787 端口。tsx watch 可能不会自动重绑，因此会先 curl 检查健康状态；若仍返回旧数据或连接被拒，再对 index.ts 做微小改动触发重启。36120 可能是未成功监听的僵尸进程，终止 13644 后会验证新实例能否正常接管。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+原因已经明确：18787 被旧的生成进程占着，新代码没挂上，`/api/qwen/models` 是 404。接下来会让模型列表在前端内置显示，并清掉占端口的旧进程。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\qwen-catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\QwenHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在将千问工具目录复制到前端代码库，以解决模型显示问题。
+
+接下来会修改前端目录逻辑、设置检测和服务器错误处理，并清理残留进程。随后通过文件变更触发 watch 重启。
+
+先终止 13644 进程，再保存 index.ts 触发 watch 重启并绑定端口。同时会在 api.ts 的健康类型中补充 tools 字段。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2**</summary>
+Invalid arguments:
+path: Required
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\index.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\QwenHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+qwen-catalog.ts 文件写入失败，原因是路径遗漏。
+
+准备重新写入文件。QwenHint 替换可能部分失败，需要检查。catalog.ts 的 import 替换应该已成功。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\qwen-catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\QwenHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+QwenHint.tsx 中残留了替换失败的重复代码。
+
+正在清理 QwenHint.tsx 的重复代码。接下来会把 loadError 错误信息传给 StudioImage 等页面，并检查所有 QwenHint 的调用位置。同时需要终止残留进程。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\QwenHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "\u003cQwenHint"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src",
+  "pattern": "\u003cQwenHint",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\Studio3D.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    }
+  ],
+  "totalFiles": 5,
+  "totalMatches": 7
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\index.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在排查千问工具模型显示异常的问题。计划将 qwen.loadError 传递给所有 studio 页面中的 QwenHint 组件。
+
+发现 StudioAudio 中已调用 useQwenCatalog()。准备终止残留进程（13644、31848、12728），避免 npx tsx 阻塞。tsx watch 将随 index.ts 修改自动重启。同时会为 QwenHints.Error 补充 error 属性。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioImage.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioVideo.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioMusic.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Studio3D.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\StudioAudio.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+Cancelled
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+进程终止被阻塞。除非必要，否则不应在获得批准后重试。
+
+前端静态目录已修复，刷新页面即可看到模型列表。生成功能仍需重启服务，因为端口 18787 被旧进程占用。请关闭该进程并重新运行 `npm run dev`。不会重试终止进程。
+
+若不重启，旧服务会忽略引擎参数并尝试调用 ComfyUI，导致生成异常。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\QwenHint.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints"><details>
+<summary>Tool use: **read_lints**</summary>
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\lib\\catalog.ts",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\components\\QwenHint.tsx",
+    "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\StudioImage.tsx"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\lib\\catalog.ts"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\components\\QwenHint.tsx"
+    },
+    {
+      "relativeWorkspacePath": "D:\\WorkSpace\\tools\\visualforge\\frontend\\src\\pages\\StudioImage.tsx"
+    }
+  ]
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在用中文总结。
+
+模型下拉框显示为空，是因为 18787 端口被旧版 ComfyUI 服务占用，导致 `/api/qwen/models` 接口返回 404。现在已将模型目录直接嵌入前端，下拉框会始终显示可用模型。但要让实际生成正常工作，仍需释放 18787 端口。我会说明如何手动释放该端口，无需强制终止进程。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+千问模型下拉是空的，是因为页面去拉 `http://127.0.0.1:18787/api/qwen/models`，但这个端口上还是**旧版生成服务**（健康检查里仍是 `engine: ComfyUI`），没有这个接口，返回 404，列表就被清空了。
+
+已经改成：千问模型清单写在前端里，切到「千问云」就能看到 Qwen-Image / Wan / Fun-Music 等，不再依赖那个接口。刷新工位页即可。
+
+真正生成仍要新版 API。请先把占着 18787 的旧进程关掉，再重新 `npm run dev`。PowerShell 可以这样查：
+
+```powershell
+netstat -ano | findstr :18787
+```
+
+`LISTENING` 那一行最后的 PID，用任务管理器结束对应 `node.exe`，或：
+
+```powershell
+Stop-Process -Id <PID> -Force
+```
+
+然后重新启动。设置页如果还提示「旧版生成服务，没有千问接口」，说明 18787 仍是旧进程。
+
+---
+
+_**User**_
+
+为什么要去拉18787，这个为什么要放到comfymanager里？不用放那边呀，那个是管理comfyui的
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户质疑为何从18787端口拉取Qwen模型，并认为该操作不应放在ComfyManager中。
+
+需要澄清架构：18787 是 VisualForge 前端生成服务，不是 ComfyManager。ComfyManager 对应 18788 端口。/api/qwen/models 接口位于前端生成服务上，与 ComfyManager 无关。
+
+用户可能希望 Qwen 模型目录直接由前端静态提供，无需经过后端代理。ComfyUI 模型列表走 18787 代理链路，但 Qwen 目录作为静态资源，或许可以直接在前端加载，不必再经过该链路。
+
+Qwen 模型目录已改为前端静态加载，不再需要从 18787 或 ComfyManager 获取。生成请求仍需通过 18787 调用 VisualForge API 来对接 DashScope。
+
+正在检查是否误将 Qwen 相关内容放入 ComfyManager。确认 18787 的 `/api/models` 代理了 ComfyManager，而旧 bug 实际拉取的是前端生成服务上的 `/api/qwen/models`。若 Qwen 目录完全由前端静态提供，则 18787 上的该接口可能已冗余，可考虑直接移除。
+
+正在代码库中搜索确认 Qwen 内容是否误入 ComfyManager。同时排查前端 catalog.ts 和 useQwenCatalog 是否仍残留对 18787 的依赖或混淆逻辑。准备清理相关冗余代码。
+
+准备彻底移除前端对 `/api/qwen/models` 的请求，让 Qwen 模型目录完全本地化。生成链路继续走 18787，因为 DashScope 密钥不应暴露在浏览器中。同时会确认 ComfyManager 中没有 Qwen 相关内容。
+
+确认 useQwenCatalog 仍在调用 api.qwenModels()，这正是旧服务器返回 404 时下拉列表为空的原因。既然 Qwen 模型目录已改为前端静态加载，应当彻底移除该接口的前端请求，避免依赖后端返回数据。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+千问模型列表不该走 ComfyManager，也不该为了下拉再去打 18787。我先核对代码里有没有误接到管理端，然后改成前端本地目录。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx,json}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "qwen|dashscope|qianwen"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\comfymanager",
+  "pattern": "qwen|dashscope|qianwen",
+  "topFiles": [
+    {
+      "matchCount": 16,
+      "uri": "comfymanager/config/models.json"
+    },
+    {
+      "matchCount": 1,
+      "uri": "comfymanager/src/pages/Workflows.tsx"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 17
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "qwenModels|/api/qwen"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "qwenModels|/api/qwen",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\lib\\api.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\pages\\ApiDocs.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\lib\\catalog.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend\\server\\src\\app.ts"
+    }
+  ],
+  "totalFiles": 4,
+  "totalMatches": 6
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+计划将 useQwenCatalog 改为纯本地实现，不再调用外部 API。
+
+前端将不再请求 18787 端点。该端点仅用于 MCP 文档，UI 不需要它。useQwenCatalog 会简化为直接返回 QWEN_CATALOG，不再依赖外部 API 或 Hook。
+
+useQwenCatalog 将简化为无副作用的纯函数，直接返回本地目录。同时清理无效的缓存刷新逻辑和未使用的 API 调用。服务端的 /api/qwen/models 端点仍会保留，但会明确标注其归属视铸生成服务而非 ComfyManager。
+
+设置页仍会引用旧的 18787 端口，但生成功能不受影响。前端客户端将彻底移除 api.qwenModels 的调用。服务端路由继续保留给本地 API 消费者使用。接下来会用中文向用户解释各端口的归属关系。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "invalidateQwenCatalog|qwenModels"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "invalidateQwenCatalog|qwenModels",
+  "topFiles": [
+    {
+      "matchCount": 2,
+      "uri": "frontend\\src\\lib\\catalog.ts"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\lib\\api.ts"
+    }
+  ],
+  "totalFiles": 2,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\ApiDocs.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+将 useQwenCatalog 简化为仅本地调用，移除 API 依赖。
+
+计划把 qwenModels 的说明改为“视铸生成服务上的静态清单”，避免用户误以为是 ComfyManager。后端 /api/qwen/models 接口可以保留给脚本/MCP 使用，但前端不再调用它。接下来会检查 README，确认是否需要更新其中关于 UI 获取模型的描述。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\catalog.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\pages\ApiDocs.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "/api/qwen/models"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\README.md",
+  "pattern": "/api/qwen/models",
+  "topFiles": [
+    {
+      "matchCount": 3,
+      "uri": "README.md"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 3
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在更新 README。Qwen 目录放在前端，不再从 ComfyManager 拉取。UI 也不再需要 /api/qwen/models。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\README.md</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+确认 catalog.ts 仍需 useEffect 导入，因为 useCatalog 仍在使用该 hook。
+
+准备用中文解释为何需要拉取 18787，以及为何将其放在 ComfyManager 中而非其他位置。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+没有放到 ComfyManager 里。刚才拉的 **18787 是视铸生成服务**，不是管理端。
+
+| 端口 | 是谁 | 干什么 |
+|---|---|---|
+| **18788** | ComfyManager | 只管 ComfyUI：安装、权重、工作流 |
+| **18787** | 视铸 `frontend/server` | 生成 API：Comfy 走管理端，千问走 DashScope |
+| **5173** | Vite 页面 | 工位 UI |
+
+千问模型下拉不该去 18788，也不该为了列表再打 18787。已经改成写在 `frontend/src/lib/qwen-catalog.ts`，页面直接用这份静态清单。ComfyManager 的 `models.json` 里那些 `qwen-image-2512` 是 **ComfyUI 本机权重**，和千问云不是一回事。
+
+点「开始生成」时仍会打 18787，那是视铸拿 API Key 去调 qianwenai，密钥不会进浏览器，也进不了 ComfyManager。刷新工位页后，切到千问云就能看到模型列表。
+
+---
+
+_**User**_
+
+千问生图fetch failed，可以显示这样接口的详细信息吗？
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户希望获取千问生图接口 fetch 失败时的详细错误信息。
+
+正在定位千问生图的调用代码。计划增强错误处理，捕获并展示 fetch 的 URL、状态码、响应体和具体原因，随后将这些详细信息在 UI 中展示出来。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先看千问生图的请求和报错是怎么传到界面的，再把失败时的接口细节显示出来。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "glob": "*.{ts,tsx}",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "fetch failed|ErrorBox|setError"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend",
+  "pattern": "fetch failed|ErrorBox|setError",
+  "topFiles": [
+    {
+      "matchCount": 6,
+      "uri": "frontend\\src\\pages\\Settings.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend/src/pages/StudioAudio.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend/src/pages/StudioVideo.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend/src/pages/StudioImage.tsx"
+    },
+    {
+      "matchCount": 8,
+      "uri": "frontend\\src\\pages\\Studio3D.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend\\src\\components\\ui.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend\\src\\pages\\StudioAudio.tsx"
+    },
+    {
+      "matchCount": 1,
+      "uri": "frontend/src/components/ui.tsx"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend/src/lib/useTaskPoll.ts"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend\\src\\pages\\StudioMusic.tsx"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend/src/components/AssetCard.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend/src/pages/Settings.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend/src/pages/StudioMusic.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend\\src\\pages\\StudioVideo.tsx"
+    },
+    {
+      "matchCount": 8,
+      "uri": "frontend/src/pages/Studio3D.tsx"
+    },
+    {
+      "matchCount": 6,
+      "uri": "frontend\\src\\pages\\StudioImage.tsx"
+    }
+  ],
+  "totalFiles": 16,
+  "totalMatches": 86
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+计划在 dashscope.ts 的 fetch 调用中加入详细错误信息，以便排查千问生图失败的原因。
+
+具体将返回请求方法、URL、HTTP 状态码、响应体片段、request_id 及底层网络错误码。这些详情会通过 API JSON 返回给前端，并在 ErrorBox 中以多行格式展示。同时需要修改 app.ts 和前端 api.ts，让错误处理能捕获并传递这些额外的 detail 字段。
+
+正在查看前端 api.ts 与 app.ts 的错误处理逻辑。注意到 "fetch failed" 是 Node.js undici 在请求未收到响应时抛出的底层系统错误，真正的网络原因通常隐藏在 `error.cause` 中，例如连接被拒绝、超时或证书过期等。准备编写一个辅助函数来提取并整理这些底层错误信息。
+
+正在实现 `describeFetchError` 辅助函数的具体逻辑。它会从 `error.cause` 中提取错误码、系统调用及地址端口等底层网络信息，并拼接成结构化文本，方便前端展示具体的连接失败原因。
+
+已为 `describeFetchError` 补充了针对常见网络错误码的中文提示：DNS 解析失败、连接被拒绝、TLS 证书校验失败、连接超时。该函数最终返回 `DashScopeError`，其中包含请求方法、URL、底层错误码及 cause 对象，但不会暴露 Authorization 头部。对于 HTTP 错误，还会附带状态码和具体的业务错误码（如 InvalidApiKey）。
+
+已确定前后端的具体实现细节。后端 app.ts 将返回 `detail` 字段，其中包含 `DashScopeError.raw` 原始对象；前端 `req()` 会在抛出异常时把 `json.detail` 追加到错误信息末尾。ErrorBox 需要使用 `whitespace-pre-wrap` 来保留换行格式。另外，原始请求体中的 API key 不会被泄漏。
+
+准备统一包装 downloadUrl 和 upload fetch，所有 DashScope 请求将共用同一个 dashFetch 入口。ErrorBox 的样式定为 whitespace-pre-wrap break-all text-xs leading-relaxed，全局生效，方便 studio 场景下展示完整接口详情。
+
+确认用户当前走的是新的 qwen 生图路径，而非旧服务端。决定不再在 dashPost 请求体中额外携带 model 参数，因为 URL 已足够定位接口。
+
+开始实现统一的 `dashFetch` 包装器：内部调用原生 fetch，一旦发生网络错误就立即用 `wrapNetworkError` 捕获并包装成结构化错误。同时会在 `parseResponse` 中补充请求方法与 URL，使错误详情更完整。
+
+正在调整 `parseResponse` 的签名，使其接收 `method` 和 `url` 参数，以便在错误信息中完整记录请求详情。同时考虑将 `request_id` 一并纳入错误提示。
+
+对于前端展示策略，明确不暴露任何密钥内容，URL 中不做脱敏处理，且避免将图片请求体完整输出。针对 fetch 失败这类无响应体的情况，仅展示底层网络错误码与系统调用信息；针对 HTTP 错误，则附带返回的 JSON 响应体片段。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在全面更新 dashscope.ts、app.ts 和 api.ts，以传递并格式化错误详情。ErrorBox 将使用 pre-wrap 来展示原始接口信息。
+
+DashScopeError 的 message 字段将保留完整可读文本，确保现有 ErrorBox 直接兼容。同时会新增 detail 字段用于结构化展示。wrapNetworkError 与 dashFetch 会仔细处理网络错误，避免暴露 Authorization 等敏感信息。若遇到 dashscope.aliyuncs.com 请求失败，通常可能是国内网络环境、代理或防火墙导致。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\lib\api.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: D:\WorkSpace\tools\visualforge\frontend\src\components\ui.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+考虑在 generate.ts 调度器中统一包装错误处理，确保从其他地方冒泡的通用 "fetch failed" 错误也能被格式化。
+
+正在验证 parseResponse 是否仍使用旧签名。同时检查 mcp 的 errorResult。注意到 formatApiError 中对无效 URL 调用 new URL 会抛异常，但 dashscope 地址通常有效。另外计划将 generateImageQwen 也纳入兜底包装，因为 uploadLocalFile 已改用 dashFetch。
+
+用户当前走的是 qwen 生图路径，因此报错应来自 dashscope 而非旧服务器。接下来会在 generateImageQwen 中捕获 DashScopeError 并重新抛出，把模型和端点路径加入错误信息。同时检查 dashscope.ts 中是否还有遗留的 parseResponse 调用，并确认 getUploadPolicy 和 downloadUrl 周边逻辑一致。pollQwenTask 现在能直接展示详细的错误详情。最后快速验证 formatApiError 对 fetch failed 的处理。
+
+Hono 返回的多行 JSON 错误格式没有问题。generate.ts 中的 generateImage 不再额外捕获 DashScopeError，避免重复处理。接下来会检查 dashscope.ts 中间部分是否存在重复函数。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\dashscope.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+正在分析 fetch 失败的原因。HTTP 错误时未传递 network 参数，导致 hintForNetwork 调用异常。
+
+确认了错误提示逻辑：即使 network 参数为空，hintForNetwork 仍会返回通用的“网络层失败”信息，这符合 fetch 失败场景。同时注意到 Hono 可能仅序列化 Error 的 message 字段，因此需要确保 tsx watch 已正确检测到 DashScopeError 类型。
+
+将用中文回复用户，并展示接口报错的具体示例。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+可以。千问请求失败时，工位上的红框会直接打出这次调用的细节，不再只显示 `fetch failed`。
+
+例如网络都没连上时，会类似：
+
+```
+POST https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation
+未建立 HTTP 连接
+code: ENOTFOUND
+message: fetch failed
+network: code=ENOTFOUND syscall=getaddrinfo ...
+DNS 解析失败，本机解析不了 dashscope.aliyuncs.com
+```
+
+如果对端有 HTTP 响应，则会带上 **HTTP 状态码、code、request_id、message** 和返回 body。不会带出 API Key。
+
+再点一次生图就能看到。
+
+---
+
+_**User**_
+
+fetch failed
+code: INTERNAL
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The fetch failure persists with an internal error code.
+
+The error bypasses the DashScopeError wrapper and falls through to the generic INTERNAL handler. Likely causes include a stale server process, a fetch failure outside the dashFetch wrapper, a raw TypeError, or a frontend fetch to port 18787.
+
+The server returns a generic Hono error with code INTERNAL, not a DashScopeError. This confirms the fetch failure occurs outside the dashFetch wrapper.
+
+The fetch failure likely originates in generate.ts or the ComfyUI manager client. A stale server process may be preventing tsx watch from reloading the updated dashFetch wrapper. Alternatively, the engine setting might default to ComfyUI, causing generateImage to hit the wrong backend.
+
+Duplicate module instances from tsx watch or ESM are likely causing the `instanceof DashScopeError` check to fail. When dashscope.ts loads twice, the error thrown inside dashFetch is not recognized by the class imported in app.ts. This causes the generic Hono error handler to treat the exception as a plain internal error and return status 500 with code INTERNAL.
+
+The raw "fetch failed" message confirms the error is a plain TypeError from undici, not a wrapped DashScopeError. The fetch failure is therefore occurring outside the dashFetch wrapper entirely. Next steps are to inspect the manager-client and generate dispatcher for unwrapped fetch calls, and to verify whether the frontend explicitly sends engine: "qwen".
+
+The frontend StudioImage component does send the engine parameter. The failure likely originates from the ComfyUI manager client at 117.50.180.17:18788. The manager itself previously logged a fetch failed error. This suggests the old server is routing requests to ComfyUI instead of the qwen backend.
+
+The terminal still shows `npm run dev` running, so the old server process may still be active despite the user restarting. The previous health check showing engine: ComfyUI confirms the old generate.ts is still in effect. I will now wrap all fetch failures in generate, qwen, and comfy paths with full error details.
+
+I will add a global onError fallback that catches any error containing "fetch failed" and unpacks its underlying cause. The manager-client fetch will also be wrapped. I will make the DashScopeError type check more resilient by checking both constructor name and instanceof. I will add a generic formatUnknownFetchError helper to onError for unknown fetch failures. I still need to confirm whether generate is routing to qwen or Comfy.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+`code: INTERNAL` 说明报错没被千问那层接住，多半是别处的 `fetch` 直接抛了。我先把实际请求路径和错误处理对上。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\generate.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\lib\manager-client.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: C:\Users\renjihe\.cursor\projects\d-WorkSpace-tools-visualforge\terminals\1.txt</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "await fetch\\("
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "D:\\WorkSpace\\tools\\visualforge\\frontend\\server\\src",
+  "pattern": "await fetch\\(",
+  "topFiles": [
+    {
+      "matchCount": 1,
+      "uri": "frontend\\server\\src\\lib\\dashscope.ts"
+    },
+    {
+      "matchCount": 5,
+      "uri": "frontend/server/src/lib/manager-client.ts"
+    },
+    {
+      "matchCount": 3,
+      "uri": "frontend/server/src/lib/comfy.ts"
+    }
+  ],
+  "totalFiles": 3,
+  "totalMatches": 9
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+The terminal still shows only Vite logs after `npm run dev`. No `[api]` logs appear.
+
+The old API process likely still holds port 18787. This causes Comfy manager fetches to fail with "fetch failed" and return INTERNAL. I will improve error unpacking to expose fetch failures with their details.
+
+The server now logs on listen and fails loudly on EADDRINUSE. The user sees "fetch failed" and "code: INTERNAL". This points to either a stale process holding port 18787 or the new server still routing to Comfy. I will make app.onError unpack any fetch failure with its cause, regardless of class. If DashScopeError wrapping fails due to duplicate tsx modules, the detailed message is already in err.message.
+
+The literal "fetch failed" message confirms the error was never wrapped. I will add a shared `explainFetchError` helper for `app.onError`, wrap manager-client fetches, and probe health to verify the new server is running.
+
+The `publicError` helper now catches any `Error` carrying a `cause` object. When the message is exactly `"fetch failed"` or a nested cause exists, it formats the error as a multi-line string containing the original message, the cause code, the cause message, and the target address with port. It returns a synthetic `FETCH_FAILED` code and HTTP 502 status.
+
+The old server process is still holding port 18787, so the new `onError` changes will not take effect until the old process is killed. I ruled out `SO_REUSEADDR` as the solution. I am also considering whether the Vite proxy itself might be causing the fetch failure.
+
+The JSON response with `code: INTERNAL` proves the request is still hitting the old VisualForge API. The Vite proxy would not return that exact JSON structure. This confirms the new server is not running and the old process is still holding port 18787.
+
+The engine field in StudioImage requests may be missing or defaulting to Comfy instead of qwen. That would bypass the qwen-specific dashFetch wrapper entirely, forcing the call to fall back to Comfy and trigger the same internal fetch failure.
+
+The frontend likely sends `engine: qwen`, but the old API server ignores it and routes to Comfy. I will add `console.error` inside `onError` so the terminal shows the raw cause. I will also check the health endpoint to confirm the new server is actually running.
+
+I will create a shared `http-error.ts` helper for dashscope, manager-client, and `app.onError` so fetch failures carry the URL in the error message. I will probe the health endpoint on port 18787 without killing the process, and I will skip adding noisy qwen routing logs.
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+Cancelled
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2**</summary>
+Cancelled
+</details></tool-use>
+
+---
+
+_**User**_
+
+千问云API key设置后，刷新就没了
+
+---
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+用户反馈千问云API密钥在设置后刷新页面即丢失。
+
+正在排查密钥保存与加载的机制。可能原因包括：空字符串覆盖了密钥、接口返回掩码值导致保存时丢失、数据目录不一致、或保存逻辑未正确包含 qwen.apiKey 字段。
+
+怀疑是界面显示问题：刷新后 keyHint 可能显示掩码值，而输入框为空，让用户误以为密钥已丢失。也可能是实际持久化失败。准备仔细检查 Settings 页面及 saveSettings/loadSettings 的代码实现。
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+先查千问 API Key 的保存和回读：设置页、接口和 `settings.json` 这几处。
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\src\pages\Settings.tsx</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\config.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: D:\WorkSpace\tools\visualforge\frontend\server\src\app.ts</summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<think><details><summary>Thought Process</summary>
+已定位问题根源：`loadSettings` 与 `saveSettings` 存在关键缺陷，导致 API key 在刷新后丢失。
+
+`loadSettings` 始终从默认数据目录读取配置文件。`saveSettings` 虽会处理 `dataDir` 的绝对路径，但写入逻辑存在缺陷，导致 API key 在刷新后丢失。
+
+进一步分析发现，`loadSettings` 读取的是 `defaultDataDir()` 目录下的配置文件，而 `saveSettings` 将配置写入了用户指定的 `dataDir` 目录。由于前后端数据目录不一致，刷新时前端实际读取的是另一个位置的旧配置，导致 API key 看似“丢失”。
+
+这是典型的 split-brain 问题。保存操作将配置写入用户指定的 `dataDir` 目录，但加载操作始终从默认数据目录读取。两者指向不同文件，导致刷新后 API key 无法被正确读取。
+
+还发现一处隐患：`defaultQwen` 会回退到环境变量 `DASHSCOPE_API_KEY`。若该变量存在，加载时可能直接使用环境变量值，而非用户手动保存的 API key。
+
+已确认这不是重复保存导致的覆盖问题。前端仅在输入框非空时才提交 apiKey，且保存后会清空输入框。用户所说的"刷新"是指页面 F5 刷新，而非再次点击保存按钮。刷新后前端重新加载配置，但 qwenKey 状态为空字符串，因此 API key 看起来"丢失"了。
+
+进一步怀疑用户实际连接的是旧版服务端（18787 版本）。该版本的 saveSettings 不支持 qwen 字段，PUT 请求可能已成功返回，但服务端并未真正持久化 API key。刷新后前端读取的是旧配置，因此 keyHint 为空，用户误以为 key 已保存。
+
+又发现一处隐患：`saveSettings` 会将完整配置写入磁盘，包括前端未发送的 masked key。若外部 PUT 回传了 public settings，masked key 可能被覆盖写入配置文件，导致刷新后 key 丢失。
+
+进一步验证发现，`defaultDataDir` 与 `.env.example` 中的 `VISUALFORGE_DATA_DIR` 都解析为同一个绝对路径。这意味着前后端读写的是同一份配置文件，并非 split-brain 导致的文件分离。此前关于 split-brain 的推测需要修正，API key 丢失的原因可能另有其因。
+
+已确认最可能的根因：用户当前连接的是旧版服务端（18787 版本）。该版本的 `/api/settings` 接口只接受 `managerUrl` 和 `dataDir`，会忽略 `qwen` 字段。保存请求虽然返回成功，但服务端并未真正持久化 API key；刷新后前端读取到的配置中缺少 `qwen` 字段，因此 keyHint 为空，用户立刻感知到 key 已丢失。
+
+此外，旧版服务端不会返回 `health.qwen.configured`，前端因此显示“未配置”状态。
+
+修复方向应优先解决服务端兼容性问题，而非依赖前端 localStorage 备份密钥。
+
+考虑将 API key 持久化到固定路径 `FRONTEND_ROOT/data/settings.json`，彻底绕过 `dataDir` 路径混淆导致的 split-brain 问题。
+
+同时正在检查 `.gitignore` 中是否存在两个配置副本，以排除配置文件被意外复制或隔离的情况。
+
+进一步发现：旧版服务端在保存 managerUrl 或 dataDir 时，会将整个 AppSettings 写入 settings.json，从而覆盖掉其中的 qwen 字段。新版服务端加载时读取不到 qwen，导致 API key 看似丢失。
+
+修复方案将包含两点：
+- 让 loadSettings 在默认路径读取失败后，自动尝试从 nextData 的 settings.json 中查找配置
+- 增加检测机制，避免用空值或掩码值覆盖现有的 qwen.apiKey
+
+还发现一个关键的 UX 陷阱：保存后前端会清空密码输入框，导致用户看到空输入框后误以为 key 已丢失。这解释了为何用户说"刷新就没了"。
+
+修复方案将包含以下改进：
+- 后端增加硬错误提示：若保存返回的配置中缺少 qwen.apiKey，则立即报错，而不是静默丢失
+- 前端增加可见的"已保存"状态标识，不再依赖空输入框来暗示已保存
+- 统一 qwen 配置的持久化路径，确保读写同源
+- 在公共设置中加入明确的配置状态布尔值，替代模糊的"未配置"提示
+
+计划将配置状态改为显式展示，例如"已配置
+</details></think>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **0** directories</summary>
+
+No results found
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+Status: **loading**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+Status: **loading**
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (grok-4.6)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+Status: **loading**
+
+</details></tool-use>

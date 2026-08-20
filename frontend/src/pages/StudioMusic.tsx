@@ -4,13 +4,19 @@ import type { TaskRecord } from "../lib/types";
 import { Button, ErrorBox, Field, Select, Spinner, Textarea } from "../components/ui";
 import { ResultStrip } from "../components/AssetCard";
 import { PageHead } from "../components/PageHead";
-import { modelLabel, pickDefault, useCatalog } from "../lib/catalog";
+import { modelLabel, pickDefault, useCatalog, useQwenCatalog, useStationEngine } from "../lib/catalog";
 import { ProviderHint } from "../components/ProviderHint";
 import { WorkflowSelect } from "../components/WorkflowSelect";
+import { EngineSwitch } from "../components/EngineSwitch";
+import { QwenHint } from "../components/QwenHint";
 import { useTaskPoll } from "../lib/useTaskPoll";
 
 export function StudioMusic() {
   const catalog = useCatalog();
+  const qwen = useQwenCatalog();
+  const { engine, setEngine, qwenOffered } = useStationEngine("music");
+  const qwenMode = engine === "qwen";
+  const models = qwenMode ? qwen.music : catalog.music;
   const [model, setModel] = useState("");
   const [workflowId, setWorkflowId] = useState("");
   const [prompt, setPrompt] = useState("雨夜铜灯下的民谣，木吉他与低音提琴，缓慢、温暖、带着一点锈蚀感");
@@ -23,12 +29,23 @@ export function StudioMusic() {
   const { assets, setAssets } = useTaskPoll(task, setTask, setError);
 
   useEffect(() => {
-    if (!model) setModel(pickDefault(catalog.music, catalog.activeModels?.music));
-  }, [catalog, model]);
+    const next = qwenMode ? pickDefault(qwen.music) : pickDefault(catalog.music, catalog.activeModels?.music);
+    if (!models.some((m) => m.id === model)) setModel(next);
+  }, [catalog, qwen, qwenMode, model, models]);
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <PageHead kicker="ComfyUI" title="生音乐工位" desc="通过 ComfyUI 音乐工作流生成歌曲或纯音乐。成品写入 data/music。" />
+      <EngineSwitch value={engine} onChange={setEngine} showQwen={qwenOffered} />
+      <PageHead
+        tone={qwenMode ? "qwen" : "comfy"}
+        kicker={qwenMode ? "千问云 · qianwenai.com" : "ComfyUI"}
+        title="生音乐工位"
+        desc={
+          qwenMode
+            ? "Fun-Music 云端谱曲，成品写入 data/music/。"
+            : "通过 ComfyUI 音乐工作流生成歌曲或纯音乐。成品写入 data/music。"
+        }
+      />
       <div className="grid items-start gap-8 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-4">
           <Field label="风格提示词">
@@ -50,6 +67,7 @@ export function StudioMusic() {
               setTask(null);
               try {
                 const r = await api.generateMusic({
+                  engine,
                   model,
                   workflowId,
                   prompt: prompt || undefined,
@@ -68,30 +86,51 @@ export function StudioMusic() {
           >
             {busy ? "提交中…" : "开始生成"}
           </Button>
-          {busy ? <Spinner label="正在提交到 ComfyUI" /> : null}
+          {busy ? <Spinner tone={qwenMode ? "qwen" : "comfy"} label={qwenMode ? "正在提交到千问云" : "正在提交到 ComfyUI"} /> : null}
           {task && task.status !== "succeeded" && task.status !== "failed" ? (
-            <Spinner label="ComfyUI 谱曲中，将自动刷新" />
+            <Spinner tone={qwenMode ? "qwen" : "comfy"} label={qwenMode ? "千问谱曲中，将自动刷新" : "ComfyUI 谱曲中，将自动刷新"} />
           ) : null}
           <ResultStrip assets={assets} />
         </div>
-        <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
-          <WorkflowSelect feature="music" value={workflowId} onChange={setWorkflowId} />
-          <Field label="模型">
-            <Select value={model} onChange={(e) => setModel(e.target.value)}>
-              {(catalog.music || []).map((m) => (
-                <option key={m.id} value={m.id}>{modelLabel(m)}</option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="人声">
-            <Select value={gender} onChange={(e) => setGender(e.target.value)} disabled={instrumental}>
-              <option value="female">女声</option>
-              <option value="male">男声</option>
-            </Select>
-          </Field>
-          <p className="text-xs leading-relaxed text-mute">使用 ComfyUI 音乐工作流。未下载的模型请到 ComfyManager「模型」页获取。</p>
-          <ProviderHint feature="music" />
-        </aside>
+        {qwenMode ? (
+          <aside className="space-y-4 rounded-2xl border border-qwen/40 bg-qwen/5 p-5">
+            <div className="text-[11px] tracking-[0.18em] uppercase text-qwen">千问云 · 生音乐</div>
+            <Field label="模型">
+              <Select value={model} onChange={(e) => setModel(e.target.value)}>
+                {models.map((m) => (
+                  <option key={m.id} value={m.id}>{m.label}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="人声">
+              <Select value={gender} onChange={(e) => setGender(e.target.value)} disabled={instrumental || model === "fun-music-preview"}>
+                <option value="female">女声</option>
+                <option value="male">男声</option>
+              </Select>
+            </Field>
+            <p className="text-xs leading-relaxed text-mute">{models.find((m) => m.id === model)?.description}</p>
+            <QwenHint extra="落盘目录 data/music/" error={qwen.loadError} />
+          </aside>
+        ) : (
+          <aside className="space-y-4 rounded-2xl border border-line bg-panel p-5">
+            <WorkflowSelect feature="music" value={workflowId} onChange={setWorkflowId} />
+            <Field label="模型">
+              <Select value={model} onChange={(e) => setModel(e.target.value)}>
+                {(catalog.music || []).map((m) => (
+                  <option key={m.id} value={m.id}>{modelLabel(m)}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="人声">
+              <Select value={gender} onChange={(e) => setGender(e.target.value)} disabled={instrumental}>
+                <option value="female">女声</option>
+                <option value="male">男声</option>
+              </Select>
+            </Field>
+            <p className="text-xs leading-relaxed text-mute">使用 ComfyUI 音乐工作流。未下载的模型请到 ComfyManager「模型」页获取。</p>
+            <ProviderHint feature="music" />
+          </aside>
+        )}
       </div>
     </section>
   );

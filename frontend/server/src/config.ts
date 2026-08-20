@@ -1,9 +1,9 @@
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { AppSettings, ComfyFeatureConfig, ComfySettings } from "./types.js";
+import type { AppSettings, ComfyFeatureConfig, ComfySettings, FeatureId, QwenSettings, StationEngine } from "./types.js";
 import { loadJson, saveJson } from "./lib/json.js";
-import { mergeFeatures } from "./lib/features.js";
+import { FEATURE_IDS, mergeFeatures } from "./lib/features.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const FRONTEND_ROOT = resolve(here, "../..");
@@ -39,6 +39,21 @@ export function settingsPath(dataDir = defaultDataDir()) {
   return join(dataDir, "settings.json");
 }
 
+function qwenSecretPath(dataDir: string) {
+  return join(dataDir, ".qwen-secret.json");
+}
+
+/** Empty or masked values from the settings page must not overwrite a real key. */
+export function isPlaceholderSecret(value?: string) {
+  if (value == null) return true;
+  const v = value.trim();
+  return !v || /[•*]/.test(v) || /^sk-\w{0,4}\.+$/i.test(v);
+}
+
+function realSecret(value?: string) {
+  return isPlaceholderSecret(value) ? "" : String(value).trim();
+}
+
 function defaultComfy(stored?: Partial<ComfySettings>): ComfySettings {
   return {
     baseUrl: stored?.baseUrl || process.env.COMFYUI_BASE_URL || "http://127.0.0.1:8188",
@@ -46,38 +61,98 @@ function defaultComfy(stored?: Partial<ComfySettings>): ComfySettings {
   };
 }
 
+function defaultQwen(stored?: Partial<QwenSettings>): QwenSettings {
+  return {
+    enabled: stored?.enabled === true,
+    apiKey: realSecret(stored?.apiKey) || process.env.DASHSCOPE_API_KEY || "",
+    workspaceId: stored?.workspaceId || process.env.DASHSCOPE_WORKSPACE_ID || "",
+    baseUrl: (stored?.baseUrl || process.env.DASHSCOPE_BASE_URL || "https://dashscope.aliyuncs.com/api/v1").replace(/\/+$/, ""),
+  };
+}
+
+function loadQwenSecret(dir: string): Partial<QwenSettings> {
+  return loadJson<Partial<QwenSettings>>(qwenSecretPath(dir), {});
+}
+
+function writeQwenSecret(dir: string, qwen: QwenSettings) {
+  mkdirSync(dir, { recursive: true });
+  const prev = loadQwenSecret(dir);
+  saveJson(qwenSecretPath(dir), {
+    enabled: qwen.enabled === true,
+    apiKey: realSecret(qwen.apiKey) || prev.apiKey || "",
+    workspaceId: qwen.workspaceId || prev.workspaceId || "",
+    baseUrl: qwen.baseUrl || prev.baseUrl || "",
+  });
+}
+
+function defaultEngines(stored?: Partial<Record<FeatureId, StationEngine>>): Record<FeatureId, StationEngine> {
+  const base = Object.fromEntries(FEATURE_IDS.map((id) => [id, "comfyui"])) as Record<FeatureId, StationEngine>;
+  if (!stored) return base;
+  for (const id of FEATURE_IDS) {
+    if (stored[id] === "qwen" || stored[id] === "comfyui") base[id] = stored[id];
+  }
+  return base;
+}
+
 export function loadSettings(): AppSettings {
-  const dataDir = defaultDataDir();
-  mkdirSync(dataDir, { recursive: true });
-  const stored = loadJson<Partial<AppSettings>>(settingsPath(dataDir), {});
-  const nextData = stored.dataDir || dataDir;
+  const fallback = defaultDataDir();
+  mkdirSync(fallback, { recursive: true });
+  const pointer = loadJson<Partial<AppSettings>>(settingsPath(fallback), {});
+  const nextData = pointer.dataDir
+    ? (isAbsolute(pointer.dataDir) ? pointer.dataDir : resolve(REPO_ROOT, pointer.dataDir))
+    : fallback;
+  mkdirSync(nextData, { recursive: true });
+  const stored =
+    resolve(nextData) === resolve(fallback)
+      ? pointer
+      : { ...pointer, ...loadJson<Partial<AppSettings>>(settingsPath(nextData), {}) };
+  const secret = { ...loadQwenSecret(fallback), ...loadQwenSecret(nextData) };
   return {
     dataDir: nextData,
     host: stored.host || process.env.VISUALFORGE_HOST || "127.0.0.1",
     port: Number(stored.port || process.env.VISUALFORGE_PORT || 18787),
     managerUrl: stored.managerUrl || process.env.COMFYMANAGER_URL || "http://127.0.0.1:18788",
     comfy: defaultComfy(stored.comfy),
+    qwen: defaultQwen({ ...stored.qwen, ...secret }),
+    engines: defaultEngines(stored.engines),
     features: mergeFeatures(stored.features as Partial<Record<string, Partial<ComfyFeatureConfig>>>),
   };
 }
 
-export function saveSettings(patch: Partial<AppSettings>): AppSettings {
+type SettingsPatch = Partial<Omit<AppSettings, "comfy" | "qwen" | "engines" | "features">> & {
+  comfy?: Partial<ComfySettings>;
+  qwen?: Partial<QwenSettings>;
+  engines?: Partial<Record<FeatureId, StationEngine>>;
+  features?: Partial<Record<string, Partial<ComfyFeatureConfig>>>;
+};
+
+export function saveSettings(patch: SettingsPatch): AppSettings {
   const current = loadSettings();
   const next: AppSettings = {
     ...current,
     ...patch,
     comfy: { ...current.comfy, ...(patch.comfy || {}) },
+    qwen: { ...current.qwen, ...(patch.qwen || {}) },
+    engines: defaultEngines({ ...current.engines, ...(patch.engines || {}) }),
     features: mergeFeatures({
       ...current.features,
       ...(patch.features || {}),
     }),
   };
-  if (patch.comfy && patch.comfy.apiKey === "") next.comfy.apiKey = current.comfy.apiKey;
+  if (patch.comfy && isPlaceholderSecret(patch.comfy.apiKey)) next.comfy.apiKey = current.comfy.apiKey;
+  if (patch.qwen && isPlaceholderSecret(patch.qwen.apiKey)) next.qwen.apiKey = current.qwen.apiKey;
   if (patch.dataDir) {
     next.dataDir = isAbsolute(patch.dataDir) ? patch.dataDir : resolve(REPO_ROOT, patch.dataDir);
   }
   mkdirSync(next.dataDir, { recursive: true });
   saveJson(settingsPath(next.dataDir), next);
+  writeQwenSecret(next.dataDir, next.qwen);
+  const fallback = defaultDataDir();
+  if (resolve(next.dataDir) !== resolve(fallback)) {
+    mkdirSync(fallback, { recursive: true });
+    saveJson(settingsPath(fallback), { ...next, dataDir: next.dataDir });
+    writeQwenSecret(fallback, next.qwen);
+  }
   ensureDataLayout(next.dataDir);
   return next;
 }

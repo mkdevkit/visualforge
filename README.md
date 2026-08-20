@@ -1,13 +1,13 @@
 # 视铸 VisualForge
 
-本地多模态工坊。生成只走本机 **ComfyUI**，不接云端大模型 API。
+本地多模态工坊。每个工位可选用本机 **ComfyUI**，或 **千问云**（[qianwenai.com](https://www.qianwenai.com/) / DashScope）。两种工具并列，ComfyUI 的工作流、模型和界面保持不变。
 
 两个独立工具：
 
 | 目录 | 作用 | 端口 |
 |---|---|---|
 | **comfymanager/** | ComfyUI 管理端：安装/启停、下载模型、各工位工作流与模型选项。视铸只调它的 API。 | `18788` |
-| **frontend/** | 视铸生成端：Web + 生成本地 API + Tauri。设置里只配 ComfyManager 地址。也提供 MCP 给 Cursor。 | Web `5173`，生成 API `18787`（`/mcp`） |
+| **frontend/** | 视铸生成端：Web + 生成本地 API + Tauri。设置里配 ComfyManager 地址和千问 API Key。也提供 MCP 给 Cursor。 | Web `5173`，生成 API `18787`（`/mcp`） |
 
 ## 目录
 
@@ -162,6 +162,9 @@ npm run dev
 | `VISUALFORGE_PORT` | `18787` | 视铸生成 API |
 | `VISUALFORGE_DATA_DIR` | `./frontend/data` | 视铸成品目录 |
 | `COMFYMANAGER_URL` | `http://127.0.0.1:18788` | 生成端访问管理端的地址 |
+| `DASHSCOPE_API_KEY` | 空 | 千问云 API Key（也可在设置页填写，写入 `frontend/data/settings.json`） |
+| `DASHSCOPE_WORKSPACE_ID` | 空 | 可选 Workspace |
+| `DASHSCOPE_BASE_URL` | `https://dashscope.aliyuncs.com/api/v1` | DashScope 原生接口 |
 | `UNIRIG_DIR` | `./comfymanager/tools/UniRig` | UniRig 仓库目录（ComfyManager 使用） |
 | `UNIRIG_PYTHON` | 空 | UniRig 用的 Python（ComfyManager 拉起子进程时使用） |
 | `BLENDER_BIN` | 空 | Mixamo FBX→GLB 用的 Blender 可执行文件 |
@@ -170,11 +173,25 @@ npm run dev
 
 视铸工位：生图、生视频、生音乐、音频（配音 / 音色设计 / 音效）、生 3D。角色动画走生视频工位（Wan Animate 2）。生 3D / 资源库可预览 GLB，并对静网格绑骨导出新 GLB，见下节。内置预览角色 Robot Expressive 为 CC0。
 
+每个工位页顶部可切换 **ComfyUI** 或 **千问云**，侧栏会换成对应工具的界面（ComfyUI 有工作流；千问是云端模型列表，没有工作流）。
+
+### 千问云
+
+平台 [qianwenai.com](https://www.qianwenai.com/)，协议是 DashScope 原生接口（不是 OpenAI compatible-mode）。Key 在设置页或 `DASHSCOPE_API_KEY`。工位下拉的千问模型写在 `frontend/src/lib/qwen-catalog.ts`，**不经过 ComfyManager**。生成请求仍打视铸生成服务 `18787`（由它去调 DashScope），和 ComfyUI 的 `18788` 无关。
+
+| 工位 | 模型 | 落盘目录 |
+|---|---|---|
+| 生图 | Qwen-Image-3.0-Pro / 3.0 / 2.0(-Pro) | `data/images/` |
+| 生视频 | Wan 2.7/2.6、Wan-Video（2.5/2.2/2.1）、HappyHorse | `data/videos/` |
+| 生音乐 | Fun-Music v1 / Preview | `data/music/` |
+| 配音 / 音色设计 / 音效 | Qwen-Audio-TTS、Qwen3-TTS、CosyVoice、Omni | `data/audio/` |
+| 生 3D | Tripo H3.1 / P1.0 | `data/models3d/` |
+
 **用 ComfyUI 做生成必须给工位配至少一份生效工作流**（安装、启动、下模型不用配）。图在 ComfyUI 里可视化编辑；ComfyManager 列出本机工作流并**追加**到工位，不会覆盖已有的份。点「生成」时视铸只把工位、工作流、模型和参数发给 ComfyManager；由管理端读图、填占位符、POST 到 ComfyUI `/prompt`。没配的工位会报错。
 
 **模型和份数互不绑定。** 同一份工作流可以换主模型：管理端把所选模型的**文件名**填进 `{{model}}`（Checkpoint 的 `ckpt_name` 或 `LoadDiffusionModel` 的 `unet_name` 等）。图里主模型槽对不上、又没有手写 `{{model}}` 时，换下拉不会生效。一份工作流也可以只服务一种架构（例如只适 SDXL / 只适 Qwen Image），换到不兼容的权重会在 Comfy 里报错。LoRA、CLIP、VAE 等配套文件默认不跟下拉走，除非 json 里自己写了占位符。
 
-需要工作流：生图、生视频、生音乐、配音、音效、音色设计、生 3D、3D 动画。
+需要工作流（仅 ComfyUI）：生图、生视频、生音乐、配音、音效、音色设计、生 3D、3D 动画。千问云工位不需要工作流。
 
 不经过 ComfyUI、也不要工作流：UniRig / Mixamo / 几何估骨、资源库预览下载。
 
@@ -406,9 +423,10 @@ POST /api/3d/rig
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/health` | 健康检查（含 ComfyManager 状态） |
-| GET | `/api/models` | 代理 ComfyManager：工位模型选项与工作流 |
-| GET/PUT | `/api/settings` | 仅 ComfyManager 地址与成品目录 |
+| GET | `/api/health` | 健康检查（含 ComfyManager 与千问配置） |
+| GET | `/api/models` | 代理 ComfyManager：ComfyUI 工位模型与工作流 |
+| GET | `/api/qwen/models` | 千问云静态目录（视铸自带，不经过 ComfyManager；界面不依赖这个接口） |
+| GET/PUT | `/api/settings` | ComfyManager 地址、千问 Key、工位工具、成品目录 |
 | POST | `/api/upload` | 上传参考文件 |
 | POST | `/api/images/generate` | 生图 / 图生图 |
 | POST | `/api/videos/generate` | 生视频（异步 task） |
@@ -429,7 +447,7 @@ POST /api/3d/rig
 
 ## MCP（Cursor 等）
 
-视铸生成 API 提供 MCP，给 Cursor 等工具调用生图/视频/音乐/配音/音效/3D。模型和工位工作流仍由 ComfyManager 提供，MCP 只调视铸生成。可用 `list_models`、`list_workflows`，生成时同时传 `model` 与 `workflowId`。
+视铸生成 API 提供 MCP，给 Cursor 等工具调用生图/视频/音乐/配音/音效/3D。生成工具可传 `engine=comfyui` 或 `qwen`（默认用该工位设置）。ComfyUI 的模型和工位工作流仍由 ComfyManager 提供。可用 `list_models`、`list_workflows`，生成时同时传 `model` 与 `workflowId`（千问云忽略工作流）。
 
 先启动：
 
@@ -506,8 +524,8 @@ npm run tauri:build
 
 ## 约定
 
-- 生成**只走 ComfyUI**。不要再接入千问 DashScope 或其他云端生成 API。
-- 视铸设置只配 ComfyManager 地址；工作流和模型选项都在管理端。
+- 生成可选 **ComfyUI** 或 **千问云**，按工位切换。ComfyUI 调用链路（工作流、ComfyManager、`/prompt`）不要改。千问走 DashScope 原生接口，模型列表在视铸前端本地，**不要写进 ComfyManager `models.json`**。
+- 视铸设置配 ComfyManager 地址和千问 API Key；ComfyUI 工作流仍在管理端。
 - `comfymanager` 是单包全栈，不要拆成管理端 frontend / server 两个工程。
 - `frontend` 是一个 npm 包（Web + `server/` + Tauri），不要再拆成 `frontend/web` + `frontend/server` 两个 workspace。
 - 根目录 workspaces：`frontend`、`comfymanager`。
