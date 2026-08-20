@@ -14,7 +14,7 @@ import { useTaskPoll } from "../lib/useTaskPoll";
 export function StudioMusic() {
   const catalog = useCatalog();
   const qwen = useQwenCatalog();
-  const { engine, setEngine, qwenOffered } = useStationEngine("music");
+  const { engine, setEngine, providers } = useStationEngine("music");
   const qwenMode = engine === "qwen";
   const models = qwenMode ? qwen.music : catalog.music;
   const [model, setModel] = useState("");
@@ -35,7 +35,7 @@ export function StudioMusic() {
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <EngineSwitch value={engine} onChange={setEngine} showQwen={qwenOffered} />
+      <EngineSwitch value={engine} onChange={setEngine} providers={providers} />
       <PageHead
         tone={qwenMode ? "qwen" : "comfy"}
         kicker={qwenMode ? "千问云 · qianwenai.com" : "ComfyUI"}

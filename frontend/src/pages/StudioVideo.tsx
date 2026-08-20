@@ -14,7 +14,7 @@ import { useTaskPoll } from "../lib/useTaskPoll";
 export function StudioVideo() {
   const catalog = useCatalog();
   const qwen = useQwenCatalog();
-  const { engine, setEngine, qwenOffered } = useStationEngine("video");
+  const { engine, setEngine, providers } = useStationEngine("video");
   const qwenMode = engine === "qwen";
   const models = qwenMode ? qwen.video : catalog.video;
   const [model, setModel] = useState("");
@@ -44,7 +44,7 @@ export function StudioVideo() {
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <EngineSwitch value={engine} onChange={setEngine} showQwen={qwenOffered} />
+      <EngineSwitch value={engine} onChange={setEngine} providers={providers} />
       <PageHead
         tone={qwenMode ? "qwen" : "comfy"}
         kicker={qwenMode ? "千问云 · qianwenai.com" : "ComfyUI"}

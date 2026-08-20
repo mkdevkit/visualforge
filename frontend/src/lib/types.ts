@@ -57,7 +57,13 @@ export interface DesignedVoice {
 
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
-export type StationEngine = "comfyui" | "qwen";
+export type ProviderId = "comfyui" | "qwen";
+export type StationEngine = ProviderId;
+
+export interface StationProviders {
+  enabled: ProviderId[];
+  default: ProviderId;
+}
 
 export interface StationWorkflowRef {
   id: string;
@@ -83,18 +89,18 @@ export interface AppSettingsView {
   host: string;
   port: number;
   managerUrl: string;
+  configDir?: string;
   comfy: {
     baseUrl: string;
     apiKey: string;
   };
   qwen: {
-    enabled?: boolean;
     apiKey: string;
     workspaceId: string;
     baseUrl: string;
     configured?: boolean;
   };
-  engines: Record<FeatureId, StationEngine>;
+  engines: Record<FeatureId, StationProviders>;
   features: Record<FeatureId, ComfyFeatureConfig>;
 }
 

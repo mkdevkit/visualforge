@@ -580,7 +580,7 @@ export async function generate3dQwen(body: Generate3dBody) {
   if (images.filter(Boolean).length >= 2) input.images = images.filter(Boolean);
   else if (single || images[0]) input.image = single || images[0];
   else input.prompt = body.prompt || "";
-  const textureQuality = body.textureQuality === "ultra" || body.textureQuality === "detailed" ? "detailed" : "standard";
+  const textureQuality = body.textureQuality && body.textureQuality !== "standard" ? "detailed" : "standard";
   const parameters: Record<string, unknown> = {
     texture_quality: textureQuality,
     pbr: body.pbr ?? true,

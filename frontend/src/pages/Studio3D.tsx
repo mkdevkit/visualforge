@@ -17,7 +17,7 @@ type RigEngine = "auto" | "unirig" | "mixamo" | "bbox";
 export function Studio3D() {
   const catalog = useCatalog();
   const qwen = useQwenCatalog();
-  const { engine, setEngine, qwenOffered } = useStationEngine("model3d");
+  const { engine, setEngine, providers } = useStationEngine("model3d");
   const qwenMode = engine === "qwen";
   const models = qwenMode ? qwen.model3d : catalog.model3d;
   const [model, setModel] = useState("");
@@ -50,7 +50,7 @@ export function Studio3D() {
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <EngineSwitch value={engine} onChange={setEngine} showQwen={qwenOffered} />
+      <EngineSwitch value={engine} onChange={setEngine} providers={providers} />
       <PageHead
         tone={qwenMode ? "qwen" : "comfy"}
         kicker={qwenMode ? "千问云 · qianwenai.com" : "ComfyUI"}

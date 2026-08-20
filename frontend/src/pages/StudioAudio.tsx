@@ -16,7 +16,7 @@ type Tab = "tts" | "design" | "sfx";
 export function StudioAudio() {
   const catalog = useCatalog();
   const qwen = useQwenCatalog();
-  const { engine, setEngine, qwenOffered } = useStationEngine(["tts", "sfx", "voiceDesign"]);
+  const { engine, setEngine, providers } = useStationEngine(["tts", "sfx", "voiceDesign"]);
   const qwenMode = engine === "qwen";
   const [tab, setTab] = useState<Tab>("tts");
   const [error, setError] = useState("");
@@ -97,7 +97,7 @@ export function StudioAudio() {
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <EngineSwitch value={engine} onChange={setEngine} showQwen={qwenOffered} />
+      <EngineSwitch value={engine} onChange={setEngine} providers={providers} />
       <PageHead
         tone={qwenMode ? "qwen" : "comfy"}
         kicker={qwenMode ? "千问云 · qianwenai.com" : "ComfyUI"}

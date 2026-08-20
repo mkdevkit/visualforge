@@ -4,7 +4,13 @@ export type TaskStatus = "queued" | "running" | "succeeded" | "failed" | "cancel
 
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
-export type StationEngine = "comfyui" | "qwen";
+export type ProviderId = "comfyui" | "qwen";
+export type StationEngine = ProviderId;
+
+export interface StationProviders {
+  enabled: ProviderId[];
+  default: ProviderId;
+}
 
 export interface StationWorkflow {
   id: string;
@@ -32,7 +38,6 @@ export interface ComfySettings {
 }
 
 export interface QwenSettings {
-  enabled: boolean;
   apiKey: string;
   workspaceId: string;
   baseUrl: string;
@@ -45,7 +50,7 @@ export interface AppSettings {
   managerUrl: string;
   comfy: ComfySettings;
   qwen: QwenSettings;
-  engines: Record<FeatureId, StationEngine>;
+  engines: Record<FeatureId, StationProviders>;
   features: Record<FeatureId, ComfyFeatureConfig>;
 }
 

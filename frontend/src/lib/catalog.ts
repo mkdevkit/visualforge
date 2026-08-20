@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { api, uploadFile } from "./api";
-import { readQwenPrefs, resolveQwenEnabled } from "./qwen-prefs";
-import type { Catalog, FeatureId, ModelDef, StationEngine } from "./types";
+import type { Catalog, FeatureId, ModelDef, ProviderId, StationProviders } from "./types";
 import { QWEN_CATALOG } from "./qwen-catalog";
+import { providersForStation } from "./providers";
 
 const EMPTY_CATALOG: Catalog = {
   image: [],
@@ -128,24 +128,38 @@ export function useQwenCatalog(): Catalog {
 
 export function useStationEngine(feature: FeatureId | FeatureId[]) {
   const features = Array.isArray(feature) ? feature : [feature];
-  const [engine, setEngineState] = useState<StationEngine>("comfyui");
-  const [qwenOffered, setQwenOffered] = useState(false);
+  const [engine, setEngineState] = useState<ProviderId>("comfyui");
+  const [providers, setProviders] = useState<ProviderId[]>(["comfyui"]);
   useEffect(() => {
     api
       .settings()
       .then((r) => {
-        const qwen = r.settings.qwen as { enabled?: boolean } | undefined;
-        const engines = {
-          ...readQwenPrefs().engines,
-          ...((r.settings.engines as Record<string, StationEngine> | undefined) || {}),
-        };
-        const offered = resolveQwenEnabled(qwen) && features.some((id) => engines[id] === "qwen");
-        setQwenOffered(offered);
-        setEngineState(offered ? "qwen" : "comfyui");
+        const engines = (r.settings.engines || {}) as Record<string, StationProviders | ProviderId>;
+        const enabled: ProviderId[] = [];
+        for (const id of features) {
+          const raw = engines[id];
+          const list = raw && typeof raw === "object" && Array.isArray(raw.enabled)
+            ? raw.enabled
+            : raw === "qwen"
+              ? (["comfyui", "qwen"] as ProviderId[])
+              : (["comfyui"] as ProviderId[]);
+          for (const p of list) {
+            if (providersForStation(id).some((d) => d.id === p) && !enabled.includes(p)) enabled.push(p);
+          }
+        }
+        if (!enabled.length) enabled.push("comfyui");
+        const first = engines[features[0]];
+        const def = first && typeof first === "object" && first.default && enabled.includes(first.default)
+          ? first.default
+          : first === "qwen" && enabled.includes("qwen")
+            ? "qwen"
+            : enabled[0];
+        setProviders(enabled);
+        setEngineState(def);
       })
       .catch(() => undefined);
   }, [features[0]]);
-  return { engine, setEngine: setEngineState, qwenOffered };
+  return { engine, setEngine: setEngineState, providers };
 }
 
 export async function uploadAll(files: File[]) {

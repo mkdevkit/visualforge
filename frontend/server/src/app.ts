@@ -11,6 +11,7 @@ import { ComfyError, pingComfy } from "./lib/comfy.js";
 import { DashScopeError } from "./lib/dashscope.js";
 import { qwenCatalog } from "./lib/qwen-catalog.js";
 import { FEATURE_LABELS } from "./lib/features.js";
+import { publicProviders, PROVIDER_IDS } from "./lib/providers.js";
 import { fetchManagerRuntime, managerUrl } from "./lib/manager-client.js";
 import { mcpEndpoint } from "./mcp.js";
 import { deleteAsset, getAsset, loadLibrary, saveUpload, scanOrphans, absPath, updateAsset } from "./lib/storage.js";
@@ -52,10 +53,10 @@ app.get("/api/ping", (c) => {
   return c.json({
     ok: true,
     engine: "VisualForge",
-    tools: ["comfyui", "qwen"],
+    tools: PROVIDER_IDS,
     port: s.port,
     pid: process.pid,
-    qwen: { enabled: Boolean(s.qwen.enabled), configured: Boolean(s.qwen.apiKey) },
+    qwen: { configured: Boolean(s.qwen.apiKey) },
   });
 });
 
@@ -90,12 +91,13 @@ app.get("/api/health", async (c) => {
     ok: true,
     name: "VisualForge",
     engine: "VisualForge",
-    tools: ["comfyui", "qwen"],
+    tools: PROVIDER_IDS,
     engines: s.engines,
+    providers: publicProviders(),
     dataDir: s.dataDir,
     storePath: storePath(s.dataDir),
     managerUrl: s.managerUrl,
-    qwen: { enabled: Boolean(s.qwen.enabled), configured: Boolean(s.qwen.apiKey), baseUrl: s.qwen.baseUrl },
+    qwen: { configured: Boolean(s.qwen.apiKey), baseUrl: s.qwen.baseUrl },
     manager,
     mcp: {
       url: mcpEndpoint(s.host, s.port),
@@ -142,6 +144,7 @@ function publicSettings() {
       apiKey: maskSecret(s.qwen.apiKey),
       configured: Boolean(s.qwen.apiKey),
     },
+    providers: publicProviders(),
   };
 }
 
@@ -159,9 +162,8 @@ app.put("/api/settings", async (c) => {
   if (typeof body.managerUrl === "string") patch.managerUrl = body.managerUrl.replace(/\/+$/, "");
   if (typeof body.dataDir === "string") patch.dataDir = body.dataDir;
   if (body.qwen && typeof body.qwen === "object") {
-    const q = body.qwen as { enabled?: boolean; apiKey?: string; workspaceId?: string; baseUrl?: string };
+    const q = body.qwen as { apiKey?: string; workspaceId?: string; baseUrl?: string };
     patch.qwen = {};
-    if (typeof q.enabled === "boolean") patch.qwen.enabled = q.enabled;
     if (typeof q.apiKey === "string" && !isPlaceholderSecret(q.apiKey)) patch.qwen.apiKey = q.apiKey.trim();
     if (typeof q.workspaceId === "string") patch.qwen.workspaceId = q.workspaceId;
     if (typeof q.baseUrl === "string") patch.qwen.baseUrl = q.baseUrl.replace(/\/+$/, "");

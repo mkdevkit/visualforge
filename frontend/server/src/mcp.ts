@@ -5,6 +5,7 @@ import { z } from "zod";
 import { loadSettings } from "./config.js";
 import { storePath } from "./lib/db.js";
 import { FEATURE_IDS, FEATURE_LABELS } from "./lib/features.js";
+import { PROVIDER_IDS } from "./lib/providers.js";
 import { fetchManagerRuntime, managerUrl } from "./lib/manager-client.js";
 import { pingComfy } from "./lib/comfy.js";
 import { deleteAsset, getAsset, loadLibrary, saveUpload, updateAsset } from "./lib/storage.js";
@@ -481,7 +482,7 @@ async function statusSnapshot() {
     ok: true,
     name: "VisualForge",
     engine: "VisualForge",
-    tools: ["comfyui", "qwen"],
+    tools: PROVIDER_IDS,
     engines: s.engines,
     dataDir: s.dataDir,
     storePath: storePath(s.dataDir),

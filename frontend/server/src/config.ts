@@ -2,9 +2,10 @@ import { mkdirSync, existsSync, readFileSync, writeFileSync, copyFileSync } from
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
-import type { AppSettings, ComfyFeatureConfig, ComfySettings, FeatureId, QwenSettings, StationEngine } from "./types.js";
+import type { AppSettings, ComfyFeatureConfig, ComfySettings, FeatureId, QwenSettings, StationProviders } from "./types.js";
 import { loadJson, saveJson } from "./lib/json.js";
-import { FEATURE_IDS, mergeFeatures } from "./lib/features.js";
+import { mergeFeatures } from "./lib/features.js";
+import { defaultStations } from "./lib/providers.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const FRONTEND_ROOT = resolve(here, "../..");
@@ -76,22 +77,12 @@ function defaultComfy(stored?: Partial<ComfySettings>): ComfySettings {
   };
 }
 
-function defaultQwen(stored?: Partial<QwenSettings>): QwenSettings {
+function defaultQwen(stored?: Partial<QwenSettings> & { enabled?: boolean }): QwenSettings {
   return {
-    enabled: stored?.enabled === true,
     apiKey: realSecret(stored?.apiKey) || process.env.DASHSCOPE_API_KEY || "",
     workspaceId: stored?.workspaceId || process.env.DASHSCOPE_WORKSPACE_ID || "",
     baseUrl: (stored?.baseUrl || process.env.DASHSCOPE_BASE_URL || "https://dashscope.aliyuncs.com/api/v1").replace(/\/+$/, ""),
   };
-}
-
-function defaultEngines(stored?: Partial<Record<FeatureId, StationEngine>>): Record<FeatureId, StationEngine> {
-  const base = Object.fromEntries(FEATURE_IDS.map((id) => [id, "comfyui"])) as Record<FeatureId, StationEngine>;
-  if (!stored) return base;
-  for (const id of FEATURE_IDS) {
-    if (stored[id] === "qwen" || stored[id] === "comfyui") base[id] = stored[id];
-  }
-  return base;
 }
 
 export function loadSettings(): AppSettings {
@@ -110,8 +101,8 @@ export function loadSettings(): AppSettings {
     port: Number(stored.port || process.env.VISUALFORGE_PORT || 18787),
     managerUrl: stored.managerUrl || process.env.COMFYMANAGER_URL || "http://127.0.0.1:18788",
     comfy: defaultComfy(stored.comfy),
-    qwen: defaultQwen(stored.qwen),
-    engines: defaultEngines(stored.engines),
+    qwen: defaultQwen(stored.qwen as Partial<QwenSettings> & { enabled?: boolean }),
+    engines: defaultStations(stored.engines, (stored.qwen as { enabled?: boolean } | undefined)?.enabled),
     features: mergeFeatures(stored.features as Partial<Record<string, Partial<ComfyFeatureConfig>>>),
   };
 }
@@ -119,7 +110,7 @@ export function loadSettings(): AppSettings {
 type SettingsPatch = Partial<Omit<AppSettings, "comfy" | "qwen" | "engines" | "features">> & {
   comfy?: Partial<ComfySettings>;
   qwen?: Partial<QwenSettings>;
-  engines?: Partial<Record<FeatureId, StationEngine>>;
+  engines?: Partial<Record<FeatureId, StationProviders>>;
   features?: Partial<Record<string, Partial<ComfyFeatureConfig>>>;
 };
 
@@ -130,7 +121,7 @@ export function saveSettings(patch: SettingsPatch): AppSettings {
     ...patch,
     comfy: { ...current.comfy, ...(patch.comfy || {}) },
     qwen: { ...current.qwen, ...(patch.qwen || {}) },
-    engines: defaultEngines({ ...current.engines, ...(patch.engines || {}) }),
+    engines: defaultStations({ ...current.engines, ...(patch.engines || {}) }),
     features: mergeFeatures({
       ...current.features,
       ...(patch.features || {}),

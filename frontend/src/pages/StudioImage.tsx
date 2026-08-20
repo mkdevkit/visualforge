@@ -14,7 +14,7 @@ import { useTaskPoll } from "../lib/useTaskPoll";
 export function StudioImage() {
   const catalog = useCatalog();
   const qwen = useQwenCatalog();
-  const { engine, setEngine, qwenOffered } = useStationEngine("image");
+  const { engine, setEngine, providers } = useStationEngine("image");
   const qwenMode = engine === "qwen";
   const models = qwenMode ? qwen.image : catalog.image;
   const [model, setModel] = useState("");
@@ -42,7 +42,7 @@ export function StudioImage() {
 
   return (
     <section className="mx-auto max-w-5xl px-8 py-10">
-      <EngineSwitch value={engine} onChange={setEngine} showQwen={qwenOffered} />
+      <EngineSwitch value={engine} onChange={setEngine} providers={providers} />
       <PageHead
         tone={qwenMode ? "qwen" : "comfy"}
         kicker={qwenMode ? "千问云 · qianwenai.com" : "ComfyUI"}

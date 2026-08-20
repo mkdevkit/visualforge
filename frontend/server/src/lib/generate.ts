@@ -1,5 +1,5 @@
 import { loadSettings } from "../config.js";
-import type { FeatureId, StationEngine } from "../types.js";
+import type { FeatureId, ProviderId, StationEngine } from "../types.js";
 import { getTask } from "./tasks.js";
 import {
   designVoiceComfy,
@@ -21,19 +21,20 @@ import {
   generateVideoQwen,
   pollQwenTask,
 } from "./qwen-generate.js";
+import { isProviderId, providerById } from "./providers.js";
 
 export type { DashScopeError } from "./dashscope.js";
 
-function qwenOffered(feature: FeatureId) {
-  const s = loadSettings();
-  return Boolean(s.qwen.enabled) && s.engines[feature] === "qwen";
+function stationOf(feature: FeatureId) {
+  return loadSettings().engines[feature];
 }
 
-function engineOf(feature: FeatureId, body?: { engine?: StationEngine }): StationEngine {
-  const offered = qwenOffered(feature);
-  const want = body?.engine === "qwen" || body?.engine === "comfyui" ? body.engine : offered ? "qwen" : "comfyui";
-  if (want === "qwen" && !offered) {
-    throw new Error("未开启千问云，或该工位默认工具不是千问云。请到设置页开启千问云，并把该工位默认工具设为千问云。");
+function engineOf(feature: FeatureId, body?: { engine?: StationEngine }): ProviderId {
+  const station = stationOf(feature);
+  const want = isProviderId(body?.engine) ? body.engine : station.default;
+  if (!station.enabled.includes(want)) {
+    const label = providerById(want)?.label || want;
+    throw new Error(`该工位未开启「${label}」。请到设置页为该工位勾选对应平台提供商。`);
   }
   return want;
 }

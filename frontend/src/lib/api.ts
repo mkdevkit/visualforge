@@ -1,4 +1,5 @@
 import { readQwenPrefs } from "./qwen-prefs";
+import type { AssetRecord, Catalog, DesignedVoice, TaskRecord } from "./types";
 
 export function apiBase() {
   if (import.meta.env.VITE_API_BASE) return String(import.meta.env.VITE_API_BASE).replace(/\/$/, "");
@@ -101,8 +102,8 @@ function postGenerate<T>(path: string, body: Record<string, unknown>) {
 }
 
 export const api = {
-  ping: () => req<{ ok: boolean; engine?: string; tools?: string[]; port?: number; pid?: number; qwen?: { enabled?: boolean; configured?: boolean } }>("/api/ping"),
-  health: () => req<{ ok: boolean; engine?: string; tools?: string[]; dataDir: string; managerUrl?: string; manager?: unknown; qwen?: { enabled?: boolean; configured?: boolean }; engines?: Record<string, string> }>("/api/health"),
+  ping: () => req<{ ok: boolean; engine?: string; tools?: string[]; port?: number; pid?: number; qwen?: { configured?: boolean } }>("/api/ping"),
+  health: () => req<{ ok: boolean; engine?: string; tools?: string[]; dataDir: string; managerUrl?: string; manager?: unknown; qwen?: { configured?: boolean }; engines?: Record<string, unknown> }>("/api/health"),
   models: () => req<Catalog & { ok: boolean; openModels?: import("./types").OpenModel[] }>("/api/models"),
   settings: () => req<{ settings: Record<string, unknown> }>("/api/settings"),
   saveSettings: (body: Record<string, unknown>) =>
