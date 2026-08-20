@@ -76,6 +76,18 @@ function hintForNetwork(code: string, url: string) {
   return "网络层失败，没有拿到 HTTP 响应";
 }
 
+/** Map common DashScope/qianwenai messages to an actionable Chinese hint. */
+export function explainDashMessage(message?: string, code?: string, url?: string) {
+  const blob = `${code || ""} ${message || ""} ${url || ""}`;
+  if (/product is not activated|Unpurchased|not been activated/i.test(blob)) {
+    if (/3d-generation|Tripo/i.test(blob)) {
+      return "Tripo 生 3D 要在千问模型市场单独开通（生图 Key 不能自动带上）。打开模型页点开通后再试：https://www.qianwenai.com/models/Tripo/Tripo-H3.1 或 https://www.qianwenai.com/models/Tripo/Tripo-P1.0";
+    }
+    return "当前模型还没在千问AI平台开通。打开 https://www.qianwenai.com/ 模型市场，找到对应模型点开通后再试。";
+  }
+  return "";
+}
+
 function formatApiError(opts: {
   method: string;
   url: string;
@@ -93,6 +105,8 @@ function formatApiError(opts: {
   if (opts.code) lines.push(`code: ${opts.code}`);
   if (opts.requestId) lines.push(`request_id: ${opts.requestId}`);
   if (opts.message) lines.push(`message: ${opts.message}`);
+  const business = explainDashMessage(opts.message, opts.code, opts.url);
+  if (business) lines.push(business);
   if (opts.network && Object.keys(opts.network).length) {
     const bits = Object.entries(opts.network)
       .filter(([, v]) => v !== undefined && v !== "")
@@ -221,6 +235,10 @@ export function collectResultUrls(output: unknown): string[] {
       pushUrl(urls, r.url);
       pushUrl(urls, r.video_url);
       pushUrl(urls, r.image);
+      pushUrl(urls, r.pbr_model_url);
+      pushUrl(urls, r.base_model_url);
+      pushUrl(urls, r.model_url);
+      pushUrl(urls, r.rendered_image_url);
     }
   }
   if (Array.isArray(o.choices)) {

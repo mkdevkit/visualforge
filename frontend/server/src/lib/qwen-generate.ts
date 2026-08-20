@@ -24,6 +24,7 @@ import {
   uploadLocalFile,
   usesOss,
   DashScopeError,
+  explainDashMessage,
 } from "./dashscope.js";
 import { qwenCatalog } from "./qwen-catalog.js";
 
@@ -579,18 +580,18 @@ export async function generate3dQwen(body: Generate3dBody) {
   if (images.filter(Boolean).length >= 2) input.images = images.filter(Boolean);
   else if (single || images[0]) input.image = single || images[0];
   else input.prompt = body.prompt || "";
+  const textureQuality = body.textureQuality === "ultra" || body.textureQuality === "detailed" ? "detailed" : "standard";
+  const parameters: Record<string, unknown> = {
+    texture_quality: textureQuality,
+    pbr: body.pbr ?? true,
+    texture: body.texture ?? true,
+  };
+  if (/Tripo-H3/i.test(model)) {
+    parameters.geometry_quality = body.geometryQuality === "ultra" ? "ultra" : "standard";
+  }
   const json = await dashPost(
     "/services/aigc/video-generation/3d-generation",
-    {
-      model,
-      input,
-      parameters: {
-        texture_quality: body.textureQuality || "standard",
-        geometry_quality: body.geometryQuality || "standard",
-        pbr: body.pbr ?? true,
-        texture: body.texture ?? true,
-      },
-    },
+    { model, input, parameters },
     { async: true, oss: hasOss(single, ...images.map(String)) },
   );
   const remote = taskIdOf(json);
@@ -626,8 +627,9 @@ export async function pollQwenTask(localId: string) {
       return patchTask(localId, { status: "running", progress });
     }
     if (status === "FAILED" || status === "CANCELED") {
-      const msg = String((json.output as { message?: string } | undefined)?.message || json.message || "千问任务失败");
-      return mark(localId, "failed", { error: msg });
+      const raw = String((json.output as { message?: string } | undefined)?.message || json.message || "千问任务失败");
+      const hint = explainDashMessage(raw, json.code, task.model);
+      return mark(localId, "failed", { error: hint ? `${raw}\n${hint}` : raw });
     }
     const urls = collectResultUrls(json.output);
     const b64 = audioBase64Of(json.output);

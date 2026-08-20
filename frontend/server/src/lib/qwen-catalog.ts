@@ -94,8 +94,8 @@ export const qwenCatalog = {
     m("qwen3-omni-flash", "Qwen3-Omni（音效描述）", "Omni", "用多模态模型按文字生成音频。", ["sfx"], false),
   ],
   model3d: [
-    m("Tripo/Tripo-H3.1", "Tripo H3.1", "Tripo", "高模，最多约 200 万面，文生 / 单图 / 多角度。", ["t23d", "i23d"]),
-    m("Tripo/Tripo-P1.0", "Tripo P1.0", "Tripo", "更快预览，约 2 万面，适合验证。", ["t23d", "i23d"]),
+    m("Tripo/Tripo-H3.1", "Tripo H3.1", "Tripo", "高模，最多约 200 万面。须在千问模型市场开通后再调用。", ["t23d", "i23d"]),
+    m("Tripo/Tripo-P1.0", "Tripo P1.0", "Tripo", "更快预览，约 2 万面。须在千问模型市场开通后再调用。", ["t23d", "i23d"]),
   ],
   imageSizes: QWEN_IMAGE_SIZES,
   ttsVoices: QWEN_TTS_VOICES,

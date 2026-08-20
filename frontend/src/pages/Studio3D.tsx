@@ -173,7 +173,7 @@ export function Studio3D() {
               </Select>
             </Field>
             <p className="text-xs leading-relaxed text-mute">{models.find((m) => m.id === model)?.description}</p>
-            <QwenHint extra="落盘目录 data/models3d/。结果链接约 2 小时失效，视铸会立刻下载。" error={qwen.loadError} />
+            <QwenHint extra="Tripo 要在千问模型市场单独开通，H3.1 / P1.0 各开一次；没开通会报 product is not activated。落盘目录 data/models3d/，结果链接约 2 小时失效，视铸会立刻下载。" error={qwen.loadError} />
             <div className="space-y-2 border-t border-qwen/20 pt-4">
               <div className="text-[11px] tracking-[0.18em] uppercase text-qwen">动作预览</div>
               <p className="text-xs leading-relaxed text-mute">绑骨仍在本机，与千问无关。</p>
