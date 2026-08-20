@@ -1,5 +1,6 @@
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, existsSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
+import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import type { AppSettings, ComfyFeatureConfig, ComfySettings, FeatureId, QwenSettings, StationEngine } from "./types.js";
 import { loadJson, saveJson } from "./lib/json.js";
@@ -29,18 +30,39 @@ loadDotEnv();
 
 const CATEGORIES = ["images", "videos", "music", "audio", "models3d", "uploads"] as const;
 
+/** Windows: %USERPROFILE%\.visualforge  Linux/macOS: ~/.visualforge */
+export function userConfigDir() {
+  return join(homedir(), ".visualforge");
+}
+
 function defaultDataDir() {
-  const fromEnv = process.env.VISUALFORGE_DATA_DIR;
+  const fromEnv = (process.env.VISUALFORGE_DATA_DIR || "").trim();
   if (fromEnv) return isAbsolute(fromEnv) ? fromEnv : resolve(REPO_ROOT, fromEnv);
-  return join(FRONTEND_ROOT, "data");
+  return userConfigDir();
 }
 
-export function settingsPath(dataDir = defaultDataDir()) {
-  return join(dataDir, "settings.json");
+export function settingsPath() {
+  return join(userConfigDir(), "settings.json");
 }
 
-function qwenSecretPath(dataDir: string) {
-  return join(dataDir, ".qwen-secret.json");
+function qwenSecretPath() {
+  return join(userConfigDir(), ".qwen-secret.json");
+}
+
+function migrateLegacySettings() {
+  mkdirSync(userConfigDir(), { recursive: true });
+  const dest = settingsPath();
+  if (existsSync(dest)) return;
+  const legacyDirs = [join(FRONTEND_ROOT, "data"), join(REPO_ROOT, "frontend", "data")];
+  for (const dir of legacyDirs) {
+    const src = join(dir, "settings.json");
+    if (!existsSync(src)) continue;
+    copyFileSync(src, dest);
+    const secretSrc = join(dir, ".qwen-secret.json");
+    const secretDest = qwenSecretPath();
+    if (existsSync(secretSrc) && !existsSync(secretDest)) copyFileSync(secretSrc, secretDest);
+    break;
+  }
 }
 
 /** Empty or masked values from the settings page must not overwrite a real key. */
@@ -70,14 +92,15 @@ function defaultQwen(stored?: Partial<QwenSettings>): QwenSettings {
   };
 }
 
-function loadQwenSecret(dir: string): Partial<QwenSettings> {
-  return loadJson<Partial<QwenSettings>>(qwenSecretPath(dir), {});
+function loadQwenSecret(): Partial<QwenSettings> {
+  return loadJson<Partial<QwenSettings>>(qwenSecretPath(), {});
 }
 
-function writeQwenSecret(dir: string, qwen: QwenSettings) {
+function writeQwenSecret(qwen: QwenSettings) {
+  const dir = userConfigDir();
   mkdirSync(dir, { recursive: true });
-  const prev = loadQwenSecret(dir);
-  saveJson(qwenSecretPath(dir), {
+  const prev = loadQwenSecret();
+  saveJson(qwenSecretPath(), {
     enabled: qwen.enabled === true,
     apiKey: realSecret(qwen.apiKey) || prev.apiKey || "",
     workspaceId: qwen.workspaceId || prev.workspaceId || "",
@@ -95,18 +118,16 @@ function defaultEngines(stored?: Partial<Record<FeatureId, StationEngine>>): Rec
 }
 
 export function loadSettings(): AppSettings {
-  const fallback = defaultDataDir();
-  mkdirSync(fallback, { recursive: true });
-  const pointer = loadJson<Partial<AppSettings>>(settingsPath(fallback), {});
-  const nextData = pointer.dataDir
-    ? (isAbsolute(pointer.dataDir) ? pointer.dataDir : resolve(REPO_ROOT, pointer.dataDir))
-    : fallback;
+  migrateLegacySettings();
+  const configDir = userConfigDir();
+  mkdirSync(configDir, { recursive: true });
+  const stored = loadJson<Partial<AppSettings>>(settingsPath(), {});
+  const fallbackData = defaultDataDir();
+  const nextData = stored.dataDir
+    ? (isAbsolute(stored.dataDir) ? stored.dataDir : resolve(REPO_ROOT, stored.dataDir))
+    : fallbackData;
   mkdirSync(nextData, { recursive: true });
-  const stored =
-    resolve(nextData) === resolve(fallback)
-      ? pointer
-      : { ...pointer, ...loadJson<Partial<AppSettings>>(settingsPath(nextData), {}) };
-  const secret = { ...loadQwenSecret(fallback), ...loadQwenSecret(nextData) };
+  const secret = loadQwenSecret();
   return {
     dataDir: nextData,
     host: stored.host || process.env.VISUALFORGE_HOST || "127.0.0.1",
@@ -144,15 +165,10 @@ export function saveSettings(patch: SettingsPatch): AppSettings {
   if (patch.dataDir) {
     next.dataDir = isAbsolute(patch.dataDir) ? patch.dataDir : resolve(REPO_ROOT, patch.dataDir);
   }
+  mkdirSync(userConfigDir(), { recursive: true });
   mkdirSync(next.dataDir, { recursive: true });
-  saveJson(settingsPath(next.dataDir), next);
-  writeQwenSecret(next.dataDir, next.qwen);
-  const fallback = defaultDataDir();
-  if (resolve(next.dataDir) !== resolve(fallback)) {
-    mkdirSync(fallback, { recursive: true });
-    saveJson(settingsPath(fallback), { ...next, dataDir: next.dataDir });
-    writeQwenSecret(fallback, next.qwen);
-  }
+  saveJson(settingsPath(), next);
+  writeQwenSecret(next.qwen);
   ensureDataLayout(next.dataDir);
   return next;
 }

@@ -16,6 +16,7 @@ function qwenConfigured(qwen?: { apiKey?: string; configured?: boolean }) {
 
 export function Settings() {
   const [dataDir, setDataDir] = useState("");
+  const [configDir, setConfigDir] = useState("");
   const [managerUrl, setManagerUrl] = useState(managerBase());
   const [qwenEnabled, setQwenEnabled] = useState(false);
   const [qwenKey, setQwenKey] = useState("");
@@ -37,11 +38,13 @@ export function Settings() {
       const r = await api.settings();
       const s = r.settings as {
         dataDir?: string;
+        configDir?: string;
         managerUrl?: string;
         qwen?: { enabled?: boolean; apiKey?: string; workspaceId?: string; baseUrl?: string; configured?: boolean };
         engines?: Record<string, StationEngine>;
       };
       setDataDir(s.dataDir || "");
+      setConfigDir(s.configDir || "");
       if (s.managerUrl) {
         setManagerBase(s.managerUrl);
         setManagerUrl(s.managerUrl);
@@ -159,7 +162,10 @@ export function Settings() {
         <Field label="地址" hint="默认 http://127.0.0.1:18788">
           <Input value={managerUrl} onChange={(e) => setManagerUrl(e.target.value)} />
         </Field>
-        <Field label="成品根目录" hint="本机保存生成结果，两种工具共用">
+        <Field label="配置目录" hint="设置和千问 Key 固定写在这里，Windows / Linux 都是用户主目录下的 .visualforge，不会进 Git">
+          <Input value={configDir} readOnly />
+        </Field>
+        <Field label="成品根目录" hint="本机保存生成结果。新安装默认与配置目录相同">
           <Input value={dataDir} onChange={(e) => setDataDir(e.target.value)} />
         </Field>
         <a className="inline-block text-sm text-brass underline" href={managerUrl || managerBase()} target="_blank" rel="noreferrer">

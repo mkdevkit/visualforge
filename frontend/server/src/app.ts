@@ -4,7 +4,7 @@ import { bodyLimit } from "hono/body-limit";
 import { existsSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { spawn } from "node:child_process";
-import { loadSettings, saveSettings, ensureDataLayout, isPlaceholderSecret, FRONTEND_ROOT } from "./config.js";
+import { loadSettings, saveSettings, ensureDataLayout, isPlaceholderSecret, FRONTEND_ROOT, userConfigDir } from "./config.js";
 import type { AppSettings } from "./types.js";
 import { ComfyError, pingComfy } from "./lib/comfy.js";
 import { DashScopeError } from "./lib/dashscope.js";
@@ -129,6 +129,7 @@ function publicSettings() {
   const s = loadSettings();
   return {
     ...s,
+    configDir: userConfigDir(),
     comfy: {
       ...s.comfy,
       apiKey: maskSecret(s.comfy.apiKey),
