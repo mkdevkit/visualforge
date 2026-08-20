@@ -3,6 +3,7 @@ import { basename, isAbsolute } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { loadSettings } from "./config.js";
+import { storePath } from "./lib/db.js";
 import { FEATURE_IDS, FEATURE_LABELS } from "./lib/features.js";
 import { fetchManagerRuntime, managerUrl } from "./lib/manager-client.js";
 import { pingComfy } from "./lib/comfy.js";
@@ -483,6 +484,7 @@ async function statusSnapshot() {
     tools: ["comfyui", "qwen"],
     engines: s.engines,
     dataDir: s.dataDir,
+    storePath: storePath(s.dataDir),
     managerUrl: s.managerUrl,
     mcp: mcpEndpoint(s.host, s.port),
     comfy: await pingComfy(),

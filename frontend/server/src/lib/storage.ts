@@ -3,7 +3,7 @@ import { extname, join } from "node:path";
 import { nanoid } from "nanoid";
 import type { AssetRecord, AssetType } from "../types.js";
 import { loadSettings, ensureDataLayout } from "../config.js";
-import { loadJson, saveJson } from "./json.js";
+import { deleteAssetRow, getAssetRow, listAssets, replaceAssets, storePath, upsertAsset } from "./db.js";
 
 const TYPE_DIR: Record<AssetType, string> = {
   image: "images",
@@ -14,34 +14,32 @@ const TYPE_DIR: Record<AssetType, string> = {
 };
 
 export function libraryPath() {
-  return join(loadSettings().dataDir, "library.json");
+  return storePath();
 }
 
 export function loadLibrary(): AssetRecord[] {
   ensureDataLayout(loadSettings().dataDir);
-  return loadJson<AssetRecord[]>(libraryPath(), []);
+  return listAssets();
 }
 
 export function saveLibrary(list: AssetRecord[]) {
-  saveJson(libraryPath(), list);
+  replaceAssets(list);
 }
 
 export function getAsset(id: string) {
-  return loadLibrary().find((a) => a.id === id);
+  return getAssetRow(id);
 }
 
 export function updateAsset(id: string, patch: Partial<AssetRecord>) {
-  const list = loadLibrary();
-  const idx = list.findIndex((a) => a.id === id);
-  if (idx < 0) return undefined;
-  list[idx] = { ...list[idx], ...patch, updatedAt: new Date().toISOString() };
-  saveLibrary(list);
-  return list[idx];
+  const current = getAssetRow(id);
+  if (!current) return undefined;
+  const next = { ...current, ...patch, updatedAt: new Date().toISOString() };
+  upsertAsset(next);
+  return next;
 }
 
 export function deleteAsset(id: string) {
-  const list = loadLibrary();
-  const asset = list.find((a) => a.id === id);
+  const asset = getAssetRow(id);
   if (!asset) return false;
   const abs = join(loadSettings().dataDir, asset.relPath);
   if (existsSync(abs)) unlinkSync(abs);
@@ -49,8 +47,7 @@ export function deleteAsset(id: string) {
     const p = join(loadSettings().dataDir, extra.relPath);
     if (existsSync(p)) unlinkSync(p);
   }
-  saveLibrary(list.filter((a) => a.id !== id));
-  return true;
+  return deleteAssetRow(id);
 }
 
 export function absPath(rel: string) {
@@ -101,9 +98,7 @@ export function saveBuffer(opts: {
     remoteUrl: opts.remoteUrl,
     ...opts.extra,
   };
-  const list = loadLibrary();
-  list.unshift(record);
-  saveLibrary(list);
+  upsertAsset(record);
   return record;
 }
 
@@ -120,7 +115,7 @@ export function saveUpload(buffer: Buffer, originalName: string) {
 
 export function scanOrphans() {
   const settings = loadSettings();
-  const known = new Set(loadLibrary().map((a) => a.relPath.replace(/\\/g, "/")));
+  const known = new Set(listAssets().map((a) => a.relPath.replace(/\\/g, "/")));
   const orphans: string[] = [];
   for (const dir of Object.values(TYPE_DIR)) {
     const full = join(settings.dataDir, dir);

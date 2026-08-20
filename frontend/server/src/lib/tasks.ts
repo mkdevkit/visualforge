@@ -1,19 +1,13 @@
-import { join } from "node:path";
 import { nanoid } from "nanoid";
 import type { AssetType, TaskRecord, TaskStatus } from "../types.js";
-import { loadSettings } from "../config.js";
-import { loadJson, saveJson } from "./json.js";
-
-function tasksFile() {
-  return join(loadSettings().dataDir, "tasks.json");
-}
+import { getTaskRow, listTasks, replaceTasks, upsertTask } from "./db.js";
 
 export function loadTasks(): TaskRecord[] {
-  return loadJson<TaskRecord[]>(tasksFile(), []);
+  return listTasks();
 }
 
 export function saveTasks(list: TaskRecord[]) {
-  saveJson(tasksFile(), list);
+  replaceTasks(list);
 }
 
 export function createTask(partial: {
@@ -37,23 +31,20 @@ export function createTask(partial: {
     updatedAt: now,
     payload: partial.payload || {},
   };
-  const list = loadTasks();
-  list.unshift(task);
-  saveTasks(list);
+  upsertTask(task);
   return task;
 }
 
 export function patchTask(id: string, patch: Partial<TaskRecord>) {
-  const list = loadTasks();
-  const idx = list.findIndex((t) => t.id === id);
-  if (idx < 0) return undefined;
-  list[idx] = { ...list[idx], ...patch, updatedAt: new Date().toISOString() };
-  saveTasks(list);
-  return list[idx];
+  const current = getTaskRow(id);
+  if (!current) return undefined;
+  const next = { ...current, ...patch, updatedAt: new Date().toISOString() };
+  upsertTask(next);
+  return next;
 }
 
 export function getTask(id: string) {
-  return loadTasks().find((t) => t.id === id);
+  return getTaskRow(id);
 }
 
 export function mark(id: string, status: TaskStatus, extra: Partial<TaskRecord> = {}) {

@@ -5,6 +5,7 @@ import { getRequestListener } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { app, prepare, startTaskPump } from "./app.js";
 import { webDistDir, userConfigDir } from "./config.js";
+import { storePath } from "./lib/db.js";
 import { handleMcpHttp, isMcpPath } from "./mcp-http.js";
 
 const settings = prepare();
@@ -53,6 +54,7 @@ server.listen(settings.port, settings.host, () => {
   console.log(`MCP              http://${settings.host}:${settings.port}/mcp`);
   console.log(`配置目录          ${userConfigDir()}`);
   console.log(`资源目录          ${settings.dataDir}`);
+  console.log(`资源库            ${storePath(settings.dataDir)}`);
   if (existsSync(dist)) console.log(`Web 静态资源      ${dist}`);
   else console.log("Web 未构建，开发请同时运行 Vite (端口 5173)");
 });

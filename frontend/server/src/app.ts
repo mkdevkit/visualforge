@@ -5,6 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { spawn } from "node:child_process";
 import { loadSettings, saveSettings, ensureDataLayout, isPlaceholderSecret, FRONTEND_ROOT, userConfigDir } from "./config.js";
+import { initStore, storePath } from "./lib/db.js";
 import type { AppSettings } from "./types.js";
 import { ComfyError, pingComfy } from "./lib/comfy.js";
 import { DashScopeError } from "./lib/dashscope.js";
@@ -92,6 +93,7 @@ app.get("/api/health", async (c) => {
     tools: ["comfyui", "qwen"],
     engines: s.engines,
     dataDir: s.dataDir,
+    storePath: storePath(s.dataDir),
     managerUrl: s.managerUrl,
     qwen: { enabled: Boolean(s.qwen.enabled), configured: Boolean(s.qwen.apiKey), baseUrl: s.qwen.baseUrl },
     manager,
@@ -130,6 +132,7 @@ function publicSettings() {
   return {
     ...s,
     configDir: userConfigDir(),
+    storePath: storePath(s.dataDir),
     comfy: {
       ...s.comfy,
       apiKey: maskSecret(s.comfy.apiKey),
@@ -389,5 +392,6 @@ export function startTaskPump() {
 export function prepare() {
   const s = loadSettings();
   ensureDataLayout(s.dataDir);
+  initStore();
   return s;
 }

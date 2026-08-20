@@ -45,10 +45,6 @@ export function settingsPath() {
   return join(userConfigDir(), "settings.json");
 }
 
-function qwenSecretPath() {
-  return join(userConfigDir(), ".qwen-secret.json");
-}
-
 function migrateLegacySettings() {
   mkdirSync(userConfigDir(), { recursive: true });
   const dest = settingsPath();
@@ -58,9 +54,6 @@ function migrateLegacySettings() {
     const src = join(dir, "settings.json");
     if (!existsSync(src)) continue;
     copyFileSync(src, dest);
-    const secretSrc = join(dir, ".qwen-secret.json");
-    const secretDest = qwenSecretPath();
-    if (existsSync(secretSrc) && !existsSync(secretDest)) copyFileSync(secretSrc, secretDest);
     break;
   }
 }
@@ -92,22 +85,6 @@ function defaultQwen(stored?: Partial<QwenSettings>): QwenSettings {
   };
 }
 
-function loadQwenSecret(): Partial<QwenSettings> {
-  return loadJson<Partial<QwenSettings>>(qwenSecretPath(), {});
-}
-
-function writeQwenSecret(qwen: QwenSettings) {
-  const dir = userConfigDir();
-  mkdirSync(dir, { recursive: true });
-  const prev = loadQwenSecret();
-  saveJson(qwenSecretPath(), {
-    enabled: qwen.enabled === true,
-    apiKey: realSecret(qwen.apiKey) || prev.apiKey || "",
-    workspaceId: qwen.workspaceId || prev.workspaceId || "",
-    baseUrl: qwen.baseUrl || prev.baseUrl || "",
-  });
-}
-
 function defaultEngines(stored?: Partial<Record<FeatureId, StationEngine>>): Record<FeatureId, StationEngine> {
   const base = Object.fromEntries(FEATURE_IDS.map((id) => [id, "comfyui"])) as Record<FeatureId, StationEngine>;
   if (!stored) return base;
@@ -127,14 +104,13 @@ export function loadSettings(): AppSettings {
     ? (isAbsolute(stored.dataDir) ? stored.dataDir : resolve(REPO_ROOT, stored.dataDir))
     : fallbackData;
   mkdirSync(nextData, { recursive: true });
-  const secret = loadQwenSecret();
   return {
     dataDir: nextData,
     host: stored.host || process.env.VISUALFORGE_HOST || "127.0.0.1",
     port: Number(stored.port || process.env.VISUALFORGE_PORT || 18787),
     managerUrl: stored.managerUrl || process.env.COMFYMANAGER_URL || "http://127.0.0.1:18788",
     comfy: defaultComfy(stored.comfy),
-    qwen: defaultQwen({ ...stored.qwen, ...secret }),
+    qwen: defaultQwen(stored.qwen),
     engines: defaultEngines(stored.engines),
     features: mergeFeatures(stored.features as Partial<Record<string, Partial<ComfyFeatureConfig>>>),
   };
@@ -168,7 +144,6 @@ export function saveSettings(patch: SettingsPatch): AppSettings {
   mkdirSync(userConfigDir(), { recursive: true });
   mkdirSync(next.dataDir, { recursive: true });
   saveJson(settingsPath(), next);
-  writeQwenSecret(next.qwen);
   ensureDataLayout(next.dataDir);
   return next;
 }

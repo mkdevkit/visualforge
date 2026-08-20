@@ -165,7 +165,7 @@ export function Settings() {
         <Field label="配置目录" hint="设置和千问 Key 固定写在这里，Windows / Linux 都是用户主目录下的 .visualforge，不会进 Git">
           <Input value={configDir} readOnly />
         </Field>
-        <Field label="成品根目录" hint="本机保存生成结果。新安装默认与配置目录相同">
+        <Field label="成品根目录" hint="本机保存生成结果、任务和资源库（visualforge.sqlite）。新安装默认与配置目录相同">
           <Input value={dataDir} onChange={(e) => setDataDir(e.target.value)} />
         </Field>
         <a className="inline-block text-sm text-brass underline" href={managerUrl || managerBase()} target="_blank" rel="noreferrer">

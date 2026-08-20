@@ -8,6 +8,9 @@ Thumbs.db
 frontend/dist/
 frontend/server/dist/
 frontend/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
 comfymanager/dist/
 comfymanager/data/
 comfymanager/comfy/
