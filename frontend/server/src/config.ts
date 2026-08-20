@@ -2,7 +2,7 @@ import { mkdirSync, existsSync, readFileSync, writeFileSync, copyFileSync } from
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
-import type { AppSettings, ComfyFeatureConfig, ComfySettings, FeatureId, QwenSettings, StationProviders } from "./types.js";
+import type { AppSettings, CloudApiSettings, ComfyFeatureConfig, ComfySettings, FeatureId, QwenSettings, StationProviders, VolcengineSettings } from "./types.js";
 import { loadJson, saveJson } from "./lib/json.js";
 import { mergeFeatures } from "./lib/features.js";
 import { defaultStations } from "./lib/providers.js";
@@ -85,6 +85,27 @@ function defaultQwen(stored?: Partial<QwenSettings> & { enabled?: boolean }): Qw
   };
 }
 
+function defaultCloud(
+  stored: Partial<CloudApiSettings> | undefined,
+  envKey: string,
+  envBase: string,
+  fallbackBase: string,
+): CloudApiSettings {
+  return {
+    apiKey: realSecret(stored?.apiKey) || process.env[envKey] || "",
+    baseUrl: (stored?.baseUrl || process.env[envBase] || fallbackBase).replace(/\/+$/, ""),
+  };
+}
+
+function defaultVolcengine(stored?: Partial<VolcengineSettings>): VolcengineSettings {
+  return {
+    apiKey: realSecret(stored?.apiKey) || process.env.ARK_API_KEY || process.env.VOLCENGINE_API_KEY || "",
+    baseUrl: (stored?.baseUrl || process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.com/api/v3").replace(/\/+$/, ""),
+    accessKeyId: realSecret(stored?.accessKeyId) || process.env.VOLCENGINE_ACCESS_KEY_ID || "",
+    secretKey: realSecret(stored?.secretKey) || process.env.VOLCENGINE_SECRET_KEY || "",
+  };
+}
+
 export function loadSettings(): AppSettings {
   migrateLegacySettings();
   const configDir = userConfigDir();
@@ -102,14 +123,22 @@ export function loadSettings(): AppSettings {
     managerUrl: stored.managerUrl || process.env.COMFYMANAGER_URL || "http://127.0.0.1:18788",
     comfy: defaultComfy(stored.comfy),
     qwen: defaultQwen(stored.qwen as Partial<QwenSettings> & { enabled?: boolean }),
+    meshy: defaultCloud(stored.meshy, "MESHY_API_KEY", "MESHY_BASE_URL", "https://api.meshy.ai"),
+    midjourney: defaultCloud(stored.midjourney, "MIDJOURNEY_API_KEY", "MIDJOURNEY_BASE_URL", ""),
+    tripo: defaultCloud(stored.tripo, "TRIPO_API_KEY", "TRIPO_BASE_URL", "https://openapi.tripo3d.ai"),
+    volcengine: defaultVolcengine(stored.volcengine),
     engines: defaultStations(stored.engines, (stored.qwen as { enabled?: boolean } | undefined)?.enabled),
     features: mergeFeatures(stored.features as Partial<Record<string, Partial<ComfyFeatureConfig>>>),
   };
 }
 
-type SettingsPatch = Partial<Omit<AppSettings, "comfy" | "qwen" | "engines" | "features">> & {
+type SettingsPatch = Partial<Omit<AppSettings, "comfy" | "qwen" | "meshy" | "midjourney" | "tripo" | "volcengine" | "engines" | "features">> & {
   comfy?: Partial<ComfySettings>;
   qwen?: Partial<QwenSettings>;
+  meshy?: Partial<CloudApiSettings>;
+  midjourney?: Partial<CloudApiSettings>;
+  tripo?: Partial<CloudApiSettings>;
+  volcengine?: Partial<VolcengineSettings>;
   engines?: Partial<Record<FeatureId, StationProviders>>;
   features?: Partial<Record<string, Partial<ComfyFeatureConfig>>>;
 };
@@ -121,6 +150,10 @@ export function saveSettings(patch: SettingsPatch): AppSettings {
     ...patch,
     comfy: { ...current.comfy, ...(patch.comfy || {}) },
     qwen: { ...current.qwen, ...(patch.qwen || {}) },
+    meshy: { ...current.meshy, ...(patch.meshy || {}) },
+    midjourney: { ...current.midjourney, ...(patch.midjourney || {}) },
+    tripo: { ...current.tripo, ...(patch.tripo || {}) },
+    volcengine: { ...current.volcengine, ...(patch.volcengine || {}) },
     engines: defaultStations({ ...current.engines, ...(patch.engines || {}) }),
     features: mergeFeatures({
       ...current.features,
@@ -129,6 +162,12 @@ export function saveSettings(patch: SettingsPatch): AppSettings {
   };
   if (patch.comfy && isPlaceholderSecret(patch.comfy.apiKey)) next.comfy.apiKey = current.comfy.apiKey;
   if (patch.qwen && isPlaceholderSecret(patch.qwen.apiKey)) next.qwen.apiKey = current.qwen.apiKey;
+  if (patch.meshy && isPlaceholderSecret(patch.meshy.apiKey)) next.meshy.apiKey = current.meshy.apiKey;
+  if (patch.midjourney && isPlaceholderSecret(patch.midjourney.apiKey)) next.midjourney.apiKey = current.midjourney.apiKey;
+  if (patch.tripo && isPlaceholderSecret(patch.tripo.apiKey)) next.tripo.apiKey = current.tripo.apiKey;
+  if (patch.volcengine && isPlaceholderSecret(patch.volcengine.apiKey)) next.volcengine.apiKey = current.volcengine.apiKey;
+  if (patch.volcengine && isPlaceholderSecret(patch.volcengine.accessKeyId)) next.volcengine.accessKeyId = current.volcengine.accessKeyId;
+  if (patch.volcengine && isPlaceholderSecret(patch.volcengine.secretKey)) next.volcengine.secretKey = current.volcengine.secretKey;
   if (patch.dataDir) {
     next.dataDir = isAbsolute(patch.dataDir) ? patch.dataDir : resolve(REPO_ROOT, patch.dataDir);
   }

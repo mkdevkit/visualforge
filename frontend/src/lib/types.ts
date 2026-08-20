@@ -57,7 +57,7 @@ export interface DesignedVoice {
 
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
-export type ProviderId = "comfyui" | "qwen";
+export type ProviderId = "comfyui" | "qwen" | "meshy" | "midjourney" | "tripo" | "volcengine";
 export type StationEngine = ProviderId;
 
 export interface StationProviders {
@@ -99,6 +99,29 @@ export interface AppSettingsView {
     workspaceId: string;
     baseUrl: string;
     configured?: boolean;
+  };
+  meshy: {
+    apiKey: string;
+    baseUrl: string;
+    configured?: boolean;
+  };
+  midjourney: {
+    apiKey: string;
+    baseUrl: string;
+    configured?: boolean;
+  };
+  tripo: {
+    apiKey: string;
+    baseUrl: string;
+    configured?: boolean;
+  };
+  volcengine: {
+    apiKey: string;
+    baseUrl: string;
+    accessKeyId?: string;
+    secretKey?: string;
+    configured?: boolean;
+    musicConfigured?: boolean;
   };
   engines: Record<FeatureId, StationProviders>;
   features: Record<FeatureId, ComfyFeatureConfig>;

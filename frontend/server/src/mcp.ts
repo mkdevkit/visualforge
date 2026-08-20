@@ -162,12 +162,12 @@ export function createVisualForgeMcp() {
   server.registerTool(
     "generate_image",
     {
-      description: "文生图或图生图。参考图可传本机绝对路径或已上传的 relPath。engine=qwen 走千问云，默认用工位设置。",
+      description: "文生图或图生图。参考图可传本机绝对路径或已上传的 relPath。engine 可选 comfyui / qwen / meshy / midjourney / volcengine。",
       inputSchema: {
         prompt: z.string(),
         model: z.string().optional(),
         workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
-        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
+        engine: z.enum(["comfyui", "qwen", "meshy", "midjourney", "volcengine"]).optional().describe("生图提供商。默认用该工位设置"),
         negativePrompt: z.string().optional(),
         size: z.string().optional().describe("如 1024*1024"),
         n: z.number().optional(),
@@ -196,7 +196,7 @@ export function createVisualForgeMcp() {
         prompt: z.string(),
         model: z.string().optional(),
         workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
-        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
+        engine: z.enum(["comfyui", "qwen", "volcengine"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云，volcengine=火山方舟 Seedance。默认用该工位设置"),
         negativePrompt: z.string().optional(),
         duration: z.number().optional(),
         resolution: z.string().optional(),
@@ -233,7 +233,7 @@ export function createVisualForgeMcp() {
         lyrics: z.string().optional(),
         model: z.string().optional(),
         workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
-        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
+        engine: z.enum(["comfyui", "qwen", "volcengine"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云，volcengine=火山海绵音乐。默认用该工位设置"),
         isInstrumental: z.boolean().optional(),
         title: z.string().optional(),
       },
@@ -323,12 +323,12 @@ export function createVisualForgeMcp() {
   server.registerTool(
     "generate_3d",
     {
-      description: "单图或文生 3D（异步）。返回 task，用 get_task 轮询。",
+      description: "单图或文生 3D（异步）。返回 task，用 get_task 轮询。engine 可选 comfyui / qwen / meshy / tripo。",
       inputSchema: {
         prompt: z.string().optional(),
         model: z.string().optional(),
         workflowId: z.string().optional().describe("ComfyUI 工位生效工作流 id，与 model 独立"),
-        engine: z.enum(["comfyui", "qwen"]).optional().describe("comfyui=本机 ComfyUI，qwen=千问云。默认用该工位设置"),
+        engine: z.enum(["comfyui", "qwen", "meshy", "tripo"]).optional().describe("生 3D 提供商。默认用该工位设置"),
         image: z.string().optional().describe("参考图：本机路径或 relPath"),
         title: z.string().optional(),
       },

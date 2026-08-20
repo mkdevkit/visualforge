@@ -9,6 +9,8 @@ import { initStore, storePath } from "./lib/db.js";
 import type { AppSettings } from "./types.js";
 import { ComfyError, pingComfy } from "./lib/comfy.js";
 import { DashScopeError } from "./lib/dashscope.js";
+import { CloudError } from "./lib/cloud-http.js";
+import { MESHY_CATALOG, MESHY_IMAGE_SIZES, MIDJOURNEY_CATALOG, TRIPO_CATALOG, VOLCENGINE_CATALOG, VOLC_IMAGE_SIZES } from "./lib/cloud-catalogs.js";
 import { qwenCatalog } from "./lib/qwen-catalog.js";
 import { FEATURE_LABELS } from "./lib/features.js";
 import { publicProviders, PROVIDER_IDS } from "./lib/providers.js";
@@ -35,14 +37,19 @@ app.use("*", cors({ origin: "*", allowMethods: ["GET", "POST", "PATCH", "PUT", "
 app.use("/api/*", bodyLimit({ maxSize: 80 * 1024 * 1024 }));
 
 app.onError((err, c) => {
-  const statusRaw = err instanceof ComfyError ? err.status : err instanceof DashScopeError ? err.status : 500;
-  const status = ([400, 401, 403, 404, 500, 502] as const).includes(statusRaw as 400) ? (statusRaw as 400 | 401 | 403 | 404 | 500 | 502) : 500;
+  const typed = err instanceof ComfyError || err instanceof DashScopeError || err instanceof CloudError;
+  const statusRaw = typed ? err.status : 500;
+  const status = ([400, 401, 403, 404, 500, 502] as const).includes(statusRaw as 400)
+    ? (statusRaw as 400 | 401 | 403 | 404 | 500 | 502)
+    : statusRaw >= 400 && statusRaw < 500
+      ? 400
+      : 502;
   return c.json(
     {
       ok: false,
       error: err.message,
-      code: err instanceof ComfyError ? err.code : err instanceof DashScopeError ? err.code : "INTERNAL",
-      detail: err instanceof DashScopeError ? err.raw : undefined,
+      code: err instanceof ComfyError ? err.code : err instanceof DashScopeError || err instanceof CloudError ? err.code : "INTERNAL",
+      detail: err instanceof DashScopeError || err instanceof CloudError ? err.raw : undefined,
     },
     status,
   );
@@ -57,6 +64,10 @@ app.get("/api/ping", (c) => {
     port: s.port,
     pid: process.pid,
     qwen: { configured: Boolean(s.qwen.apiKey) },
+    meshy: { configured: Boolean(s.meshy.apiKey) },
+    midjourney: { configured: Boolean(s.midjourney.apiKey), gateway: Boolean(s.midjourney.baseUrl) },
+    tripo: { configured: Boolean(s.tripo.apiKey) },
+    volcengine: { configured: Boolean(s.volcengine.apiKey), music: Boolean(s.volcengine.accessKeyId && s.volcengine.secretKey) },
   });
 });
 
@@ -98,6 +109,14 @@ app.get("/api/health", async (c) => {
     storePath: storePath(s.dataDir),
     managerUrl: s.managerUrl,
     qwen: { configured: Boolean(s.qwen.apiKey), baseUrl: s.qwen.baseUrl },
+    meshy: { configured: Boolean(s.meshy.apiKey), baseUrl: s.meshy.baseUrl },
+    midjourney: { configured: Boolean(s.midjourney.apiKey), gateway: Boolean(s.midjourney.baseUrl) },
+    tripo: { configured: Boolean(s.tripo.apiKey), baseUrl: s.tripo.baseUrl },
+    volcengine: {
+      configured: Boolean(s.volcengine.apiKey),
+      music: Boolean(s.volcengine.accessKeyId && s.volcengine.secretKey),
+      baseUrl: s.volcengine.baseUrl,
+    },
     manager,
     mcp: {
       url: mcpEndpoint(s.host, s.port),
@@ -144,6 +163,29 @@ function publicSettings() {
       apiKey: maskSecret(s.qwen.apiKey),
       configured: Boolean(s.qwen.apiKey),
     },
+    meshy: {
+      ...s.meshy,
+      apiKey: maskSecret(s.meshy.apiKey),
+      configured: Boolean(s.meshy.apiKey),
+    },
+    midjourney: {
+      ...s.midjourney,
+      apiKey: maskSecret(s.midjourney.apiKey),
+      configured: Boolean(s.midjourney.apiKey),
+    },
+    tripo: {
+      ...s.tripo,
+      apiKey: maskSecret(s.tripo.apiKey),
+      configured: Boolean(s.tripo.apiKey),
+    },
+    volcengine: {
+      ...s.volcengine,
+      apiKey: maskSecret(s.volcengine.apiKey),
+      accessKeyId: maskSecret(s.volcengine.accessKeyId),
+      secretKey: maskSecret(s.volcengine.secretKey),
+      configured: Boolean(s.volcengine.apiKey),
+      musicConfigured: Boolean(s.volcengine.accessKeyId && s.volcengine.secretKey),
+    },
     providers: publicProviders(),
   };
 }
@@ -168,6 +210,22 @@ app.put("/api/settings", async (c) => {
     if (typeof q.workspaceId === "string") patch.qwen.workspaceId = q.workspaceId;
     if (typeof q.baseUrl === "string") patch.qwen.baseUrl = q.baseUrl.replace(/\/+$/, "");
   }
+  for (const id of ["meshy", "midjourney", "tripo"] as const) {
+    const raw = body[id];
+    if (!raw || typeof raw !== "object") continue;
+    const cloud = raw as { apiKey?: string; baseUrl?: string };
+    patch[id] = {};
+    if (typeof cloud.apiKey === "string" && !isPlaceholderSecret(cloud.apiKey)) patch[id]!.apiKey = cloud.apiKey.trim();
+    if (typeof cloud.baseUrl === "string") patch[id]!.baseUrl = cloud.baseUrl.replace(/\/+$/, "");
+  }
+  if (body.volcengine && typeof body.volcengine === "object") {
+    const v = body.volcengine as { apiKey?: string; baseUrl?: string; accessKeyId?: string; secretKey?: string };
+    patch.volcengine = {};
+    if (typeof v.apiKey === "string" && !isPlaceholderSecret(v.apiKey)) patch.volcengine.apiKey = v.apiKey.trim();
+    if (typeof v.baseUrl === "string") patch.volcengine.baseUrl = v.baseUrl.replace(/\/+$/, "");
+    if (typeof v.accessKeyId === "string" && !isPlaceholderSecret(v.accessKeyId)) patch.volcengine.accessKeyId = v.accessKeyId.trim();
+    if (typeof v.secretKey === "string" && !isPlaceholderSecret(v.secretKey)) patch.volcengine.secretKey = v.secretKey.trim();
+  }
   if (body.engines && typeof body.engines === "object") {
     patch.engines = body.engines as AppSettings["engines"];
   }
@@ -177,6 +235,16 @@ app.put("/api/settings", async (c) => {
 
 app.get("/api/qwen/models", (c) => {
   return c.json({ ok: true, ...qwenCatalog });
+});
+
+app.get("/api/cloud/models", (c) => {
+  return c.json({
+    ok: true,
+    meshy: { ...MESHY_CATALOG, imageSizes: MESHY_IMAGE_SIZES },
+    midjourney: MIDJOURNEY_CATALOG,
+    tripo: TRIPO_CATALOG,
+    volcengine: { ...VOLCENGINE_CATALOG, imageSizes: VOLC_IMAGE_SIZES },
+  });
 });
 
 app.get("/api/qwen/ping", (c) => {
@@ -357,12 +425,13 @@ app.get("/api/files/*", (c) => {
 app.get("/api/openapi.json", (c) => {
   return c.json({
     openapi: "3.0.3",
-    info: { title: "VisualForge Local API", version: "0.3.0", description: "视铸本地多模态工坊：ComfyUI 或千问云" },
+    info: { title: "VisualForge Local API", version: "0.3.0", description: "视铸本地多模态工坊：ComfyUI / 千问 / Meshy / Midjourney / Tripo" },
     servers: [{ url: `http://${loadSettings().host}:${loadSettings().port}` }],
     paths: {
       "/api/health": { get: { summary: "健康检查" } },
       "/api/models": { get: { summary: "从 ComfyManager 读取 ComfyUI 模型目录" } },
       "/api/qwen/models": { get: { summary: "千问云模型目录（与 ComfyUI 目录分开）" } },
+      "/api/cloud/models": { get: { summary: "Meshy / Midjourney / Tripo 静态目录" } },
       "/api/upload": { post: { summary: "上传参考文件" } },
       "/api/images/generate": { post: { summary: "生图 / 图生图" } },
       "/api/videos/generate": { post: { summary: "生视频（异步）" } },

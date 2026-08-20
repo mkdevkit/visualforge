@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, uploadFile } from "./api";
 import type { Catalog, FeatureId, ModelDef, ProviderId, StationProviders } from "./types";
 import { QWEN_CATALOG } from "./qwen-catalog";
+import { MESHY_CATALOG, MESHY_IMAGE_SIZES, MIDJOURNEY_CATALOG, TRIPO_CATALOG, VOLCENGINE_CATALOG, VOLC_IMAGE_SIZES } from "./cloud-catalogs";
 import { providersForStation } from "./providers";
 
 const EMPTY_CATALOG: Catalog = {
@@ -124,6 +125,23 @@ export function useQwenCatalog(): Catalog {
     ...QWEN_CATALOG,
     loadError: "",
   };
+}
+
+export function modelsForEngine(engine: ProviderId, feature: FeatureId, catalog: Catalog): ModelDef[] {
+  if (engine === "qwen") return (QWEN_CATALOG[feature as keyof typeof QWEN_CATALOG] as ModelDef[] | undefined) || [];
+  if (engine === "meshy") return (MESHY_CATALOG[feature as keyof typeof MESHY_CATALOG] as ModelDef[] | undefined) || [];
+  if (engine === "midjourney") return (MIDJOURNEY_CATALOG[feature as keyof typeof MIDJOURNEY_CATALOG] as ModelDef[] | undefined) || [];
+  if (engine === "tripo") return (TRIPO_CATALOG[feature as keyof typeof TRIPO_CATALOG] as ModelDef[] | undefined) || [];
+  if (engine === "volcengine") return (VOLCENGINE_CATALOG[feature as keyof typeof VOLCENGINE_CATALOG] as ModelDef[] | undefined) || [];
+  return catalog[feature] || [];
+}
+
+export function sizesForEngine(engine: ProviderId, catalog: Catalog) {
+  if (engine === "qwen") return QWEN_CATALOG.imageSizes;
+  if (engine === "meshy") return MESHY_IMAGE_SIZES;
+  if (engine === "midjourney") return MIDJOURNEY_CATALOG.imageSizes;
+  if (engine === "volcengine") return VOLC_IMAGE_SIZES;
+  return catalog.imageSizes || [];
 }
 
 export function useStationEngine(feature: FeatureId | FeatureId[]) {

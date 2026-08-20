@@ -93,10 +93,14 @@ export function ErrorBox({ error }: { error?: string }) {
   );
 }
 
-export function Spinner({ label, tone = "comfy" }: { label: string; tone?: "comfy" | "qwen" }) {
-  const color = tone === "qwen" ? "border-qwen/20 border-t-qwen text-qwen" : "border-brass/20 border-t-brass text-brass";
+export function Spinner({ label, tone = "comfy" }: { label: string; tone?: "comfy" | "qwen" | "cloud" }) {
+  const color =
+    tone === "qwen" ? "border-qwen/20 border-t-qwen text-qwen"
+    : tone === "cloud" ? "border-cloud/20 border-t-cloud text-cloud"
+    : "border-brass/20 border-t-brass text-brass";
+  const text = tone === "qwen" ? "text-qwen" : tone === "cloud" ? "text-cloud" : "text-brass";
   return (
-    <div className={`flex items-center gap-3 text-sm ${tone === "qwen" ? "text-qwen" : "text-brass"}`}>
+    <div className={`flex items-center gap-3 text-sm ${text}`}>
       <span className={`size-4 animate-spin rounded-full border-2 ${color}`} />
       {label}
     </div>

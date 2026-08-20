@@ -13,7 +13,7 @@ export function EngineSwitch({
   const list = PROVIDERS.filter((p) => providers.includes(p.id));
   if (!list.length) return null;
   return (
-    <div className={`mb-8 grid gap-3 ${list.length > 1 ? "sm:grid-cols-2" : ""}`}>
+    <div className={`mb-8 grid gap-3 ${list.length > 2 ? "sm:grid-cols-2 lg:grid-cols-3" : list.length > 1 ? "sm:grid-cols-2" : ""}`}>
       {list.map((p) => {
         const active = value === p.id;
         return (

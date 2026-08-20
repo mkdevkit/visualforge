@@ -4,7 +4,7 @@ export type TaskStatus = "queued" | "running" | "succeeded" | "failed" | "cancel
 
 export type ComfyMode = "prompt" | "http";
 export type FeatureId = "image" | "video" | "music" | "tts" | "sfx" | "voiceDesign" | "model3d" | "anim3d";
-export type ProviderId = "comfyui" | "qwen";
+export type ProviderId = "comfyui" | "qwen" | "meshy" | "midjourney" | "tripo" | "volcengine";
 export type StationEngine = ProviderId;
 
 export interface StationProviders {
@@ -43,6 +43,18 @@ export interface QwenSettings {
   baseUrl: string;
 }
 
+export interface CloudApiSettings {
+  apiKey: string;
+  baseUrl: string;
+}
+
+export interface VolcengineSettings {
+  apiKey: string;
+  baseUrl: string;
+  accessKeyId: string;
+  secretKey: string;
+}
+
 export interface AppSettings {
   dataDir: string;
   host: string;
@@ -50,6 +62,10 @@ export interface AppSettings {
   managerUrl: string;
   comfy: ComfySettings;
   qwen: QwenSettings;
+  meshy: CloudApiSettings;
+  midjourney: CloudApiSettings;
+  tripo: CloudApiSettings;
+  volcengine: VolcengineSettings;
   engines: Record<FeatureId, StationProviders>;
   features: Record<FeatureId, ComfyFeatureConfig>;
 }
